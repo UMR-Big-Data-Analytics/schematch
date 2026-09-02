@@ -18,8 +18,41 @@ import java.nio.file.Path;
 public class OutputWriter {
     private final static Logger log = LogManager.getLogger(OutputWriter.class);
 
+    // Matcher names embed every parameter, which for SimilarityFlooding exceeds
+    // the 255-character file name limit of NTFS and ext4 alike. Names longer
+    // than this are truncated and disambiguated with a hash of the full name.
+    private final static int MAX_FILE_NAME_LENGTH = 240;
+
+    /**
+     * Shortens a matcher name to a length the file system accepts, keeping it
+     * unique by appending a hash of the original. Names that already fit are
+     * returned unchanged, so existing output paths do not move.
+     *
+     * Both ends of the name are preserved: matcher names share a long common
+     * prefix of fixed parameters, so the parameters that actually distinguish
+     * one configuration from another sit at the end. Dropping the middle keeps
+     * the output self-describing rather than a wall of identical prefixes.
+     */
+    public static String toSafeFileName(String name) {
+        // Matcher names embed their parameter values, and a value can be a
+        // path: initialMatrixDir is one. Separators and the Windows drive
+        // colon then make the file name an invalid path, which surfaces as an
+        // InvalidPathException from deep inside the writer rather than as
+        // anything a caller could interpret. Replace the characters no file
+        // name may contain before anything else looks at the length.
+        name = name.replaceAll("[\\\\/:*?\"<>|]", "_");
+        if (name.length() <= MAX_FILE_NAME_LENGTH) {
+            return name;
+        }
+        String hash = String.format("_%08x_", name.hashCode());
+        int budget = MAX_FILE_NAME_LENGTH - hash.length();
+        int head = budget / 5;
+        int tail = budget - head;
+        return name.substring(0, head) + hash + name.substring(name.length() - tail);
+    }
+
     public static void writeSimMatrix(Path path, MatchTask matchTask, String matcherInfo, float[][] simMatrix) {
-        Path pathToFile = path.resolve(matcherInfo + ".csv");
+        Path pathToFile = path.resolve(toSafeFileName(matcherInfo) + ".csv");
         boolean isCacheFile = path.toString().startsWith(Configuration.getInstance().getCacheDir());
 
         try {
@@ -64,7 +97,7 @@ public class OutputWriter {
 
     private static void writeTablePairSimMatrices(Path path, MatchTask matchTask, String matcherInfo, float[][] simMatrix) {
         Path pathToTablePairs = path.resolve("tablepairs");
-        Path pathToMatcher = pathToTablePairs.resolve(matcherInfo);
+        Path pathToMatcher = pathToTablePairs.resolve(toSafeFileName(matcherInfo));
 
         for (TablePair tablePair : matchTask.getTablePairs()) {
             Path pathToTablePair = pathToMatcher.resolve(tablePair.toString() + ".csv");

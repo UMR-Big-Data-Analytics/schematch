@@ -43,6 +43,12 @@ public class SimilarityFlooding extends Matcher {
     private String uccFilterThreshold;
     private String indFilterThreshold;
     private String fdFilterThreshold;
+    private String constraintWeighting;
+    private String graphEncoding = "COMPLETE";
+    private String dependencyTopK = "";
+    private String fdAllowListFile = "";
+    private String initialMatrix = "PREVIOUS";
+    private String initialMatrixDir = "";
 
     private static Map<NodePair, Double> similarityFlooding
             (Graph<NodePair, CoefficientEdge> propagationGraph, Map<NodePair, Double> initialMapping, FixpointFormula formula) {
@@ -51,59 +57,79 @@ public class SimilarityFlooding extends Matcher {
         boolean convergence = false;
         int iterationCount = 0;
 
-        //First, current and next similarity maps
-        Map<NodePair, Double> sigma_0 = new HashMap<>();
-        for (NodePair node : propagationGraph.vertexSet()) {
-            sigma_0.put(node, initialMapping.getOrDefault(node, 0.0));
+        // Index the map pairs once. The iteration below is the hot loop of the
+        // whole matcher, and resolving NodePair keys through hash maps on every
+        // neighbour dominated its runtime; with an index the state is plain
+        // double arrays and the neighbourhood is a CSR adjacency.
+        List<NodePair> nodes = new ArrayList<>(propagationGraph.vertexSet());
+        int nodeCount = nodes.size();
+        Map<NodePair, Integer> indexOf = new HashMap<>(Math.max(16, nodeCount * 2));
+        for (int i = 0; i < nodeCount; i++) {
+            indexOf.put(nodes.get(i), i);
         }
 
-        Map<NodePair, Double> sigma_i_plus_1 = new HashMap<>();
-        Map<NodePair, Double> sigma_i = new HashMap<>(sigma_0);
+        double[] sigma_0 = new double[nodeCount];
+        boolean[] isDependencyPair = new boolean[nodeCount];
+        for (int i = 0; i < nodeCount; i++) {
+            NodePair node = nodes.get(i);
+            sigma_0[i] = initialMapping.getOrDefault(node, 0.0);
+            isDependencyPair[i] = node.getFirstNode().getNodeType().equals(NodeType.CONSTRAINT)
+                    && node.getSecondNode().getNodeType().equals(NodeType.CONSTRAINT);
+        }
+
+        // Compressed sparse row over incoming edges: rowPtr[i]..rowPtr[i+1]
+        // are the edges flowing into node i.
+        int[] rowPtr = new int[nodeCount + 1];
+        for (int i = 0; i < nodeCount; i++) {
+            rowPtr[i + 1] = rowPtr[i] + propagationGraph.incomingEdgesOf(nodes.get(i)).size();
+        }
+        int[] src = new int[rowPtr[nodeCount]];
+        double[] coeff = new double[rowPtr[nodeCount]];
+        for (int i = 0; i < nodeCount; i++) {
+            int k = rowPtr[i];
+            for (CoefficientEdge edge : propagationGraph.incomingEdgesOf(nodes.get(i))) {
+                src[k] = indexOf.get(propagationGraph.getEdgeSource(edge));
+                coeff[k] = edge.getCoefficient();
+                k++;
+            }
+        }
+
+        double[] sigma_i = sigma_0.clone();
+        double[] sigma_i_plus_1 = new double[nodeCount];
 
         while (!convergence && iterationCount <= MAX_ITERATIONS) {
 
             double maxValueCurrentIteration = Double.MIN_VALUE;
 
-            for (NodePair node : sigma_0.keySet()) {
-
-                //Alle Nachbarn bekommen
-                Set<CoefficientEdge> incomingEdges = propagationGraph.incomingEdgesOf(node); //Only neighbors from incoming edges
-//                Set<NodePair> neighborNodes = incomingEdges.stream().map(propagationGraph::getEdgeSource).collect(Collectors.toSet());
-                Set<NodePair> neighborNodes = new HashSet<>();
-                for (CoefficientEdge edge : incomingEdges) {
-                    NodePair source = propagationGraph.getEdgeSource(edge);
-                    neighborNodes.add(source);
-                }
-
-                //Neuen Wert für Node auf Basis der Nachbarn berechnen
-                double newValue;
-                try {
-                    newValue = formula.evaluate(node, neighborNodes, sigma_0, sigma_i, propagationGraph);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
+            for (int node = 0; node < nodeCount; node++) {
+                double newValue = formula.evaluate(node, sigma_0, sigma_i, rowPtr, src, coeff, isDependencyPair);
 
                 //MaxWert der aktuellen Iteration speichern, damit später normalisieren möglich
                 if (newValue > maxValueCurrentIteration) {
                     maxValueCurrentIteration = newValue;
                 }
 
-                sigma_i_plus_1.put(node, newValue);
+                sigma_i_plus_1[node] = newValue;
             }
 
             //Normalisieren für die aktuelle Iteration
-            for (NodePair node : sigma_0.keySet()) {
-                sigma_i_plus_1.put(node, (sigma_i_plus_1.get(node) / maxValueCurrentIteration));
+            for (int node = 0; node < nodeCount; node++) {
+                sigma_i_plus_1[node] = sigma_i_plus_1[node] / maxValueCurrentIteration;
             }
 
             //Prüfen ob Residuum(sigma_i, sigma_i+1) konvergiert
             convergence = hasConverged(sigma_i, sigma_i_plus_1, PRECISION_OF_CONVERGENCE);
-            sigma_i.putAll(sigma_i_plus_1);
+            System.arraycopy(sigma_i_plus_1, 0, sigma_i, 0, nodeCount);
             iterationCount++;
         }
 
         log.info("Ran {} Iterations for {} Nodes", iterationCount - 1, initialMapping.size());
-        return sigma_i_plus_1;
+
+        Map<NodePair, Double> result = new HashMap<>(Math.max(16, nodeCount * 2));
+        for (int i = 0; i < nodeCount; i++) {
+            result.put(nodes.get(i), sigma_i_plus_1[i]);
+        }
+        return result;
     }
 
     public static Map<String, Collection<String>> getPossibleValues() {
@@ -161,9 +187,14 @@ public class SimilarityFlooding extends Matcher {
 
         List<Matcher> matcher = matchTask.getFirstLineMatchers();
         Matcher firstLineMatcher = matcher.get(0);
-        float [][] prevMatrix = matchTask.getSimMatrixFromPreviousMatchStep(matchStep, firstLineMatcher);
+        float [][] prevMatrix = switch (initialMatrix) {
+            case "PREVIOUS" -> matchTask.getSimMatrixFromPreviousMatchStep(matchStep, firstLineMatcher);
+            case "RAW_FIRST_LINE" -> matchTask.getFirstLineSimMatrix(firstLineMatcher);
+            case "FILE" -> readSeedMatrix(matchTask, sourceDb, targetDb);
+            default -> throw new IllegalArgumentException("Unknown initial matrix: " + initialMatrix);
+        };
 
-        SchemaGraphBuilder schemaGraphBuilder = new SchemaGraphBuilder(this.uccFilterThreshold, this.indFilterThreshold, this.fdFilterThreshold);
+        SchemaGraphBuilder schemaGraphBuilder = new SchemaGraphBuilder(this.uccFilterThreshold, this.indFilterThreshold, this.fdFilterThreshold, this.constraintWeighting, this.graphEncoding, this.dependencyTopK, this.fdAllowListFile);
 
         Graph<Node, LabelEdge> sourceGraph = schemaGraphBuilder.transformIntoGraphRepresentationSchema(sourceDb);
         Graph<Node, LabelEdge> targetGraph = schemaGraphBuilder.transformIntoGraphRepresentationSchema(targetDb);
@@ -282,6 +313,132 @@ public class SimilarityFlooding extends Matcher {
         }
     }
 
+    /**
+     * Seeds the flooding from a similarity matrix produced outside Schematch.
+     *
+     * Similarity Flooding does not score columns from scratch; it propagates
+     * whatever a first-line matcher already produced. That makes the seed a
+     * free choice, but the only seeds reachable through the configuration are
+     * Schematch's own matchers, so a matrix from another system -- PRISMA, say
+     * -- could not be used as a starting point without this.
+     *
+     * The file is expected at &lt;initialMatrixDir&gt;/&lt;dataset&gt;/&lt;scenario&gt;/seed.csv,
+     * with a header row of "table.column" labels and a matching first column,
+     * which is the format Schematch itself writes with saveOutputVerbose. The
+     * columns are realigned by label rather than trusted in file order.
+     *
+     * Every failure here throws. A seed matrix that silently reads as zeros
+     * would still produce a complete, plausible-looking run, and that class of
+     * fault has already cost this project several days of misleading numbers.
+     */
+    private float[][] readSeedMatrix(MatchTask matchTask, Database sourceDb, Database targetDb) {
+        if (this.initialMatrixDir == null || this.initialMatrixDir.isBlank()) {
+            throw new IllegalArgumentException("initialMatrix=FILE needs initialMatrixDir");
+        }
+        java.nio.file.Path scenarioPath = java.nio.file.Paths.get(
+                matchTask.getScenario().getPath());
+        String scenario = scenarioPath.getFileName().toString();
+        String dataset = scenarioPath.getParent().getFileName().toString();
+        java.nio.file.Path seedPath = java.nio.file.Paths.get(this.initialMatrixDir)
+                .resolve(dataset).resolve(scenario).resolve("seed.csv");
+
+        List<String> lines;
+        try {
+            lines = java.nio.file.Files.readAllLines(seedPath);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("cannot read seed matrix " + seedPath, e);
+        }
+        if (lines.size() < 2) {
+            throw new IllegalStateException("seed matrix has no rows: " + seedPath);
+        }
+
+        String[] header = lines.get(0).split(",", -1);
+        Map<String, Integer> columnOf = new HashMap<>();
+        for (int j = 1; j < header.length; j++) {
+            columnOf.put(normaliseLabel(header[j]), j - 1);
+        }
+        Map<String, Integer> rowOf = new HashMap<>();
+        List<String[]> body = new ArrayList<>();
+        for (int i = 1; i < lines.size(); i++) {
+            String[] cells = lines.get(i).split(",", -1);
+            if (cells.length < 2) {
+                continue;
+            }
+            rowOf.put(normaliseLabel(cells[0]), body.size());
+            body.add(cells);
+        }
+
+        List<String> sourceLabels = labelsOf(sourceDb);
+        List<String> targetLabels = labelsOf(targetDb);
+        float[][] out = new float[sourceLabels.size()][targetLabels.size()];
+        int resolved = 0;
+        for (int i = 0; i < sourceLabels.size(); i++) {
+            Integer r = rowOf.get(sourceLabels.get(i));
+            if (r == null) {
+                continue;
+            }
+            String[] cells = body.get(r);
+            for (int j = 0; j < targetLabels.size(); j++) {
+                Integer c = columnOf.get(targetLabels.get(j));
+                if (c == null || c + 1 >= cells.length) {
+                    continue;
+                }
+                try {
+                    out[i][j] = parseCell(cells[c + 1]);
+                    resolved++;
+                } catch (NumberFormatException ignored) {
+                    // a non-numeric cell stays zero
+                }
+            }
+        }
+
+        int expected = sourceLabels.size() * targetLabels.size();
+        if (resolved < expected / 2) {
+            throw new IllegalStateException(String.format(
+                    "seed matrix %s resolved only %d of %d cells; labels do not line up",
+                    seedPath, resolved, expected));
+        }
+        log.info("Seeded SF from {} ({} of {} cells)", seedPath, resolved, expected);
+        return out;
+    }
+
+    /**
+     * Reads one cell of a similarity matrix in either format Schematch writes.
+     *
+     * With saveOutputVerbose the cell is "&lt;selected&gt; / &lt;score&gt;", where the
+     * first number is the binary decision and the second the soft score; plain
+     * output carries the score alone. Only the score is wanted here. The
+     * harness reader has handled both since the beginning -- this side had not,
+     * and every cell of a verbose file failed to parse.
+     */
+    private static float parseCell(String raw) {
+        String cell = raw.trim();
+        int slash = cell.indexOf('/');
+        if (slash >= 0) {
+            cell = cell.substring(slash + 1).trim();
+        }
+        return Float.parseFloat(cell);
+    }
+
+    private static String normaliseLabel(String raw) {
+        String label = raw.trim();
+        if (label.startsWith("\"") && label.endsWith("\"") && label.length() > 1) {
+            label = label.substring(1, label.length() - 1);
+        }
+        int dot = label.lastIndexOf('.');
+        return dot >= 0 ? label.substring(dot + 1) : label;
+    }
+
+    private static List<String> labelsOf(Database db) {
+        List<String> out = new ArrayList<>();
+        for (Table table : db.getTables()) {
+            for (Column column : table.getColumns()) {
+                out.add(column.getLabel());
+            }
+        }
+        return out;
+    }
+
     private Map<NodePair, Double> buildInitialMappingFromMatrix(float[][] simMatrix, Database sourceDb, Database targetDb) {
         Map<NodePair, Double> initialMapping = new HashMap<>();
 
@@ -316,7 +473,12 @@ public class SimilarityFlooding extends Matcher {
         FIXPOINT("fixpoint", List.of("BASIC","A", "B", "C")),
         IND_FILTER_THRESHOLD("indFilterThreshold", List.of("normalizedValue")),
         FD_FILTER_THRESHOLD("fdFilterThreshold", List.of("normalizedValue")),
-        UCC_FILTER_THRESHOLD("uccFilterThreshold", List.of("normalizedValue"));
+        UCC_FILTER_THRESHOLD("uccFilterThreshold", List.of("normalizedValue")),
+        CONSTRAINT_WEIGHTING("constraintWeighting", List.of("NONE", "QUALITY")),
+        GRAPH_ENCODING("graphEncoding", List.of("COMPLETE", "QUICK")),
+        DEPENDENCY_TOP_K("dependencyTopK", List.of("positiveIntegerOrEmpty")),
+        FD_ALLOW_LIST_FILE("fdAllowListFile", List.of("fileNameOrEmpty")),
+        INITIAL_MATRIX("initialMatrix", List.of("PREVIOUS", "RAW_FIRST_LINE"));
 
         public final String key;
         public final Collection<String> possibleValues;
