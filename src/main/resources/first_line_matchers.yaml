@@ -1,9 +1,5 @@
 ---
-name: "LevenshteinMatcher"
-packageName: "similarity.label"
-
-
-
-
-
-
+name: "PMFMatcher"
+packageName: "similarity.instance"
+params:
+  distance: ["L2"]

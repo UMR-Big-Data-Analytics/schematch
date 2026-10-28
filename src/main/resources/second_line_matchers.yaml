@@ -1,9 +1,1 @@
----
-name: "SimilarityFlooding"
-packageName: "similarityFlooding"
-params:
-  propCoeffPolicy: ["INV_AVG", "INV_PROD"]
-  fixpoint: ["BASIC", "A", "B", "C"]
-  indFilterThreshold: [""]
-  uccFilterThreshold: [""]
-  fdFilterThreshold: ["0.0", "0.05", "0.10"]
+# Optional second-line matchers; see MATCHERS.md for configurations.

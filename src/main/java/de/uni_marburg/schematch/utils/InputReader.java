@@ -34,7 +34,9 @@ public class InputReader {
         List<Table> tables = new ArrayList<>();
 
         File dir = new File(inputPath);
-        File[] listOfFiles = dir.listFiles();
+        File[] listOfFiles = dir.listFiles(file -> file.isFile() && file.getName().toLowerCase(Locale.ROOT).endsWith(".csv"));
+        if (listOfFiles == null) throw new IllegalArgumentException("Cannot read table directory: " + inputPath);
+        if (listOfFiles.length == 0) throw new IllegalArgumentException("No CSV tables in: " + inputPath);
         Arrays.sort(listOfFiles);
 
         for (File file : listOfFiles) {
@@ -51,59 +53,7 @@ public class InputReader {
     }
 
     public static Table readDataFile(String inputPath, String separator, Database database) {
-        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader()
-                .setDelimiter(separator)
-                .setAllowMissingColumnNames(true)
-                .build();
-
-        File file = new File(inputPath);
-        String fileName = StringUtils.getFileName(file);
-        log.trace("Reading file " + file.getAbsolutePath());
-
-        List<String> labels;
-        List<Column> columns = new ArrayList<>();
-
-        try (Reader reader = new FileReader(inputPath)) {
-            CSVParser csvParser = new CSVParser(reader, csvFormat);
-            // parse labels
-            // TODO: set labels to null if they are all empty strings
-            /*if (csvParser.getHeaderMap().keySet().size() == 1 &&
-                csvParser.getHeaderNames().get(0) == "") {
-                labels = null;
-            } else {
-                labels = csvParser.getHeaderNames();
-            }*/
-            labels = csvParser.getHeaderNames();
-            // parse records
-            int numColumns = csvParser.getHeaderNames().size();
-            List<List<String>> valueLists = new ArrayList<>();
-            for (int j = 0; j < numColumns; j++) {
-                valueLists.add(new ArrayList<>());
-            }
-            for (CSVRecord csvRecord : csvParser) {
-               for (int j = 0; j < numColumns; j++) {
-                   valueLists.get(j).add(csvRecord.get(j));
-               }
-            }
-            // TODO: work with null labels instead of empty strings
-            /*if (labels == null) {
-                for (int j = 0; j < valueLists.size(); j++) {
-                    columns.add(new Column(null, valueLists.get(j)));
-                }
-            } else {
-                for (int j = 0; j < valueLists.size(); j++) {
-                    columns.add(new Column(labels.get(j), valueLists.get(j)));
-                }
-            }*/
-            for (int j = 0; j < valueLists.size(); j++) {
-                columns.add(new Column(labels.get(j), valueLists.get(j)));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new Table(fileName, labels, columns, inputPath, database);
+        return CsvTables.read(Path.of(inputPath), separator, database);
     }
 
     public static List<String> fetchGroundTruthTablePairNames(String inputPath) {
@@ -127,51 +77,10 @@ public class InputReader {
                 Configuration.getInstance().getDefaultSeparator());
     }
     private static int[][] readGroundTruthFile(String inputPath, String tablePairSeparator, String csvSeparator) {
-        File file = new File(inputPath);
-
-        // FIXME: find better way to skip table pairs without ground truth
-        if (!file.exists()) {
-            return null;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file.getAbsolutePath()))) {
-            String line;
-            int numLines = 0;
-            int numColumns = 0;
-            while ((line = br.readLine()) != null) {
-                numLines += 1;
-                numColumns = line.split(String.valueOf(csvSeparator)).length;
-            }
-            int[][] scores = new int[numLines][numColumns];
-            br.close();
-            // TODO: find better way to reset buffered reader
-            BufferedReader br2 = new BufferedReader(new FileReader(file.getAbsolutePath()));
-            int i = 0;
-            int j = 0;
-            int numAssignments = 0;
-            String[] values;
-            while ((line = br2.readLine()) != null) {
-                values = line.split(String.valueOf(csvSeparator));
-                for (j = 0; j < values.length; j++) {
-                    int value = Integer.parseInt(values[j]);
-                    numAssignments += value;
-                    scores[i][j] = value;
-                }
-                i += 1;
-            }
-            // we only add table pairs with at least one ground truth assignment
-            if (numAssignments > 0) {
-                String fileName = StringUtils.getFileName(file);
-                String[] tableNames = fileName.split(tablePairSeparator);
-                String sourceTableName = tableNames[0];
-                String targetTableName = tableNames[1];
-                return scores;
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Path path = Path.of(inputPath);
+        if (!Files.isRegularFile(path)) return null;
+        int[][] matrix = GroundTruthReader.readUnlabeled(path, csvSeparator);
+        return ArrayUtils.sumOfMatrix(matrix) > 0 ? matrix : null;
     }
 
     public static DatabaseMetadata readDatabaseMetadata(Database database) {
@@ -198,6 +107,8 @@ public class InputReader {
                 Path fdFilePath = metadataFolderPath.resolve(table.getName()).resolve("FD_results.txt");
                 Path uccFilePath = metadataFolderPath.resolve(table.getName()).resolve("UCC_results.txt");
 
+                ManagedProfiles.requireFD(Path.of(inputPath).getParent(), folderName,
+                        Path.of(table.getPath()), fdFilePath);
                 Collection<FunctionalDependency> datasetFDs = readFDFile(fdFilePath, table, fdMap);
 //                if(datasetFDs.isEmpty()) {
 //                    // datasetFDs = Metanome.executeFD(List.of(table));
@@ -248,6 +159,50 @@ public class InputReader {
     }
     
     
+    /**
+     * Resolves a qualified name from a metadata file to a column of the table.
+     *
+     * Profilers qualify columns inconsistently: some emit "table.column",
+     * others "table.csv.column". Rather than assume a fixed number of
+     * segments, every dot-separated suffix is tested against the table's
+     * labels, longest first, so a column whose own name contains a dot still
+     * wins over a shorter accidental match.
+     *
+     * @throws IllegalArgumentException naming the offending value, instead of
+     *         letting an unresolved name surface as an index out of bounds.
+     */
+    /**
+     * Removes a trailing profiler measurement such as " (pdep 0.32, 0.0)".
+     *
+     * The annotation contains a comma, so it has to go before a right-hand
+     * side is split on commas into individual columns.
+     */
+    public static String stripAnnotation(String value) {
+        // Parentheses also occur in real column labels (OpenData/GDC).
+        // Only the reserved trailing profiler annotation is metadata.
+        int annotation = value.lastIndexOf(" (pdep ");
+        return (annotation >= 0 ? value.substring(0, annotation) : value).trim();
+    }
+
+    public static Column resolveColumn(String qualifiedName, Table table) {
+        String name = stripAnnotation(qualifiedName);
+        List<String> labels = table.getLabels();
+
+        int index = labels.indexOf(name);
+        if (index >= 0) {
+            return table.getColumn(index);
+        }
+        for (int i = name.indexOf('.'); i >= 0; i = name.indexOf('.', i + 1)) {
+            index = labels.indexOf(name.substring(i + 1));
+            if (index >= 0) {
+                return table.getColumn(index);
+            }
+        }
+        throw new IllegalArgumentException(
+                "Cannot resolve column '" + qualifiedName + "' in table '"
+                        + table.getName() + "'; known columns: " + labels);
+    }
+
     public static Collection<FunctionalDependency> readFDFile(Path filePath, Table table, Map<Column, Collection<FunctionalDependency>> map) throws IOException{
         Set<FunctionalDependency> fds = new HashSet<>();
         if(!filePath.toFile().exists()) {
@@ -260,10 +215,13 @@ public class InputReader {
                 continue;
             String[] split = line.split(" --> ");
             if(split[0].equalsIgnoreCase("[]")) {
-                for (String right : split[1].split(",")) {
-                    Column rightC = table.getColumn(table.getLabels().indexOf(right.trim().split("\\.")[1]));
+                for (String right : stripAnnotation(split[1]).split(",")) {
+                    Column rightC = resolveColumn(right, table);
                     for (Column leftCol : table.getColumns()){
-                        if(leftCol.getLabel().equals(right))
+                        // Compare resolved columns: the right-hand side is a
+                        // qualified name, so comparing it to a bare label
+                        // never matched and admitted trivial FDs A -> A.
+                        if(leftCol.equals(rightC))
                             continue;
                         List<Column> leftCC = List.of(leftCol);
                         extracted(map, leftCC, rightC, fds);
@@ -271,8 +229,8 @@ public class InputReader {
                 }
             } else {
                 Collection<Column> leftCC = (Collection<Column>) extractColumnsFromString(split[0], table);
-                for (String right : split[1].split(",")) {
-                    Column rightC = table.getColumn(table.getLabels().indexOf(right.trim().split("\\.")[1]));
+                for (String right : stripAnnotation(split[1]).split(",")) {
+                    Column rightC = resolveColumn(right, table);
                     extracted(map, leftCC, rightC, fds);
                 }
             }
@@ -335,7 +293,7 @@ public class InputReader {
         for (String line : lines) {
             if(line.isEmpty() || line.isBlank())
                 continue;
-            String[] split = line.split(" \\[= ");
+            String[] split = line.split(" (?:\\[=|-->) ");
 
             Collection<String[]> supersetCCString = (Collection<String[]>) extractColumnsFromString(split[0], null);
 
@@ -391,46 +349,41 @@ public class InputReader {
             String output = input.substring(start + 1, end);
             input = input.substring(end + 1);
 
-            String[] tableColumnString = output.split("\\.");
             if (table == null) {
-                columnList.add(tableColumnString);
+                String qualified = output.trim();
+                columnList.add(qualified.contains(".csv.")
+                        ? qualified.split("\\.csv\\.", 2) : qualified.split("\\.", 2));
             } else {
-                Column column = table.getColumn(table.getLabels().indexOf(tableColumnString[1]));
-                columnList.add(column);
+                columnList.add(resolveColumn(output, table));
             }
         }
         return columnList;
     }
 
     public static float[][] readCache(MatchTask matchTask, MatchStep matchStep, Matcher matcher, String separator) {
-        float[][] simMatrix = matchTask.getEmptySimMatrix();
-
-        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader()
-                .setDelimiter(separator)
-                .setAllowMissingColumnNames(true)
-                .build();
-
-        File file = ResultsUtils.getCachePathForMatchStepInScenario(matchTask, matchStep).resolve(matcher.toString() + ".csv").toFile();
-
-        try (Reader reader = new FileReader(file.getAbsolutePath())) {
-            log.trace("Reading cache file " + file.getAbsolutePath());
-            matchTask.incrementCacheRead();
-            CSVParser csvParser = new CSVParser(reader, csvFormat);
-            // parse records
+        Path file = ResultsUtils.getCachePathForMatchStepInScenario(matchTask,matchStep)
+                .resolve(OutputWriter.toSafeFileName(matcher.toString())+".csv");
+        if (!Files.isRegularFile(file)) return null;
+        float[][] matrix = matchTask.getEmptySimMatrix();
+        CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(separator).setIgnoreEmptyLines(false).build();
+        try (Reader reader = CsvTables.reader(file); CSVParser parser = new CSVParser(reader,format)) {
             int i = 0;
-            for (CSVRecord csvRecord : csvParser) {
-                for (int j = 0; j < simMatrix[0].length; j++) {
-                    simMatrix[i][j] = Float.parseFloat(csvRecord.get(j));
+            for (CSVRecord record : parser) {
+                if (i >= matrix.length || record.size() != matrix[i].length)
+                    throw new IllegalStateException("Cache dimensions differ from scenario: " + file);
+                for (int j = 0; j < matrix[i].length; j++) {
+                    float value = Float.parseFloat(record.get(j));
+                    if (!Float.isFinite(value)) throw new IllegalStateException("Non-finite cached score: " + file);
+                    matrix[i][j] = value;
                 }
-                i += 1;
+                i++;
             }
-        } catch (IOException e) {
-            // no cache for matcher in matchstep
-            return null;
+            if (i != matrix.length) throw new IllegalStateException("Truncated matrix cache: " + file);
+            matchTask.incrementCacheRead();
+            return matrix;
+        } catch (IOException | UncheckedIOException | NumberFormatException e) {
+            throw new IllegalStateException("Cannot read similarity cache " + file,e);
         }
-
-        return simMatrix;
     }
 
     public static float[][] readCache(MatchTask matchTask, MatchStep matchStep, Matcher matcher) {

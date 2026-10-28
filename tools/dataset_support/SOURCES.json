@@ -1,0 +1,42 @@
+{
+  "lossless.py": {
+    "source": "harness/smx/datasets.py",
+    "source_sha256": "19fd1cd9556bf9aecfec8ae8876ba5a8f9908c8a486da0d0e013a1ed395070b9",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "external.py": {
+    "source": "sf-matcher-study/data/convert_external_raw.py",
+    "source_sha256": "2cce5e39e2c3e994fb057c93544eff5cb4e0c3be089ecfd37c88f345f73091f0",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "unified.py": {
+    "source": "sf-matcher-study/data/convert_external_raw_c.py",
+    "source_sha256": "27b090d58551d20f553d9a5031f3fb2dc8ff8a89019029ef7d72e6fcb385236a",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "xlsx_read.py": {
+    "source": "sf-matcher-study/data/xlsx_read.py",
+    "source_sha256": "9a885862c43bab44fc5f01f6400f1750e941d3ad09de49cef0651dacc0f8bb1c",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "mimic.py": {
+    "source": "sf-matcher-study/data/convert_mimic_omop.py",
+    "source_sha256": "78673327072ffc06639b37dacc544de46ccffcd5c618a8b27aee82305f0fadde",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "synthea.py": {
+    "source": "sf-matcher-study/data/convert_synthea.py",
+    "source_sha256": "06bf4cb1299f1433db936f8e437d82a9de62668e2c0b112bf34fb6a99bf4d033",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "controlled.py": {
+    "source": "harness/smx/controlled.py",
+    "source_sha256": "297debc0398d454cd5a175a966f4ac431623e1f5f12e84370242c66a8d0a6ee4",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "scale.py": {
+    "source": "sf-matcher-study/data/make_scale_corpus.py",
+    "source_sha256": "3f4a8e6a234f7052612114b6582cf48b0f5105a40259c098728d4c92c76e5bce",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  }
+}

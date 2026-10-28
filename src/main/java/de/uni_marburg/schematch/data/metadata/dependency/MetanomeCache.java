@@ -2,6 +2,7 @@ package de.uni_marburg.schematch.data.metadata.dependency;
 
 import de.uni_marburg.schematch.data.Table;
 import de.uni_marburg.schematch.utils.InputReader;
+import de.uni_marburg.schematch.utils.MetadataUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,7 +16,8 @@ public class MetanomeCache{
         List<UniqueColumnCombination> uccs = new ArrayList<>();
         try {
             for (Table table : tables) {
-                uccs.addAll(InputReader.readUCCFile(Path.of(table.getPath()), table, new HashMap<>()));
+                Path uccPath = MetadataUtils.getMetadataPathFromTable(Path.of(table.getPath())).resolve("UCC_results.txt");
+                uccs.addAll(InputReader.readUCCFile(uccPath, table, new HashMap<>()));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -27,7 +29,8 @@ public class MetanomeCache{
         List<FunctionalDependency> fds = new ArrayList<>();
         try {
             for (Table table : tables) {
-                fds.addAll(InputReader.readFDFile(Path.of(table.getPath()), table, new HashMap<>()));
+                Path fdPath = MetadataUtils.getMetadataPathFromTable(Path.of(table.getPath())).resolve("FD_results.txt");
+                fds.addAll(InputReader.readFDFile(fdPath, table, new HashMap<>()));
 
             }
         } catch (IOException e) {
@@ -39,7 +42,8 @@ public class MetanomeCache{
     public static List<InclusionDependency> executeIND(List<Table> tables) {
         List<InclusionDependency> inds;
         try {
-            inds = new ArrayList<>(InputReader.readINDFile(Path.of(tables.get(0).getPath()), tables, tables, new HashMap<>()));
+            Path indPath = MetadataUtils.getMetadataRootPathFromTable(Path.of(tables.get(0).getPath())).resolve("inds.txt");
+            inds = new ArrayList<>(InputReader.readINDFile(indPath, tables, tables, new HashMap<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

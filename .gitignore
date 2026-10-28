@@ -5,6 +5,36 @@
 /target
 /META-INF
 /out
+/cp.txt
+
+# Downloaded releases and prepared benchmark data stay local.
+/datasets-local/
+/data/
+/seed*/
+/.venv/
+/.venv-*/
+/release-audit/
+*.orig*
+
+# Python integration/evaluation bytecode is regenerated locally.
+__pycache__/
+*.py[cod]
+
+# Reproducible SF representation-ablation seeds, validity masks, and logs.
+/rel_exp
+
+# Dataset metadata files auto-created by InputReader during tests/runs.
+/data/**/metadata/**/FD_results.txt
+/data/**/metadata/**/UCC_results.txt
+/data/**/metadata/**/inds.txt
+/data/**/metadata/source-to-target-inds.txt
+/data/**/metadata/target-to-source-inds.txt
+!/data/Efes-bib/**/metadata/**/FD_results.txt
+!/data/Efes-bib/**/metadata/**/UCC_results.txt
+!/data/Efes-bib/**/metadata/**/inds.txt
+!/data/Pubs/**/metadata/**/FD_results.txt
+!/data/Pubs/**/metadata/**/UCC_results.txt
+!/data/Pubs/**/metadata/**/inds.txt
 
 # Build files
 dependency-reduced-pom.xml

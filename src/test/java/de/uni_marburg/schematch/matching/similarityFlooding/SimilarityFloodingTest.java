@@ -49,5 +49,9 @@ class SimilarityFloodingTest {
 
         assertTrue(possibleValues.containsKey("indFilterThreshold"));
         assertTrue(possibleValues.get("indFilterThreshold").contains("normalizedValue"));
+
+        assertTrue(possibleValues.containsKey("constraintWeighting"));
+        assertTrue(possibleValues.get("constraintWeighting").contains("NONE"));
+        assertTrue(possibleValues.get("constraintWeighting").contains("QUALITY"));
     }
 }

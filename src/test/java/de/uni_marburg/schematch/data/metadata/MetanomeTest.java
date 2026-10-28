@@ -2,6 +2,8 @@ package de.uni_marburg.schematch.data.metadata;
 
 import de.uni_marburg.schematch.utils.MetadataUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,9 +12,16 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MetanomeTest {
-    Path basePath = Paths.get(System.getProperty("user.dir")).resolve("data").resolve("Pubs").resolve("pubs1_pubs2").resolve("source");
+    @TempDir Path root;
+    Path basePath;
     String fileName = "authors";
-    Path testFilePath = basePath.resolve(fileName + ".csv");
+    Path testFilePath;
+    @BeforeEach void prepare() throws Exception {
+        basePath = Files.createDirectories(root.resolve("source"));
+        testFilePath = basePath.resolve(fileName + ".csv");
+        Files.writeString(testFilePath,"id,name\n1,Alice\n");
+        Files.createDirectories(root.resolve("metadata/source/authors"));
+    }
     @Test
     void getMetadataPath_includeFileName() {
         Path result = MetadataUtils.getMetadataPath(testFilePath, true);

@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class ForeignKeyConstraintTest {
 
     TestUtils.TestData testData = TestUtils.getTestData();
-    Scenario scenario = new Scenario(testData.getScenarios().get("s1a-s2b").getPath());
+    Scenario scenario = new Scenario(testData.getScenarios().get("test1").getPath());
 
 
 }

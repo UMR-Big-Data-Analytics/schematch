@@ -10,7 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,91 +55,43 @@ public class OutputWriter {
         return name.substring(0, head) + hash + name.substring(name.length() - tail);
     }
 
-    public static void writeSimMatrix(Path path, MatchTask matchTask, String matcherInfo, float[][] simMatrix) {
-        Path pathToFile = path.resolve(toSafeFileName(matcherInfo) + ".csv");
-        boolean isCacheFile = path.toString().startsWith(Configuration.getInstance().getCacheDir());
-
-        try {
-            Files.createDirectories(pathToFile.getParent());
-            BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile.toString()));
-            if (Configuration.getInstance().isSaveOutputVerbose() &&
-                    !isCacheFile) { // always cache plain sim matrices
-                StringBuilder line = new StringBuilder();
-                line.append("Source\\Target");
-                for (Table table : matchTask.getScenario().getTargetDatabase().getTables()) {
-                    for (String targetLabel : table.getLabels()) {
-                        line.append(Configuration.getInstance().getDefaultSeparator());
-                        line.append(table.getName() + "." + targetLabel);
-                    }
-                }
-                writer.write(line.toString());
-                writer.newLine();
+    public static void writeSimMatrix(Path path, MatchTask task, String matcherInfo, float[][] scores) {
+        Path file = path.resolve(toSafeFileName(matcherInfo) + ".csv");
+        Configuration config = Configuration.getInstance();
+        boolean cache = path.toAbsolutePath().normalize().startsWith(Path.of(config.getCacheDir()).toAbsolutePath().normalize());
+        boolean verbose = config.isSaveOutputVerbose() && !cache;
+        List<String> source = GroundTruthReader.columns(task.getScenario().getSourceDatabase()).stream().map(GroundTruthReader.ColumnRef::fullName).toList();
+        List<String> target = GroundTruthReader.columns(task.getScenario().getTargetDatabase()).stream().map(GroundTruthReader.ColumnRef::fullName).toList();
+        if (scores.length != source.size()) throw new IllegalArgumentException("Invalid source dimensions for output");
+        for (float[] row : scores) if (row.length != target.size()) throw new IllegalArgumentException("Invalid target dimensions for output");
+        print(file,scores,0,0,source,target,verbose);
+        if (config.isSaveOutputPerTablePair()) {
+            for (TablePair pair : task.getTablePairs()) {
+                Path block = path.resolve("tablepairs").resolve(toSafeFileName(matcherInfo)).resolve(pair.toString()+".csv");
+                print(block,scores,pair.getSourceTable().getOffset(),pair.getTargetTable().getOffset(),
+                        pair.getSourceTable().getLabels(),pair.getTargetTable().getLabels(),verbose);
             }
-            for (int i = 0; i < simMatrix.length; i++) {
-                float[] scoreList = simMatrix[i];
-                StringBuilder line = new StringBuilder();
-                if (Configuration.getInstance().isSaveOutputVerbose() &&
-                        !isCacheFile) { // always cache plain sim matrices
-                    line.append(matchTask.getScenario().getSourceDatabase().getFullColumnNameByIndex(i));
-                    line.append(Configuration.getInstance().getDefaultSeparator());
-                }
-                for (float score : scoreList) {
-                    line.append(score).append(Configuration.getInstance().getDefaultSeparator());
-                }
-                writer.write(line.substring(0, line.length() - 1));
-                writer.newLine();
-            }
-            writer.close();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-
-        if (Configuration.getInstance().isSaveOutputPerTablePair()) {
-            writeTablePairSimMatrices(path, matchTask, matcherInfo, simMatrix);
         }
     }
 
-    private static void writeTablePairSimMatrices(Path path, MatchTask matchTask, String matcherInfo, float[][] simMatrix) {
-        Path pathToTablePairs = path.resolve("tablepairs");
-        Path pathToMatcher = pathToTablePairs.resolve(toSafeFileName(matcherInfo));
-
-        for (TablePair tablePair : matchTask.getTablePairs()) {
-            Path pathToTablePair = pathToMatcher.resolve(tablePair.toString() + ".csv");
-            try {
-                Files.createDirectories(pathToTablePair.getParent());
-                BufferedWriter tpWriter = new BufferedWriter(new FileWriter(pathToTablePair.toString()));
-                Table sourceTable = tablePair.getSourceTable();
-                Table targetTable = tablePair.getTargetTable();
-                int sourceOffset = sourceTable.getOffset();
-                int targetOffset = targetTable.getOffset();
-                int numSourceColumns = sourceTable.getNumColumns();
-                int numTargetColumns = targetTable.getNumColumns();
-                if (Configuration.getInstance().isSaveOutputVerbose()) {
-                    StringBuilder line = new StringBuilder();
-                    line.append("Source\\Target");
-                    for (String targetLabel : targetTable.getLabels()) {
-                        line.append(Configuration.getInstance().getDefaultSeparator());
-                        line.append(targetLabel);
-                    }
-                    tpWriter.write(line.toString());
-                    tpWriter.newLine();
+    private static void print(Path file, float[][] scores, int sourceOffset, int targetOffset,
+                              List<String> source, List<String> target, boolean verbose) {
+        CSVFormat format = CSVFormat.DEFAULT.builder().setDelimiter(Configuration.getInstance().getDefaultSeparator())
+                .setRecordSeparator(System.lineSeparator()).build();
+        try {
+            Files.createDirectories(file.getParent());
+            try (var writer = Files.newBufferedWriter(file,StandardCharsets.UTF_8); CSVPrinter printer = new CSVPrinter(writer,format)) {
+                if (verbose) {
+                    List<Object> header = new ArrayList<>(); header.add("Source\\Target"); header.addAll(target);
+                    printer.printRecord(header);
                 }
-                for (int i = sourceOffset; i < (sourceOffset+numSourceColumns); i++) {
-                    StringBuilder line = new StringBuilder();
-                    if (Configuration.getInstance().isSaveOutputVerbose()) {
-                        line.append(sourceTable.getColumn(i-sourceOffset).getLabel());
-                        line.append(Configuration.getInstance().getDefaultSeparator());
-                    }
-                    for (int j = targetOffset; j < (targetOffset+numTargetColumns); j++) {
-                        line.append(simMatrix[i][j]).append(Configuration.getInstance().getDefaultSeparator());
-                    }
-                    tpWriter.write(line.substring(0, line.length() - 1));
-                    tpWriter.newLine();
+                for (int i = 0; i < source.size(); i++) {
+                    List<Object> row = new ArrayList<>();
+                    if (verbose) row.add(source.get(i));
+                    for (int j = 0; j < target.size(); j++) row.add(scores[sourceOffset+i][targetOffset+j]);
+                    printer.printRecord(row);
                 }
-                tpWriter.close();
-            } catch (IOException e) {
-                log.error(e.getMessage());
             }
-        }
+        } catch (IOException e) { throw new java.io.UncheckedIOException("Cannot write matrix " + file,e); }
     }
 }

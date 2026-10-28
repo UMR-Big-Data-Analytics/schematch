@@ -1,0 +1,263 @@
+{
+  "version": 1,
+  "checked": "2026-10-15",
+  "sources": {
+    "valentine": {
+      "title": "Valentine: ChEMBL, TPC-DI, OpenData, Magellan, Wikidata",
+      "adapter": "valentine",
+      "homepage": "https://zenodo.org/records/5084605",
+      "acquisition": "Download the fixed v1 archive, about 602 MB; prepare audits mappings and requires explicit --skip-invalid for invalid release cases.",
+      "downloads": [
+        {
+          "file": "Valentine-datasets.zip",
+          "url": "https://zenodo.org/records/5084605/files/Valentine-datasets.zip?download=1",
+          "checksum": "md5:98da6d6701806538e5c685f4426b95f6",
+          "extract_to": "."
+        }
+      ]
+    },
+    "valentine-layout": {
+      "title": "Any existing Valentine-layout release or generated corpus",
+      "adapter": "valentine",
+      "homepage": "https://zenodo.org/records/5084605",
+      "acquisition": "Supply --input containing Valentine-datasets/<family>/.../*_mapping.json and matching CSV files."
+    },
+    "gdc": {
+      "title": "Existing Magneto GDC CSV release",
+      "adapter": "valentine",
+      "homepage": "https://zenodo.org/records/14963588",
+      "acquisition": "Supply --input containing gdc/{source-tables,target-tables,ground-truth}; for original supplementary XLSX inputs use gdcsm instead."
+    },
+    "t2dsm": {
+      "title": "WDC T2D-SM with headers",
+      "adapter": "t2dsm",
+      "homepage": "https://webdatacommons.org/structureddata/smb/",
+      "acquisition": "Fixed WH release; retains original train/valid/test in conversion manifest.",
+      "downloads": [
+        {
+          "file": "t2d_sm_wh.zip",
+          "url": "https://raw.githubusercontent.com/wbsg-uni-mannheim/wdc-smb/main/data/t2d_sm/t2d_sm_wh.zip",
+          "checksum": "sha256:e3c5f4c4313ac7c000f9c6531383a6d21e56658378c2698f5ff757688feda7e7",
+          "bytes": 1591174,
+          "extract_to": "."
+        }
+      ]
+    },
+    "hdxsm": {
+      "title": "HDXSM 0.2",
+      "adapter": "hdxsm",
+      "homepage": "https://github.com/MAGICS-LAB/SMUTF",
+      "acquisition": "Google Drive may require a browser; alternatively unpack the same archive and supply --input.",
+      "downloads": [
+        {
+          "file": "hdx_datasets_0.2.zip",
+          "url": "https://drive.google.com/uc?export=download&id=1xgK0MyZwlekoHp9OtLy28eccOx59NC0W",
+          "checksum": "sha256:05fc0c16a119768a49ef16e0af58f1af4e595adb83ba69b94bef4b4083e2d215",
+          "bytes": 2641485,
+          "extract_to": "."
+        }
+      ]
+    },
+    "gdcsm": {
+      "title": "Magneto GDC-SM from original supplementary XLSX sheets",
+      "adapter": "gdcsm",
+      "homepage": "https://zenodo.org/records/14963588",
+      "acquisition": "Fetches mappings, target catalogue, and the ten original study supplements; publisher downloads may require manual acquisition.",
+      "downloads": [
+        {
+          "file": "gdc-sm-data.zip",
+          "url": "https://zenodo.org/api/records/14963588/files/gdc-sm-data.zip/content",
+          "checksum": "sha256:cf5461feed28f4cdc263d68ddd910b25ebd16bf32be3aa0c7c00629abacc4a4a",
+          "bytes": 179992,
+          "extract_to": "."
+        },
+        {
+          "file": "papers_info.json",
+          "url": "https://zenodo.org/api/records/14963588/files/papers_info.json/content",
+          "checksum": "sha256:d360be3f17e68f37123a2b3f2f64556f611d23361697bd3ddcdf919dccb2ebd7",
+          "bytes": 4048
+        },
+        {
+          "file": "sources/Clark.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867419311237-mmc1.xlsx",
+          "checksum": "sha256:3174a83fa98e0416bedaf28e4f7526b8a70f0fe1954da5994dbabe470f6fd078",
+          "bytes": 115514
+        },
+        {
+          "file": "sources/Krug.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867420314008-mmc1.xlsx",
+          "checksum": "sha256:9c0fb08c65541d8c24a71a8d5737d9a0389135c17d5e2456c3da3806f9029526",
+          "bytes": 2491045
+        },
+        {
+          "file": "sources/Vasaikar.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867419302922-mmc1.xlsx",
+          "checksum": "sha256:dc9c970097d6b4aaf51e0e74ae900fbce2bd0a60b5ccd9a61c037e6e05a91c76",
+          "bytes": 38111
+        },
+        {
+          "file": "sources/Wang.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S1535610821000507-mmc2.xlsx",
+          "checksum": "sha256:c1fa2a7c67136dde22700dcbf648f659a3e7630e47b0524b3644731d3617de65",
+          "bytes": 65151
+        },
+        {
+          "file": "sources/Huang.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S1535610820306553-mmc2.xlsx",
+          "checksum": "sha256:fccbd91635d2eb9b368ca5da705ef7fea4e6bb61c341120c1b852c372a969086",
+          "bytes": 56156
+        },
+        {
+          "file": "sources/Satpathy.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867421008576-mmc1.xlsx",
+          "checksum": "sha256:8cdff61042eca53c09c42ea9fef2340e22e3eca1d6d7c8eaa96c6e2cca768fde",
+          "bytes": 335223
+        },
+        {
+          "file": "sources/Gillette.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867420307443-mmc1.xlsx",
+          "checksum": "sha256:00ef1caa741c211546d9d2c6c3051fa3febf5a040d1cd5d6fc98955a326af56a",
+          "bytes": 172561
+        },
+        {
+          "file": "sources/McDermott.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S2666379120300045-mmc2.xlsx",
+          "checksum": "sha256:1dbb62061c3d8e0f86a0c90cbec999ccceed2fdaecbd08ac6f8e52381c256e03",
+          "bytes": 85959
+        },
+        {
+          "file": "sources/Cao.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867421009971-mmc1.xlsx",
+          "checksum": "sha256:ceb984e2c29cf197bfff3514e3d4267be69d8b8402afdb4c53739daaf453d9d7",
+          "bytes": 3339436
+        },
+        {
+          "file": "sources/Dou.xlsx",
+          "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0092867420301070-mmc1.xlsx",
+          "checksum": "sha256:cefdda0a26bbf667639f8787f426f046545453cb911252e05f5e3a16dcc9c9d2",
+          "bytes": 195823
+        }
+      ]
+    },
+    "mimic": {
+      "title": "MIMIC-IV demo 2.2 to OMOP demo 0.9",
+      "adapter": "mimic",
+      "homepage": "https://physionet.org/content/mimic-iv-demo-omop/0.9/",
+      "acquisition": "Uses public demo releases only, with the 49-row Parciak mapping; no credentialed full MIMIC download.",
+      "downloads": [
+        {
+          "file": "mimic-iv-demo-2.2.zip",
+          "url": "https://physionet.org/content/mimic-iv-demo/get-zip/2.2/",
+          "checksum": "sha256:97301a03820e8f41af211cf3462ddc19aefe75bbed05f11753859affaafeb8ec",
+          "bytes": 16189661,
+          "extract_to": "mimic-iv-demo-2.2"
+        },
+        {
+          "file": "mimic-iv-demo-omop-0.9.zip",
+          "url": "https://physionet.org/content/mimic-iv-demo-omop/get-zip/0.9/",
+          "checksum": "sha256:00ea8a956a5d963c06bbf1d90703478f47f94fda7db80e9ff0b2ab01dbd9ef23",
+          "bytes": 10786504,
+          "extract_to": "mimic-iv-demo-omop-0.9"
+        },
+        {
+          "file": "parciak_ground_truth.csv",
+          "url": "https://raw.githubusercontent.com/UHasselt-DSI-Data-Systems-Lab/code-schema-matching-LLMs-artefacs/main/benchmark/ground_truth.csv",
+          "checksum": "sha256:b00303b598f0e984ea5d20882cc950ee5f36365d5d32c78e4e7fbb8c0f8aacae",
+          "bytes": 4401
+        }
+      ]
+    },
+    "madi": {
+      "title": "MaDI-Bench five base tasks (18 pairwise scenarios)",
+      "adapter": "madi",
+      "homepage": "https://github.com/wbsg-uni-mannheim/MaDI-Bench",
+      "acquisition": "Obtain the repository at commit 655faa751536b0c33150f681adc1a305c570a114, then --input the checkout root. Download is manual; source terms apply.",
+      "revision": "655faa751536b0c33150f681adc1a305c570a114"
+    },
+    "goby": {
+      "title": "GOBY seeded sample of 200 eligible wrapper pairs",
+      "adapter": "goby",
+      "homepage": "https://goby-benchmark.github.io/",
+      "acquisition": "Download GOBY.zip from the official page (about 1.53 GB), password GOBY2025. Unpack it and goby_data_csv_files.tar.gz into wrappers/. Supply --input with wrappers/, both mapping CSVs and the inner tar.gz.",
+      "archive_sha256": "63e217fbe91656ee153dcb70da613cabddf0d4bdd910b57924061cdcad80a73c"
+    },
+    "synthea": {
+      "title": "Synthea to OMOP (OMAP truth)",
+      "adapter": "synthea",
+      "homepage": "https://github.com/JZCS2018/SMAT",
+      "acquisition": "Acquire omop_synthea_data.xlsx, Synthea CSV sample, and OHDSI Eunomia GiBleed_5.3. Layout and historical hashes are in DATASETS.md."
+    },
+    "controlled": {
+      "title": "Controlled MusicBrainz and Lahman (16 scenarios)",
+      "adapter": "controlled",
+      "homepage": "https://musicbrainz.org/doc/MusicBrainz_Database/Download",
+      "acquisition": "Supply --input with Musicbrainz/medium, release, release_group headerless TSV dumps and Lahman/Batting.csv, People.csv, Teams.csv; see DATASETS.md."
+    },
+    "scale": {
+      "title": "Deterministic synthetic scaling corpus (93 scenarios)",
+      "adapter": "scale",
+      "homepage": "",
+      "acquisition": "Generated locally; no external data. --smoke creates one small case."
+    },
+    "amalgam": {
+      "title": "Amalgam bibliographic schemas",
+      "adapter": "manual",
+      "homepage": "https://www.cs.toronto.edu/~miller/amalgam/",
+      "acquisition": "Obtain original instances and a separately versioned correspondence set. Published schema pages alone do not reproduce study C+L annotations."
+    },
+    "efes": {
+      "title": "EFES bibliography/music integration scenarios",
+      "adapter": "manual",
+      "homepage": "https://hpi.de/naumann/projects/repeatability/data-integration/estimating-data-integration-and-cleaning-effort.html",
+      "acquisition": "Download Integration scenarios; retain published mappings. Match local schema/table names explicitly before converting. Study final_indep uses its own C+L truth."
+    },
+    "musicbrainz": {
+      "title": "MusicBrainz raw database dump",
+      "adapter": "manual",
+      "homepage": "https://musicbrainz.org/doc/MusicBrainz_Database/Download",
+      "acquisition": "Download a dated dump. Controlled adapter handles the three required tables; other paper variants need the recorded generation recipes."
+    },
+    "lahman": {
+      "title": "Lahman baseball database",
+      "adapter": "manual",
+      "homepage": "https://sabr.org/lahman-database/",
+      "acquisition": "Download CSV release, retain release date and SHA256; controlled adapter accepts the three required tables."
+    },
+    "adventureworks": {
+      "title": "AdventureWorks sample database",
+      "adapter": "manual",
+      "homepage": "https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works",
+      "acquisition": "Acquire pinned release and export CSV with declared order/delimiter/null policy. Study uses a local CSV snapshot; newer releases are not byte-identical."
+    },
+    "imdb": {
+      "title": "IMDb non-commercial datasets",
+      "adapter": "manual",
+      "homepage": "https://datasets.imdbws.com/",
+      "acquisition": "Acquire a dated TSV snapshot under IMDb terms. Study uses basics, name, principals and other declared tables; latest snapshots are not the frozen paper input."
+    },
+    "sakila": {
+      "title": "MySQL Sakila sample database",
+      "adapter": "manual",
+      "homepage": "https://dev.mysql.com/doc/sakila/en/",
+      "acquisition": "Obtain the sample database and export tables to CSV. Preserve keys, null policy and table names."
+    },
+    "scope": {
+      "title": "SCOPe structural classification database",
+      "adapter": "manual",
+      "homepage": "https://scop.berkeley.edu/downloads/",
+      "acquisition": "Obtain the recorded relational CSV snapshot (node/comment/level). Current public flat files are not drop-in CSV replacements."
+    },
+    "tpch": {
+      "title": "TPC-H dbgen",
+      "adapter": "manual",
+      "homepage": "https://www.tpc.org/tpch/",
+      "acquisition": "Use the recorded dbgen version/scale/seed and export CSV; record generated input hashes."
+    },
+    "chinook": {
+      "title": "Chinook v1.4.5",
+      "adapter": "manual",
+      "homepage": "https://github.com/lerocha/chinook-database/releases/tag/v1.4.5",
+      "acquisition": "Get Chinook_Sqlite.sqlite from this release; use the independent-sampling recipe for normalized/denormalized matching scenarios."
+    }
+  }
+}

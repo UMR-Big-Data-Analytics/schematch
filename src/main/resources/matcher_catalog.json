@@ -1,0 +1,2180 @@
+{
+  "description": "Concrete class inventory, including presets, controls and transports; not an algorithm or installation count",
+  "backend_counts": {
+    "External HTTP service": 1,
+    "Generic Python seed bridge": 1,
+    "Generic Python study bridge": 1,
+    "Java": 67,
+    "Java composition + Python seeds": 3,
+    "Python seed server": 56,
+    "Python study server": 11
+  },
+  "matchers": [
+    {
+      "name": "ConstantMatcher",
+      "package": "control",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "control",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/control/ConstantMatcher.java"
+    },
+    {
+      "name": "FileSeedMatcher",
+      "package": "control",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "file input adapter",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/control/FileSeedMatcher.java"
+    },
+    {
+      "name": "OracleMatcher",
+      "package": "control",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "oracle control (uses ground truth)",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/control/OracleMatcher.java"
+    },
+    {
+      "name": "C3Matcher",
+      "package": "ensemble",
+      "backend": "Java composition + Python seeds",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/C3Matcher.java"
+    },
+    {
+      "name": "CompositeMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/CompositeMatcher.java"
+    },
+    {
+      "name": "CompositeMaxMeanMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/CompositeMaxMeanMatcher.java"
+    },
+    {
+      "name": "CompositeMinMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/CompositeMinMatcher.java"
+    },
+    {
+      "name": "CompositeStdevMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/CompositeStdevMatcher.java"
+    },
+    {
+      "name": "CompositeWeightedMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/CompositeWeightedMatcher.java"
+    },
+    {
+      "name": "IVMatcher",
+      "package": "ensemble",
+      "backend": "Java composition + Python seeds",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/IVMatcher.java"
+    },
+    {
+      "name": "IVPlusValueMatcher",
+      "package": "ensemble",
+      "backend": "Java composition + Python seeds",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/IVPlusValueMatcher.java"
+    },
+    {
+      "name": "ProbabilisticMappingMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/ProbabilisticMappingMatcher.java"
+    },
+    {
+      "name": "RandomEnsembleMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "control",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/RandomEnsembleMatcher.java"
+    },
+    {
+      "name": "ValueAverageMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/ValueAverageMatcher.java"
+    },
+    {
+      "name": "AbbreviationMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/AbbreviationMatcher.java",
+      "method": "abbreviation"
+    },
+    {
+      "name": "AfdRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/AfdRoleMatcher.java",
+      "method": "afd_role"
+    },
+    {
+      "name": "BagDistanceMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BagDistanceMatcher.java",
+      "method": "bag_distance"
+    },
+    {
+      "name": "BdikitContrastiveLearningMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BdikitContrastiveLearningMatcher.java",
+      "method": "bdikit_cl"
+    },
+    {
+      "name": "BdikitMaxValSimMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BdikitMaxValSimMatcher.java",
+      "method": "bdikit_max_val_sim"
+    },
+    {
+      "name": "BdikitTwoPhaseComaMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BdikitTwoPhaseComaMatcher.java",
+      "method": "bdikit_two_phase_coma"
+    },
+    {
+      "name": "BdikitTwoPhaseMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BdikitTwoPhaseMatcher.java",
+      "method": "bdikit_two_phase"
+    },
+    {
+      "name": "BenfordMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BenfordMatcher.java",
+      "method": "benford"
+    },
+    {
+      "name": "BhattacharyyaMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BhattacharyyaMatcher.java",
+      "method": "bhattacharyya"
+    },
+    {
+      "name": "BinaryFdRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BinaryFdRoleMatcher.java",
+      "method": "binary_fd_role"
+    },
+    {
+      "name": "BottomKSketchMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/BottomKSketchMatcher.java",
+      "method": "bottom_k"
+    },
+    {
+      "name": "Char3SoftMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/Char3SoftMatcher.java",
+      "method": "char3_soft"
+    },
+    {
+      "name": "ComaInstancesMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ComaInstancesMatcher.java",
+      "method": "coma_instances"
+    },
+    {
+      "name": "ComaMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ComaMatcher.java",
+      "method": "coma"
+    },
+    {
+      "name": "CrossSchemaIndMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/CrossSchemaIndMatcher.java",
+      "method": "cross_ind"
+    },
+    {
+      "name": "CupidMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/CupidMatcher.java",
+      "method": "cupid"
+    },
+    {
+      "name": "DcRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/DcRoleMatcher.java",
+      "method": "dc_role"
+    },
+    {
+      "name": "DependenceRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/DependenceRoleMatcher.java",
+      "method": "dependence_role"
+    },
+    {
+      "name": "DependencyMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/DependencyMatcher.java",
+      "method": "dep"
+    },
+    {
+      "name": "DigitCountMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/DigitCountMatcher.java",
+      "method": "digit_count"
+    },
+    {
+      "name": "DumasMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/DumasMatcher.java",
+      "method": "dumas"
+    },
+    {
+      "name": "EditexMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/EditexMatcher.java",
+      "method": "editex"
+    },
+    {
+      "name": "EmbeddingRandomMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "control",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/EmbeddingRandomMatcher.java",
+      "method": "embedding_random"
+    },
+    {
+      "name": "EnergyDistanceMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/EnergyDistanceMatcher.java",
+      "method": "energy_distance"
+    },
+    {
+      "name": "EntityAlignmentMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/EntityAlignmentMatcher.java",
+      "method": "entity_alignment"
+    },
+    {
+      "name": "ExactEntityAlignmentMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ExactEntityAlignmentMatcher.java",
+      "method": "entity_alignment"
+    },
+    {
+      "name": "GcovPindMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/GcovPindMatcher.java",
+      "method": "gcov_pind"
+    },
+    {
+      "name": "GeneralizedJaccardMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/GeneralizedJaccardMatcher.java",
+      "method": "generalized_jaccard"
+    },
+    {
+      "name": "HistogramIntersectionMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/HistogramIntersectionMatcher.java",
+      "method": "histogram_intersection"
+    },
+    {
+      "name": "HmacContainmentMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/HmacContainmentMatcher.java",
+      "method": "hmac_containment"
+    },
+    {
+      "name": "IsresmatMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/IsresmatMatcher.java",
+      "method": "isresmat"
+    },
+    {
+      "name": "KangNaughtonMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/KangNaughtonMatcher.java",
+      "method": "kang_naughton"
+    },
+    {
+      "name": "KangNaughtonProfileMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/KangNaughtonProfileMatcher.java",
+      "method": "kang_naughton_profile"
+    },
+    {
+      "name": "LexPmfMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/LexPmfMatcher.java",
+      "method": "lex_pmf"
+    },
+    {
+      "name": "LlmMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/LlmMatcher.java",
+      "method": "llm"
+    },
+    {
+      "name": "MagnetoMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/MagnetoMatcher.java",
+      "method": "magneto"
+    },
+    {
+      "name": "NmiRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/NmiRoleMatcher.java",
+      "method": "nmi_role"
+    },
+    {
+      "name": "OrderRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/OrderRoleMatcher.java",
+      "method": "order_role"
+    },
+    {
+      "name": "PartialRatioMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PartialRatioMatcher.java",
+      "method": "partial_ratio"
+    },
+    {
+      "name": "PdedMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PdedMatcher.java",
+      "method": "pded"
+    },
+    {
+      "name": "PythonAliteMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonAliteMatcher.java",
+      "method": "alite"
+    },
+    {
+      "name": "PythonOmniMatchMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonOmniMatchMatcher.java",
+      "method": "omnimatch"
+    },
+    {
+      "name": "PythonOmniMatchReleaseMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonOmniMatchReleaseMatcher.java",
+      "method": "omnimatch_release"
+    },
+    {
+      "name": "PythonQualifiedNameMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonQualifiedNameMatcher.java",
+      "method": "q"
+    },
+    {
+      "name": "PythonRactMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonRactMatcher.java",
+      "method": "ract"
+    },
+    {
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "backend": "Generic Python seed bridge",
+      "scope": "table pair",
+      "purpose": "generic transport",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonServerMatcher.java"
+    },
+    {
+      "name": "RangeOverlapMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/RangeOverlapMatcher.java",
+      "method": "range_overlap"
+    },
+    {
+      "name": "RatcliffObershelpMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/RatcliffObershelpMatcher.java",
+      "method": "ratcliff_obershelp"
+    },
+    {
+      "name": "RoleGcovMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/RoleGcovMatcher.java",
+      "method": "role_gcov"
+    },
+    {
+      "name": "RoleGcovSignificanceMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/RoleGcovSignificanceMatcher.java",
+      "method": "role_gcov_sig"
+    },
+    {
+      "name": "RoleUncertaintyMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/RoleUncertaintyMatcher.java",
+      "method": "role_uncertainty"
+    },
+    {
+      "name": "SbertMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/SbertMatcher.java",
+      "method": "sbert"
+    },
+    {
+      "name": "ScenarioPythonServerMatcher",
+      "package": "external",
+      "backend": "Generic Python study bridge",
+      "scope": "scenario",
+      "purpose": "generic transport",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ScenarioPythonServerMatcher.java"
+    },
+    {
+      "name": "SemanticTypesMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/SemanticTypesMatcher.java",
+      "method": "semantic_types"
+    },
+    {
+      "name": "SnoopyMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/SnoopyMatcher.java",
+      "method": "snoopy"
+    },
+    {
+      "name": "StudyBaseMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/StudyBaseMatcher.java",
+      "method": "base"
+    },
+    {
+      "name": "StudyReplayEntityAlignmentMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/StudyReplayEntityAlignmentMatcher.java",
+      "method": "entity_alignment"
+    },
+    {
+      "name": "TfIdfValuesMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TfIdfValuesMatcher.java",
+      "method": "tfidf_values"
+    },
+    {
+      "name": "TokenOverlapCoefficientMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TokenOverlapCoefficientMatcher.java",
+      "method": "overlap_coefficient"
+    },
+    {
+      "name": "TokenSetRatioMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TokenSetRatioMatcher.java",
+      "method": "token_set_ratio"
+    },
+    {
+      "name": "TokenSoftMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TokenSoftMatcher.java",
+      "method": "token_soft"
+    },
+    {
+      "name": "TokenSortRatioMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TokenSortRatioMatcher.java",
+      "method": "token_sort_ratio"
+    },
+    {
+      "name": "TokenTverskyMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TokenTverskyMatcher.java",
+      "method": "tversky"
+    },
+    {
+      "name": "TopKValuesMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/TopKValuesMatcher.java",
+      "method": "topk_values"
+    },
+    {
+      "name": "UnaryKeyRoleMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/UnaryKeyRoleMatcher.java",
+      "method": "unary_key_role"
+    },
+    {
+      "name": "ValentineDistributionMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ValentineDistributionMatcher.java",
+      "method": "valentine_distribution"
+    },
+    {
+      "name": "ValentineJaccardMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ValentineJaccardMatcher.java",
+      "method": "valentine_jaccard"
+    },
+    {
+      "name": "ValueLengthMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/ValueLengthMatcher.java",
+      "method": "value_length"
+    },
+    {
+      "name": "WordVectorsMatcher",
+      "package": "external",
+      "backend": "Python seed server",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/WordVectorsMatcher.java",
+      "method": "word_vectors"
+    },
+    {
+      "name": "DatatypeMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/DatatypeMatcher.java"
+    },
+    {
+      "name": "DistinctCountMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/DistinctCountMatcher.java"
+    },
+    {
+      "name": "ExtremaMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/ExtremaMatcher.java"
+    },
+    {
+      "name": "NullPercentageMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/NullPercentageMatcher.java"
+    },
+    {
+      "name": "NumberOfRowsMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/NumberOfRowsMatcher.java"
+    },
+    {
+      "name": "SemIntMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/SemIntMatcher.java"
+    },
+    {
+      "name": "UnaryStatisticsMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/UnaryStatisticsMatcher.java"
+    },
+    {
+      "name": "UniquenessMatcher",
+      "package": "metadata",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/UniquenessMatcher.java"
+    },
+    {
+      "name": "HungarianBonusMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/HungarianBonusMatcher.java"
+    },
+    {
+      "name": "QualifiedNameRefinementMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/QualifiedNameRefinementMatcher.java"
+    },
+    {
+      "name": "SinkhornMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/SinkhornMatcher.java"
+    },
+    {
+      "name": "CharDistributionMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/CharDistributionMatcher.java"
+    },
+    {
+      "name": "ContainmentMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/ContainmentMatcher.java"
+    },
+    {
+      "name": "DistributionMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/DistributionMatcher.java"
+    },
+    {
+      "name": "DistributionShapeMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/DistributionShapeMatcher.java"
+    },
+    {
+      "name": "DistributionTestMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/DistributionTestMatcher.java"
+    },
+    {
+      "name": "FuzzyJaccardMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/FuzzyJaccardMatcher.java"
+    },
+    {
+      "name": "JensenShannonValueMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/JensenShannonValueMatcher.java"
+    },
+    {
+      "name": "KolmogorovSmirnovMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/KolmogorovSmirnovMatcher.java"
+    },
+    {
+      "name": "MinHashMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/MinHashMatcher.java"
+    },
+    {
+      "name": "NullStructureMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/NullStructureMatcher.java"
+    },
+    {
+      "name": "PatternProfileMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/PatternProfileMatcher.java"
+    },
+    {
+      "name": "PMFMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/PMFMatcher.java"
+    },
+    {
+      "name": "UnionabilityMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/UnionabilityMatcher.java"
+    },
+    {
+      "name": "ValueShapeRoleMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/ValueShapeRoleMatcher.java"
+    },
+    {
+      "name": "WassersteinMatcher",
+      "package": "similarity.instance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/instance/WassersteinMatcher.java"
+    },
+    {
+      "name": "AlignmentMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/AlignmentMatcher.java"
+    },
+    {
+      "name": "ColognePhoneticMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/ColognePhoneticMatcher.java"
+    },
+    {
+      "name": "CosineMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/CosineMatcher.java"
+    },
+    {
+      "name": "HammingMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/HammingMatcher.java"
+    },
+    {
+      "name": "JaroWinklerMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/JaroWinklerMatcher.java"
+    },
+    {
+      "name": "LevenshteinMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/LevenshteinMatcher.java"
+    },
+    {
+      "name": "LongestCommonSubsequenceMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/LongestCommonSubsequenceMatcher.java"
+    },
+    {
+      "name": "MetaphoneMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/MetaphoneMatcher.java"
+    },
+    {
+      "name": "MongeElkanMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/MongeElkanMatcher.java"
+    },
+    {
+      "name": "NormsMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/NormsMatcher.java"
+    },
+    {
+      "name": "NysiisMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/NysiisMatcher.java"
+    },
+    {
+      "name": "PhoneticMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/PhoneticMatcher.java"
+    },
+    {
+      "name": "PrefixSuffixMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/PrefixSuffixMatcher.java"
+    },
+    {
+      "name": "QGramCosineMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/QGramCosineMatcher.java"
+    },
+    {
+      "name": "QGramMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/QGramMatcher.java"
+    },
+    {
+      "name": "SmoaMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/SmoaMatcher.java"
+    },
+    {
+      "name": "SoftTfIdfMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/SoftTfIdfMatcher.java"
+    },
+    {
+      "name": "TableQualifiedNameMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/TableQualifiedNameMatcher.java"
+    },
+    {
+      "name": "ThesaurusMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/ThesaurusMatcher.java"
+    },
+    {
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/label/WordNetMatcher.java"
+    },
+    {
+      "name": "DiceInstanceMatcher",
+      "package": "similarity.tokenizedinstance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedinstance/DiceInstanceMatcher.java"
+    },
+    {
+      "name": "JaccardInstanceMatcher",
+      "package": "similarity.tokenizedinstance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedinstance/JaccardInstanceMatcher.java"
+    },
+    {
+      "name": "OverlapInstanceMatcher",
+      "package": "similarity.tokenizedinstance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedinstance/OverlapInstanceMatcher.java"
+    },
+    {
+      "name": "SetCosineInstanceMatcher",
+      "package": "similarity.tokenizedinstance",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedinstance/SetCosineInstanceMatcher.java"
+    },
+    {
+      "name": "DiceLabelMatcher",
+      "package": "similarity.tokenizedlabel",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedlabel/DiceLabelMatcher.java"
+    },
+    {
+      "name": "JaccardLabelMatcher",
+      "package": "similarity.tokenizedlabel",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedlabel/JaccardLabelMatcher.java"
+    },
+    {
+      "name": "OverlapLabelMatcher",
+      "package": "similarity.tokenizedlabel",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedlabel/OverlapLabelMatcher.java"
+    },
+    {
+      "name": "SetCosineLabelMatcher",
+      "package": "similarity.tokenizedlabel",
+      "backend": "Java",
+      "scope": "table pair",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarity/tokenizedlabel/SetCosineLabelMatcher.java"
+    },
+    {
+      "name": "SimilarityFlooding",
+      "package": "similarityFlooding",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/similarityFlooding/SimilarityFlooding.java"
+    },
+    {
+      "name": "EmbdiMatcher",
+      "package": "sota",
+      "backend": "External HTTP service",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/sota/EmbdiMatcher.java"
+    },
+    {
+      "name": "RandomMatcher",
+      "package": "sota",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "control",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/sota/RandomMatcher.java"
+    }
+  ],
+  "study_seed_count": 92,
+  "parameter_cases": [
+    {
+      "seed": "bert_base",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"<configured resource>\"}"
+      }
+    },
+    {
+      "seed": "bert_base",
+      "name": "SbertMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"<configured resource>\"}"
+      }
+    },
+    {
+      "seed": "char3_soft",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "char3_soft"
+      }
+    },
+    {
+      "seed": "char3_soft",
+      "name": "Char3SoftMatcher",
+      "package": "external",
+      "params": {
+        "method": "char3_soft"
+      }
+    },
+    {
+      "seed": "char_distribution",
+      "name": "CharDistributionMatcher",
+      "package": "similarity.instance",
+      "params": {}
+    },
+    {
+      "seed": "coma",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "coma"
+      }
+    },
+    {
+      "seed": "coma",
+      "name": "ComaMatcher",
+      "package": "external",
+      "params": {
+        "method": "coma"
+      }
+    },
+    {
+      "seed": "coma_instances",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "coma_instances"
+      }
+    },
+    {
+      "seed": "coma_instances",
+      "name": "ComaInstancesMatcher",
+      "package": "external",
+      "params": {
+        "method": "coma_instances"
+      }
+    },
+    {
+      "seed": "composite_average",
+      "name": "CompositeMatcher",
+      "package": "ensemble",
+      "params": {
+        "components": "[{\"name\": \"LevenshteinMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"PrefixSuffixMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"WordNetMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"ContainmentMatcher\", \"package\": \"similarity.instance\"}, {\"name\": \"DistributionMatcher\", \"package\": \"similarity.instance\"}]",
+        "aggregation": "AVERAGE"
+      }
+    },
+    {
+      "seed": "composite_confidence",
+      "name": "CompositeMatcher",
+      "package": "ensemble",
+      "params": {
+        "components": "[{\"name\": \"LevenshteinMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"PrefixSuffixMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"WordNetMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"ContainmentMatcher\", \"package\": \"similarity.instance\"}, {\"name\": \"DistributionMatcher\", \"package\": \"similarity.instance\"}]",
+        "aggregation": "CONFIDENCE"
+      }
+    },
+    {
+      "seed": "composite_dominants",
+      "name": "CompositeMatcher",
+      "package": "ensemble",
+      "params": {
+        "components": "[{\"name\": \"LevenshteinMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"PrefixSuffixMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"WordNetMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"ContainmentMatcher\", \"package\": \"similarity.instance\"}, {\"name\": \"DistributionMatcher\", \"package\": \"similarity.instance\"}]",
+        "aggregation": "PREDICTOR",
+        "predictor": "DOMINANTS"
+      }
+    },
+    {
+      "seed": "composite_max",
+      "name": "CompositeMatcher",
+      "package": "ensemble",
+      "params": {
+        "components": "[{\"name\": \"LevenshteinMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"PrefixSuffixMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"WordNetMatcher\", \"package\": \"similarity.label\"}, {\"name\": \"ContainmentMatcher\", \"package\": \"similarity.instance\"}, {\"name\": \"DistributionMatcher\", \"package\": \"similarity.instance\"}]",
+        "aggregation": "MAX"
+      }
+    },
+    {
+      "seed": "constant",
+      "name": "ConstantMatcher",
+      "package": "control",
+      "params": {
+        "value": 1.0
+      }
+    },
+    {
+      "seed": "containment",
+      "name": "ContainmentMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "alpha": 1.0,
+        "beta": 0.0
+      }
+    },
+    {
+      "seed": "cosine",
+      "name": "CosineMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "cupid",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "cupid"
+      }
+    },
+    {
+      "seed": "cupid",
+      "name": "CupidMatcher",
+      "package": "external",
+      "params": {
+        "method": "cupid"
+      }
+    },
+    {
+      "seed": "datatype",
+      "name": "DatatypeMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "distinct_count",
+      "name": "DistinctCountMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "distribution_shape",
+      "name": "DistributionShapeMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "normalization": "MINMAX"
+      }
+    },
+    {
+      "seed": "distribution_shape_z",
+      "name": "DistributionShapeMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "normalization": "ZSCORE"
+      }
+    },
+    {
+      "seed": "double_metaphone",
+      "name": "PhoneticMatcher",
+      "package": "similarity.label",
+      "params": {
+        "algorithm": "DOUBLE_METAPHONE"
+      }
+    },
+    {
+      "seed": "embdi",
+      "name": "EmbdiMatcher",
+      "package": "sota",
+      "params": {}
+    },
+    {
+      "seed": "embedding_random",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "embedding_random"
+      }
+    },
+    {
+      "seed": "embedding_random",
+      "name": "EmbeddingRandomMatcher",
+      "package": "external",
+      "params": {
+        "method": "embedding_random"
+      }
+    },
+    {
+      "seed": "extrema",
+      "name": "ExtremaMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "fuzzy_jaccard",
+      "name": "FuzzyJaccardMatcher",
+      "package": "similarity.instance",
+      "params": {}
+    },
+    {
+      "seed": "hamming",
+      "name": "HammingMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "isresmat",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "isresmat",
+        "options": "{\"col_name_prob\": 0}"
+      }
+    },
+    {
+      "seed": "isresmat",
+      "name": "IsresmatMatcher",
+      "package": "external",
+      "params": {
+        "method": "isresmat",
+        "options": "{\"col_name_prob\": 0}"
+      }
+    },
+    {
+      "seed": "isresmat_hybrid",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "isresmat",
+        "options": "{\"col_name_prob\": 0.5}"
+      }
+    },
+    {
+      "seed": "isresmat_hybrid",
+      "name": "IsresmatMatcher",
+      "package": "external",
+      "params": {
+        "method": "isresmat",
+        "options": "{\"col_name_prob\": 0.5}"
+      }
+    },
+    {
+      "seed": "jaccard_exact",
+      "name": "ContainmentMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "alpha": 1.0,
+        "beta": 1.0
+      }
+    },
+    {
+      "seed": "jaro_winkler",
+      "name": "JaroWinklerMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "jsd_values",
+      "name": "DistributionTestMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "test": "JSD",
+        "domain": "VALUE"
+      }
+    },
+    {
+      "seed": "kang_naughton",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "kang_naughton"
+      }
+    },
+    {
+      "seed": "kang_naughton",
+      "name": "KangNaughtonMatcher",
+      "package": "external",
+      "params": {
+        "method": "kang_naughton"
+      }
+    },
+    {
+      "seed": "kang_naughton_profile",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "kang_naughton_profile"
+      }
+    },
+    {
+      "seed": "kang_naughton_profile",
+      "name": "KangNaughtonProfileMatcher",
+      "package": "external",
+      "params": {
+        "method": "kang_naughton_profile"
+      }
+    },
+    {
+      "seed": "ks",
+      "name": "DistributionTestMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "test": "KS"
+      }
+    },
+    {
+      "seed": "lcs",
+      "name": "LongestCommonSubsequenceMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "levenshtein",
+      "name": "LevenshteinMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "llm_opus",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "llm",
+        "options": "{\"effort\": \"medium\"}"
+      }
+    },
+    {
+      "seed": "llm_opus",
+      "name": "LlmMatcher",
+      "package": "external",
+      "params": {
+        "method": "llm",
+        "options": "{\"effort\": \"medium\"}"
+      }
+    },
+    {
+      "seed": "llm_opus_rerank",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "llm",
+        "options": "{\"effort\": \"medium\", \"candidates\": 3}"
+      }
+    },
+    {
+      "seed": "llm_opus_rerank",
+      "name": "LlmMatcher",
+      "package": "external",
+      "params": {
+        "method": "llm",
+        "options": "{\"effort\": \"medium\", \"candidates\": 3}"
+      }
+    },
+    {
+      "seed": "magneto",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "magneto"
+      }
+    },
+    {
+      "seed": "magneto",
+      "name": "MagnetoMatcher",
+      "package": "external",
+      "params": {
+        "method": "magneto"
+      }
+    },
+    {
+      "seed": "minhash_containment",
+      "name": "MinHashMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "estimate": "CONTAINMENT"
+      }
+    },
+    {
+      "seed": "minhash_jaccard",
+      "name": "MinHashMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "estimate": "JACCARD"
+      }
+    },
+    {
+      "seed": "monge_elkan_jw",
+      "name": "MongeElkanMatcher",
+      "package": "similarity.label",
+      "params": {
+        "inner": "JARO_WINKLER"
+      }
+    },
+    {
+      "seed": "monge_elkan_jw_expand",
+      "name": "MongeElkanMatcher",
+      "package": "similarity.label",
+      "params": {
+        "inner": "JARO_WINKLER",
+        "normalization": "EXPAND"
+      }
+    },
+    {
+      "seed": "monge_elkan_porter",
+      "name": "MongeElkanMatcher",
+      "package": "similarity.label",
+      "params": {
+        "inner": "JARO_WINKLER",
+        "normalization": "PORTER"
+      }
+    },
+    {
+      "seed": "needleman_wunsch",
+      "name": "AlignmentMatcher",
+      "package": "similarity.label",
+      "params": {
+        "algorithm": "NEEDLEMAN_WUNSCH"
+      }
+    },
+    {
+      "seed": "norms",
+      "name": "NormsMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "null_percentage",
+      "name": "NullPercentageMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "oracle",
+      "name": "OracleMatcher",
+      "package": "control",
+      "params": {}
+    },
+    {
+      "seed": "oracle_decoy100",
+      "name": "OracleMatcher",
+      "package": "control",
+      "params": {
+        "decoy": 1.0
+      }
+    },
+    {
+      "seed": "oracle_erase050",
+      "name": "OracleMatcher",
+      "package": "control",
+      "params": {
+        "erase": 0.5
+      }
+    },
+    {
+      "seed": "oracle_noise025",
+      "name": "OracleMatcher",
+      "package": "control",
+      "params": {
+        "noise": 0.25
+      }
+    },
+    {
+      "seed": "oracle_noise050",
+      "name": "OracleMatcher",
+      "package": "control",
+      "params": {
+        "noise": 0.5
+      }
+    },
+    {
+      "seed": "pattern_charclass",
+      "name": "PatternProfileMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "granularity": "CHARCLASS"
+      }
+    },
+    {
+      "seed": "pattern_shape",
+      "name": "PatternProfileMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "granularity": "SHAPE"
+      }
+    },
+    {
+      "seed": "pmf",
+      "name": "DistributionMatcher",
+      "package": "similarity.instance",
+      "params": {}
+    },
+    {
+      "seed": "pmf",
+      "name": "PMFMatcher",
+      "package": "similarity.instance",
+      "params": {}
+    },
+    {
+      "seed": "prefix_suffix",
+      "name": "PrefixSuffixMatcher",
+      "package": "similarity.label",
+      "params": {
+        "useIdf": false
+      }
+    },
+    {
+      "seed": "prefix_suffix_tfidf",
+      "name": "PrefixSuffixMatcher",
+      "package": "similarity.label",
+      "params": {
+        "useIdf": true
+      }
+    },
+    {
+      "seed": "probabilistic_levenshtein",
+      "name": "ProbabilisticMappingMatcher",
+      "package": "ensemble",
+      "params": {
+        "k": 20
+      }
+    },
+    {
+      "seed": "qgram2_dice",
+      "name": "QGramMatcher",
+      "package": "similarity.label",
+      "params": {
+        "q": 2,
+        "coefficient": "DICE"
+      }
+    },
+    {
+      "seed": "qgram3_jaccard",
+      "name": "QGramMatcher",
+      "package": "similarity.label",
+      "params": {
+        "q": 3,
+        "coefficient": "JACCARD"
+      }
+    },
+    {
+      "seed": "random",
+      "name": "RandomMatcher",
+      "package": "sota",
+      "params": {}
+    },
+    {
+      "seed": "role_gcov",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_gcov"
+      }
+    },
+    {
+      "seed": "role_gcov",
+      "name": "RoleGcovMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_gcov"
+      }
+    },
+    {
+      "seed": "role_gcov_sig",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_gcov_sig"
+      }
+    },
+    {
+      "seed": "role_gcov_sig",
+      "name": "RoleGcovSignificanceMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_gcov_sig"
+      }
+    },
+    {
+      "seed": "role_uncertainty",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_uncertainty"
+      }
+    },
+    {
+      "seed": "role_uncertainty",
+      "name": "RoleUncertaintyMatcher",
+      "package": "external",
+      "params": {
+        "method": "role_uncertainty"
+      }
+    },
+    {
+      "seed": "sbert_e5",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"intfloat/e5-small\", \"prefix\": \"query: \"}"
+      }
+    },
+    {
+      "seed": "sbert_e5",
+      "name": "SbertMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"intfloat/e5-small\", \"prefix\": \"query: \"}"
+      }
+    },
+    {
+      "seed": "sbert_minilm",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-MiniLM-L6-v2\"}"
+      }
+    },
+    {
+      "seed": "sbert_minilm",
+      "name": "SbertMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-MiniLM-L6-v2\"}"
+      }
+    },
+    {
+      "seed": "sbert_mpnet",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-mpnet-base-v2\"}"
+      }
+    },
+    {
+      "seed": "sbert_mpnet",
+      "name": "SbertMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-mpnet-base-v2\"}"
+      }
+    },
+    {
+      "seed": "sbert_mpnet_values",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-mpnet-base-v2\", \"text\": \"label_values\"}"
+      }
+    },
+    {
+      "seed": "sbert_mpnet_values",
+      "name": "SbertMatcher",
+      "package": "external",
+      "params": {
+        "method": "sbert",
+        "options": "{\"model\": \"all-mpnet-base-v2\", \"text\": \"label_values\"}"
+      }
+    },
+    {
+      "seed": "semantic_types",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "semantic_types",
+        "options": "{\"adapter\": \"<module:function>\"}"
+      }
+    },
+    {
+      "seed": "semantic_types",
+      "name": "SemanticTypesMatcher",
+      "package": "external",
+      "params": {
+        "method": "semantic_types",
+        "options": "{\"adapter\": \"<module:function>\"}"
+      }
+    },
+    {
+      "seed": "semint",
+      "name": "SemIntMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "smith_waterman",
+      "name": "AlignmentMatcher",
+      "package": "similarity.label",
+      "params": {
+        "algorithm": "SMITH_WATERMAN"
+      }
+    },
+    {
+      "seed": "smith_waterman_gotoh",
+      "name": "AlignmentMatcher",
+      "package": "similarity.label",
+      "params": {
+        "algorithm": "SMITH_WATERMAN_GOTOH"
+      }
+    },
+    {
+      "seed": "smoa",
+      "name": "SmoaMatcher",
+      "package": "similarity.label",
+      "params": {}
+    },
+    {
+      "seed": "soft_tfidf",
+      "name": "SoftTfIdfMatcher",
+      "package": "similarity.label",
+      "params": {
+        "theta": 0.9
+      }
+    },
+    {
+      "seed": "soundex",
+      "name": "PhoneticMatcher",
+      "package": "similarity.label",
+      "params": {
+        "algorithm": "SOUNDEX"
+      }
+    },
+    {
+      "seed": "thesaurus_generic",
+      "name": "ThesaurusMatcher",
+      "package": "similarity.label",
+      "params": {
+        "thesaurusFile": "<configured resource>"
+      }
+    },
+    {
+      "seed": "thesaurus_umls",
+      "name": "ThesaurusMatcher",
+      "package": "similarity.label",
+      "params": {
+        "thesaurusFile": "<path to MRCONSO.RRF>",
+        "format": "MRCONSO"
+      }
+    },
+    {
+      "seed": "token_soft",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "token_soft"
+      }
+    },
+    {
+      "seed": "token_soft",
+      "name": "TokenSoftMatcher",
+      "package": "external",
+      "params": {
+        "method": "token_soft"
+      }
+    },
+    {
+      "seed": "topk_uniform_levenshtein",
+      "name": "ProbabilisticMappingMatcher",
+      "package": "ensemble",
+      "params": {
+        "k": 20,
+        "weighting": "UNIFORM"
+      }
+    },
+    {
+      "seed": "unary_statistics",
+      "name": "UnaryStatisticsMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "unary_statistics_invariant",
+      "name": "UnaryStatisticsMatcher",
+      "package": "metadata",
+      "params": {
+        "recodingInvariant": true
+      }
+    },
+    {
+      "seed": "unionability",
+      "name": "UnionabilityMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "domain": "TABLES"
+      }
+    },
+    {
+      "seed": "unionability_pair",
+      "name": "UnionabilityMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "domain": "PAIR"
+      }
+    },
+    {
+      "seed": "uniqueness",
+      "name": "UniquenessMatcher",
+      "package": "metadata",
+      "params": {}
+    },
+    {
+      "seed": "valentine_distribution",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "valentine_distribution"
+      }
+    },
+    {
+      "seed": "valentine_distribution",
+      "name": "ValentineDistributionMatcher",
+      "package": "external",
+      "params": {
+        "method": "valentine_distribution"
+      }
+    },
+    {
+      "seed": "valentine_jaccard",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "valentine_jaccard"
+      }
+    },
+    {
+      "seed": "valentine_jaccard",
+      "name": "ValentineJaccardMatcher",
+      "package": "external",
+      "params": {
+        "method": "valentine_jaccard"
+      }
+    },
+    {
+      "seed": "wasserstein",
+      "name": "DistributionTestMatcher",
+      "package": "similarity.instance",
+      "params": {
+        "test": "WASSERSTEIN"
+      }
+    },
+    {
+      "seed": "word_vectors",
+      "name": "PythonServerMatcher",
+      "package": "external",
+      "params": {
+        "method": "word_vectors",
+        "options": "{\"vectors\": \"<path to .vec/.txt>\"}"
+      }
+    },
+    {
+      "seed": "word_vectors",
+      "name": "WordVectorsMatcher",
+      "package": "external",
+      "params": {
+        "method": "word_vectors",
+        "options": "{\"vectors\": \"<path to .vec/.txt>\"}"
+      }
+    },
+    {
+      "seed": "wordnet_jcn",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "JCN"
+      }
+    },
+    {
+      "seed": "wordnet_lch",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "LCH"
+      }
+    },
+    {
+      "seed": "wordnet_lin",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "LIN"
+      }
+    },
+    {
+      "seed": "wordnet_lin_brown",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "LIN",
+        "icFile": "<path to ic-brown.dat>"
+      }
+    },
+    {
+      "seed": "wordnet_path",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "PATH"
+      }
+    },
+    {
+      "seed": "wordnet_res",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "RES"
+      }
+    },
+    {
+      "seed": "wordnet_wup",
+      "name": "WordNetMatcher",
+      "package": "similarity.label",
+      "params": {
+        "measure": "WUP"
+      }
+    }
+  ],
+  "file_seeds": [
+    {
+      "seed": "learned_lofo",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/learned_lofo/{regime}"
+    },
+    {
+      "seed": "prisma",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/prisma/{regime}"
+    },
+    {
+      "seed": "rema",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/rema/{regime}"
+    },
+    {
+      "seed": "rema_shuffled",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/rema_shuffled/{regime}"
+    },
+    {
+      "seed": "semstruct",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/semstruct/{regime}"
+    },
+    {
+      "seed": "semstruct_lm_only",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/semstruct_lm_only/{regime}"
+    },
+    {
+      "seed": "sima_tpcdi",
+      "status": "Existing study FILE seed; no live named matcher backend",
+      "path_pattern": "seed_in/sima_tpcdi/{regime}"
+    }
+  ]
+}

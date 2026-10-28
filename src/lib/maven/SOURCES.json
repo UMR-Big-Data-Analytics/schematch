@@ -1,0 +1,102 @@
+{
+  "description": "Exact build-support artifacts already resolved by the inherited build; parent POMs retained. Not a general Maven cache. Licensing and redistribution review remains pending.",
+  "upstream_repository": "https://oss.sonatype.org/content/repositories/snapshots",
+  "files": {
+    "de/hpi/isg/mdms-clients/0.0.3-SNAPSHOT/mdms-clients-0.0.3-SNAPSHOT.jar": {
+      "sha256": "6e3af6f4a92130af2f3d34205f31d7431f475012fb0454f66e7d0f2640448627",
+      "bytes": 18839
+    },
+    "de/hpi/isg/mdms-clients/0.0.3-SNAPSHOT/mdms-clients-0.0.3-SNAPSHOT.pom": {
+      "sha256": "a40b4a3cb11becda02ad098107b81b4f730f40303707a288dc3ac22a39daff29",
+      "bytes": 1444
+    },
+    "de/hpi/isg/mdms-dependencies/0.0.3-SNAPSHOT/mdms-dependencies-0.0.3-SNAPSHOT.jar": {
+      "sha256": "a6f586c1ed84105720c19523817f02af2b390f8bc9e6d107ffc46a0a40094d42",
+      "bytes": 26216
+    },
+    "de/hpi/isg/mdms-dependencies/0.0.3-SNAPSHOT/mdms-dependencies-0.0.3-SNAPSHOT.pom": {
+      "sha256": "decc516f0c4a6aff6e0844f05ce7446de98becf4a2ff98f1bd4494fe4fd39bd5",
+      "bytes": 1108
+    },
+    "de/hpi/isg/mdms-model/0.0.3-SNAPSHOT/mdms-model-0.0.3-SNAPSHOT.jar": {
+      "sha256": "579e4df6a5fa81e865a3b27426eb4347c5fd0f644ea14e810e69ab346aed0a23",
+      "bytes": 23256
+    },
+    "de/hpi/isg/mdms-model/0.0.3-SNAPSHOT/mdms-model-0.0.3-SNAPSHOT.pom": {
+      "sha256": "ef72c86edabfe0def7471f42290a3c739202622a24befde075a97578db48b1c7",
+      "bytes": 1042
+    },
+    "de/hpi/isg/mdms-rdbms/0.0.3-SNAPSHOT/mdms-rdbms-0.0.3-SNAPSHOT.jar": {
+      "sha256": "15049f3ce25239d49995db373e932759c6344086bc57ad5fc4b6f2cc940d9f28",
+      "bytes": 33648
+    },
+    "de/hpi/isg/mdms-rdbms/0.0.3-SNAPSHOT/mdms-rdbms-0.0.3-SNAPSHOT.pom": {
+      "sha256": "fce7050325e422bfa3a182cb6f6ca1770c30aff08ef8742f2a73f063afd5da10",
+      "bytes": 1159
+    },
+    "de/hpi/isg/mdms-simple/0.0.3-SNAPSHOT/mdms-simple-0.0.3-SNAPSHOT.jar": {
+      "sha256": "ded60c43eddad6729986a229aefaaa6bfe205148b500ed3b8c20bce20fa8a40d",
+      "bytes": 23233
+    },
+    "de/hpi/isg/mdms-simple/0.0.3-SNAPSHOT/mdms-simple-0.0.3-SNAPSHOT.pom": {
+      "sha256": "63aeadf2a91b1c71791e6ef9dac5f55cda3116c11c88bdaccfad4befc46615bb",
+      "bytes": 1491
+    },
+    "de/hpi/isg/mdms-sqlite/0.0.3-SNAPSHOT/mdms-sqlite-0.0.3-SNAPSHOT.jar": {
+      "sha256": "ed6625d18c85840adfc44e0c32b0434782400d4dbe4209e01acaa1f89709211a",
+      "bytes": 40152
+    },
+    "de/hpi/isg/mdms-sqlite/0.0.3-SNAPSHOT/mdms-sqlite-0.0.3-SNAPSHOT.pom": {
+      "sha256": "c61c1af61821f5441d200170ec55689bcc6574a78b9d6cfe1603b543e217213f",
+      "bytes": 1934
+    },
+    "de/hpi/isg/mdms-util/0.0.3-SNAPSHOT/mdms-util-0.0.3-SNAPSHOT.jar": {
+      "sha256": "1e0fc179b2a4e82a089a15e0587f4c522875844049e12fb3af5dc749a4d277e7",
+      "bytes": 47338
+    },
+    "de/hpi/isg/mdms-util/0.0.3-SNAPSHOT/mdms-util-0.0.3-SNAPSHOT.pom": {
+      "sha256": "eaf5058b60936ba0743c4b972bbc5ec05d5452c01affafab0852c78cbd4b0e1a",
+      "bytes": 1498
+    },
+    "de/hpi/isg/mdms/0.0.3-SNAPSHOT/mdms-0.0.3-SNAPSHOT.pom": {
+      "sha256": "43c7ad22fe9cdc92c4030230b47394c99987161eb00114a23384b38e7827d127",
+      "bytes": 14295
+    },
+    "de/metanome/algorithm_helper/1.1-SNAPSHOT/algorithm_helper-1.1-SNAPSHOT.jar": {
+      "sha256": "73ee948cfcec5e0245361b63cff5d867975f51466113616731cee7926d78abda",
+      "bytes": 20871
+    },
+    "de/metanome/algorithm_helper/1.1-SNAPSHOT/algorithm_helper-1.1-SNAPSHOT.pom": {
+      "sha256": "5eb8ce9bd723c422c912a4a4cb8e2f5377504c8a732c56a0c5266cb356d54a21",
+      "bytes": 3740
+    },
+    "de/metanome/algorithm_integration/1.1-SNAPSHOT/algorithm_integration-1.1-SNAPSHOT.jar": {
+      "sha256": "cb9d775d614527693709b06bf496238a8744b26ed00ab9474df18f34555ecc5a",
+      "bytes": 98914
+    },
+    "de/metanome/algorithm_integration/1.1-SNAPSHOT/algorithm_integration-1.1-SNAPSHOT.pom": {
+      "sha256": "cbcf0e1d0f639c8ac82ead2e20135a4348634ca088738a08bdbadc4d0a15b563",
+      "bytes": 3946
+    },
+    "de/metanome/backend/1.1-SNAPSHOT/backend-1.1-SNAPSHOT.jar": {
+      "sha256": "7dbc5e8ba9bc5e86dba9f765a98800683f230ddbdf366a40d7f75e4f083a2ec2",
+      "bytes": 234948
+    },
+    "de/metanome/backend/1.1-SNAPSHOT/backend-1.1-SNAPSHOT.pom": {
+      "sha256": "d999675cb6a2721606686b69450a428ced3a93dd0a1ee8c08b35696c85cc085e",
+      "bytes": 15198
+    },
+    "de/metanome/metanome/1.1-SNAPSHOT/metanome-1.1-SNAPSHOT.pom": {
+      "sha256": "dde8596a1e03641db286c7cf29c98c51a9e9c9462710e15baecc345c61b51201",
+      "bytes": 15697
+    },
+    "de/metanome/test_helper/1.1-SNAPSHOT/test_helper-1.1-SNAPSHOT.jar": {
+      "sha256": "57c3a9e80e8449a9c8d55d845bc80fed8daa6b4e31271105d7e288493de18e70",
+      "bytes": 4555
+    },
+    "de/metanome/test_helper/1.1-SNAPSHOT/test_helper-1.1-SNAPSHOT.pom": {
+      "sha256": "531ee6a6a3f2a6d4cf907bf95bfc26cfb23f655f9fcd77da27d5c0e2ccbdbe0f",
+      "bytes": 2772
+    }
+  }
+}

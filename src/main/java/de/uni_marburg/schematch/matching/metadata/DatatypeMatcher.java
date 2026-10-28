@@ -40,7 +40,15 @@ public class DatatypeMatcher extends TablePairMatcher {
             return 0.7f; // some arbitrary value
         } else if (a == Datatype.STRING || b == Datatype.STRING) {
             // the closer to 1.0 the non-string score is the less similar the columns are
-            return (float) (1f - Math.min(scores_a.get(a), scores_b.get(b)));
+            float s = (float) (1f - Math.min(scores_a.get(a), scores_b.get(b)));
+            // B's dev copy (sf-matcher-study/devjava_b, X30): a column with no non-null value has NaN type
+            // scores (0/0 in Datatype.calculateScores), and the NaN reaches this cell. With
+            // -Dsmx.datatype.nanAsZero=true such a cell scores 0 (no evidence of compatibility). Off by
+            // default; all finite cells are unchanged.
+            if (Float.isNaN(s) && Boolean.getBoolean("smx.datatype.nanAsZero")) {
+                return 0f;
+            }
+            return s;
         } else {
             return  0;
         }

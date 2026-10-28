@@ -31,6 +31,17 @@ public enum PropagationCoefficientPolicy {
 
             return List.of(countInLabelsTotal, countOutLabelsTotal);
         }
+
+        @Override
+        public List<Map<String, Double>> combine(Map<String, Double> in1, Map<String, Double> out1,
+                                                 Map<String, Double> in2, Map<String, Double> out2) {
+            BinaryOperator<Double> sumMergeFunction = Double::sum;
+            Map<String, Double> countInLabelsTotal = mergeMaps(in1, in2, sumMergeFunction);
+            Map<String, Double> countOutLabelsTotal = mergeMaps(out1, out2, sumMergeFunction);
+            invertMapValues(countInLabelsTotal, 2.0);
+            invertMapValues(countOutLabelsTotal, 2.0);
+            return List.of(countInLabelsTotal, countOutLabelsTotal);
+        }
     },
 
     INVERSE_PRODUCT {
@@ -54,6 +65,17 @@ public enum PropagationCoefficientPolicy {
 
             return List.of(countInLabelsTotal, countOutLabelsTotal);
         }
+
+        @Override
+        public List<Map<String, Double>> combine(Map<String, Double> in1, Map<String, Double> out1,
+                                                 Map<String, Double> in2, Map<String, Double> out2) {
+            BinaryOperator<Double> productMergeFunction = (a, b) -> a * b;
+            Map<String, Double> countInLabelsTotal = mergeMaps(in1, in2, productMergeFunction);
+            Map<String, Double> countOutLabelsTotal = mergeMaps(out1, out2, productMergeFunction);
+            invertMapValues(countInLabelsTotal, 1.0);
+            invertMapValues(countOutLabelsTotal, 1.0);
+            return List.of(countInLabelsTotal, countOutLabelsTotal);
+        }
     },
 
     CONSTANT_ONE {
@@ -61,10 +83,36 @@ public enum PropagationCoefficientPolicy {
         public List<Map<String, Double>> evaluate(Node nodeGraph1, Node nodeGraph2, Graph<Node, LabelEdge> graph1, Graph<Node, LabelEdge> graph2) throws NoSuchMethodException {
             return new ArrayList<>();
         }
+
+        @Override
+        public List<Map<String, Double>> combine(Map<String, Double> in1, Map<String, Double> out1,
+                                                 Map<String, Double> in2, Map<String, Double> out2) {
+            return new ArrayList<>();
+        }
     };
 
     public List<Map<String, Double>> evaluate(Node nodeGraph1, Node nodeGraph2, Graph<Node, LabelEdge> graph1, Graph<Node, LabelEdge> graph2) throws NoSuchMethodException {
         throw new NoSuchMethodException("Not Implemented");
+    }
+
+    /**
+     * Combines label counts that were tallied once per node rather than once
+     * per map pair.
+     *
+     * {@link #evaluate} recounts the incident labels of both endpoints on every
+     * call, and a node appears in as many map pairs as the other graph has
+     * nodes, so the same counts were recomputed thousands of times. Callers
+     * that cache {@link #countLabelsOf} can use this instead.
+     */
+    public List<Map<String, Double>> combine(Map<String, Double> in1, Map<String, Double> out1,
+                                             Map<String, Double> in2, Map<String, Double> out2)
+            throws NoSuchMethodException {
+        throw new NoSuchMethodException("Not Implemented");
+    }
+
+    /** Label counts of one node, in the shape {@link #combine} expects. */
+    public static Map<String, Double> countLabelsOf(Graph<Node, LabelEdge> graph, Node node, boolean incoming) {
+        return countLabels(graph, node, incoming);
     }
 
     // Method to count either incoming or outgoing labels

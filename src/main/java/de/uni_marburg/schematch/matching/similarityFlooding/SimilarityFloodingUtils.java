@@ -26,6 +26,23 @@ public class SimilarityFloodingUtils {
         return calcResidualVector(sigma_i, sigma_i_plus_1) < epsilon;
     }
 
+    /** Array form of the residual, for the indexed fixpoint iteration. */
+    public static double calcResidualVector(double[] sigma_i, double[] sigma_i_plus_1) {
+
+        double residualSum = 0;
+
+        for (int i = 0; i < sigma_i.length; i++) {
+            double difference = sigma_i[i] - sigma_i_plus_1[i];
+            residualSum = residualSum + difference * difference;
+        }
+
+        return Math.sqrt(residualSum);
+    }
+
+    public static boolean hasConverged(double[] sigma_i, double[] sigma_i_plus_1, double epsilon) {
+        return calcResidualVector(sigma_i, sigma_i_plus_1) < epsilon;
+    }
+
 
     public static void populateSimMatrix(float[][] simMatrix, Map<NodePair, Double> mapping, Table sourceTable, Table targetTable) {
 
