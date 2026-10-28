@@ -1,39 +1,64 @@
-# Structural Schema Matching with Similarity Flooding
+# Schematch
 
-This project is a fork of the [schematch project](https://github.com/avielhauer/schematch), developed by the **Big Data Analytics Group** at the University of Marburg. It implements the **Similarity Flooding (SF) algorithm** by Melnik et al., as described in this [conference paper](https://old.dbs.uni-leipzig.de/file/icde2002-sf.pdf).
+Schematch is a framework for schema matching and evaluation. This fork builds on
+[Alexander Vielhauer's original project](https://github.com/avielhauer/schematch)
+and [Julian Trösser's development fork](https://github.com/juliantroesser/schematch)
+at Marburg University, retaining their history and attribution.
 
-## Enhancements for Bachelor Thesis
+It includes Similarity Flooding and dependency-aware graph variants, native
+label/value/distribution matchers, compositions and refinements, and named
+adapters for optional Python systems. The generated inventory identifies
+implementations, presets, controls and service requirements separately.
 
-In the context of my Bachelor Thesis, *"Structural Schema Matching with Similarity Flooding"*, additional methods were developed to incorporate dependency information (functional dependencies, unique column combinations & inclusion dependencies) into the SF algorithm. These enhancements aim to extend the algorithm's capabilities and improve schema matching performance.
+## Run the bundled example
 
-## Usage
+Install JDK 17 or newer and Maven. From this directory:
 
-To use the enhanced methods described in the thesis, add the following configuration to your `first_line_matchers.yaml` file:
-
-```yaml
-name: "SimilarityFlooding"
-packageName: "similarityFlooding"
-params:
-  wholeSchema: ["true", "false"] # Root graph representation at schema node (true) or match pairs of tables (false)
-  propCoeffPolicy: ["INV_PROD", "INV_AVG"] # Propagation Coefficient Policy: Inverse Product or Inverse Average
-  fixpoint: ["BASIC", "A", "B", "C", "BASIC_Lambda", "A_Lambda", "B_Lambda", "C_Lambda"] # Fixpoint Formula: Basic, A, B, or C; or Lambda adaptations
-  eps: ["0.0001"] # Precision of convergence
-  maxIter: ["100"] # Maximum number of iterations
-  FDV1: ["true", "false"] # Use FD-Quick Graph Extension
-  FDV2: ["true", "false"] # Use FD-Complete Graph Extension
-  UCCV1: ["true", "false"] # Use UCC-Quick Graph Extension
-  UCCV2: ["true", "false"] # Use UCC-Complete Graph Extension
-  INDV1: ["true", "false"] # Use IND-Quick Graph Extension
-  INDV2: ["true", "false"] # Use IND-Complete Graph Extension
-  FDSim: ["0.0"] # Initial similarities for FD-Dependency-ID nodes
-  UCCSim: ["0.0"] # Initial similarities for UCC-Dependency-ID nodes
-  INDSim: ["0.0"] # Initial similarities for IND-Dependency-ID nodes
+```shell
+mvn test compile dependency:build-classpath -Dmdep.outputFile=target/cp.txt
+python tools/run_schematch.py
 ```
-## Datasets used in Thesis Examples
 
-- SimilarityFloodingExample: Includes the example used in Chapter 2 to demonstrate how the SF algorithm works.
-- DependencyTest: Includes examples used in Chapter 3 to highlight dependency impact.
+Python 3.10 or newer runs the launcher and preparation tools. The default PMF
+example uses small synthetic tables included under `examples/data/` and writes
+its matrix below `results/`. It needs no model, server, benchmark download or
+dependency profiling. Normal Maven dependencies are downloaded on the first
+build. Legacy profiling snapshots unavailable from their old remote are
+preserved with checksums under `src/lib/maven/`.
+
+For numerical Python methods and regression checks, use a dedicated environment:
+
+```shell
+python -m venv .venv
+# Activate .venv with the command appropriate for your shell.
+python -m pip install -r requirements-python.txt
+python -m unittest discover -s tools/tests -v
+```
+
+Two optional learned-model subtests require PyTorch and are explicitly skipped
+when it is absent. Their synthetic inputs do not need pretrained model weights.
 
 ## Documentation
 
-For a general manual on using the schematch project, along with links to additional large datasets, refer to the official [wiki](https://github.com/avielhauer/schematch/wiki).
+- [Getting started](QUICKSTART.md): example, build, run and evaluation commands.
+- [Matcher guide](MATCHERS.md) and [class inventory](MATCHER_INVENTORY.md).
+- [Python systems](PYTHON_MATCHERS.md): dependencies, local resources and services.
+- [Dataset preparation](DATASETS.md) and [source/recipe inventory](DATASET_INVENTORY.md).
+- [Evaluation and loading](EVALUATION_AND_DATASETS.md): metrics and input contracts.
+- [Contributing](CONTRIBUTING.md) and [local release preparation](RELEASE.md).
+- [Provenance and licensing review](THIRD_PARTY.md).
+
+The framework uses relative input paths and explicit external-resource settings;
+it does not discover adjacent source repositories. Downloaded data, seed
+matrices, models and run outputs stay outside the source release. The separate
+paper artifact supplies its frozen protocols, configurations and cached results,
+and should identify the exact framework commit used.
+
+## Release status
+
+This is a local release candidate. Technical validation is recorded in
+[release_validation.json](reports/release_validation.json). Public redistribution
+requires the upstream and third-party permissions review described in
+[THIRD_PARTY.md](THIRD_PARTY.md); no project-wide license has been assigned by
+this preparation. Optional backend availability and published-system parity are
+separate from class registration or passing transport tests.

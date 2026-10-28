@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-14",
+  "reference_matrices": 30,
+  "reference_metrics": 7,
+  "reference_permutations_per_scenario": 50,
+  "reference_equality": "15 decimal places",
+  "native_tests": {
+    "tests": 139,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "harness_tests": 131,
+  "dataset_pipeline_tests_passed": 25,
+  "dataset_pipeline_native_tests_not_run": 3,
+  "standalone_evaluator_tests": 4,
+  "normal_main_real_dataset": "Test-IMDB (readable, multi-table)",
+  "normal_main_algorithms": [
+    "TableQualifiedNameMatcher",
+    "HungarianBonusMatcher"
+  ],
+  "normal_main_scenarios": 9,
+  "normal_main_matrices": 18,
+  "normal_main_paired_differences": 9,
+  "numpy": "2.2.6",
+  "scipy": "1.15.3"
+}

@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-15",
+  "preparation_unit_tests": 10,
+  "evaluator_tests": 4,
+  "live_download": "T2D-SM-WH: downloaded from catalog URL, verified checksum, extracted, prepared and Java-validated all 178 scenarios",
+  "local_preparation_checks": [
+    {
+      "source": "controlled",
+      "scenarios": 16,
+      "java_errors": 0
+    },
+    {
+      "source": "gdcsm",
+      "scenarios": 10,
+      "java_errors": 0
+    },
+    {
+      "source": "goby",
+      "scenarios": 200,
+      "java_errors": 0
+    },
+    {
+      "source": "hdxsm",
+      "scenarios": 204,
+      "java_errors": 0
+    },
+    {
+      "source": "madi",
+      "scenarios": 18,
+      "java_errors": 0
+    },
+    {
+      "source": "mimic",
+      "scenarios": 1,
+      "java_errors": 0,
+      "reference_csv_files_checked": 56,
+      "reference_differences": []
+    },
+    {
+      "source": "scale",
+      "scenarios": 1,
+      "java_errors": 0
+    },
+    {
+      "source": "synthea",
+      "scenarios": 39,
+      "java_errors": 0,
+      "reference_csv_files_checked": 534,
+      "reference_differences": []
+    },
+    {
+      "source": "t2dsm",
+      "scenarios": 178,
+      "java_errors": 0
+    },
+    {
+      "source": "valentine",
+      "scenarios": 33,
+      "java_errors": 0
+    }
+  ],
+  "total_distinct_source_scenarios_checked": 700,
+  "notes": [
+    "Controlled check used 50 base rows rather than the paper default 5000.",
+    "Scale check used --smoke (one scenario).",
+    "Valentine check selected 33 TPC-DI Unionable scenarios, not the complete archive.",
+    "All local preparation checks used --validate-java. No FD/UCC/IND mining was performed.",
+    "Data output remains in ignored target/; no raw or prepared dataset files are added as source changes."
+  ]
+}
