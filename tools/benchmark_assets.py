@@ -261,6 +261,10 @@ def install(archive, prepared, *, expected_sha256=None, dry_run=False):
             table = safe_path(folder, name)
             if not table.is_file() or digest(table) != expected:
                 raise ValueError(f"Prepared table SHA-256 mismatch: {scenario['path']}/{name}")
+        undeclared = {p.relative_to(folder).as_posix() for p in payload_files(folder)} - set(scenario['files'])
+        undeclared.discard('metadata/profile-status.properties')
+        if undeclared:
+            raise ValueError(f"Existing annotations/profiles are absent from the bundle: {scenario['path']}: {sorted(undeclared)}")
         for name, spec in scenario['files'].items():
             target = safe_path(folder, name)
             if target.exists():
@@ -269,7 +273,8 @@ def install(archive, prepared, *, expected_sha256=None, dry_run=False):
                 if name != 'metadata/profile-status.properties' or not target.is_file():
                     raise ValueError(f'Refusing to replace a conflicting annotation/profile: {target}')
                 old = properties(target)
-                if not old or any(value != 'not_profiled' for key, value in old.items() if key.endswith(('.fd', '.ucc', '.ind', '.dc'))) or any('sha256' in key for key in old):
+                allowed = {side + '.' + kind for side in ('source', 'target') for kind in ('fd', 'ucc', 'ind', 'dc')}
+                if not old or any(key not in allowed or value != 'not_profiled' for key, value in old.items()):
                     raise ValueError(f'Refusing to replace an existing profile status: {target}')
             planned.append((f"payload/{scenario['path']}/{name}", target))
     if not dry_run:

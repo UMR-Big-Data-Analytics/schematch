@@ -137,6 +137,25 @@ class BenchmarkAssetsTest(unittest.TestCase):
         (target/'Example').rename(target/'Renamed')
         self.assertGreater(tool.install(self.archive, target)['files_to_attach'], 0)
 
+    def test_alternative_local_truth_is_not_silently_ignored(self):
+        self.build()
+        target = self.empty_target()
+        alternative = target/'Example/case/ground_truth/other.csv'
+        alternative.parent.mkdir()
+        alternative.write_bytes(b'other truth')
+        with self.assertRaisesRegex(ValueError, 'absent from the bundle'):
+            tool.install(self.archive, target)
+        self.assertFalse((target/'Example/case/metadata').exists())
+
+    def test_custom_status_marker_is_not_overwritten(self):
+        self.build()
+        target = self.empty_target()
+        marker = target/'Example/case/metadata/profile-status.properties'
+        marker.parent.mkdir()
+        marker.write_text('custom.status=retained\n')
+        with self.assertRaisesRegex(ValueError, 'existing profile status'):
+            tool.install(self.archive, target)
+
 
 if __name__ == '__main__':
     unittest.main()

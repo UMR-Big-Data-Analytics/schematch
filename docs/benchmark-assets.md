@@ -74,6 +74,9 @@ truth origin, profiler version/settings and limitations. The builder validates
 managed profile checksums, retains original file hashes and replaces absolute
 JSON source/cache locations with portable identifiers. It excludes table rows.
 The resulting ZIP contains a manifest and declared truth/profile files only.
+For legacy exports without recorded profiling-input hashes, the new table binding
+describes the archived snapshot. It does not independently prove the original
+profiler used that snapshot; retain that provenance limitation in the release.
 
 Small synthetic fixtures remain with Schematch. Reusable benchmark assets belong
 in the companion project; study-specific selections and reported results belong
