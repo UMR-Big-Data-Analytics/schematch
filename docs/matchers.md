@@ -210,7 +210,7 @@ These give SF's information to a matcher without propagation. Each starts from q
 | `TableContextTermMatcher` | q⁺ + βD + λC, C = scaled best-partner mean of each table pair | λ = 0.5 | — |
 | `LiteralTermMatcher` | q⁺ + βD + w·L/max L, L = SF's two-step literal evidence | w = 0.05 | — |
 
-A value-shape class is a column's dominant value shape (≥ 50% of its non-empty values), else MIXED. Rule-based semantic-type classes are not included. `LiteralTermMatcher` builds SF's published graph (no dependency edges, inverse-average coefficients, prefix/suffix literal similarities) with the SF graph builder and applies the propagation matrix twice to the literal similarities; L does not depend on q. Its `form` selects RESCALED (default), RAW (unrescaled L) or TWO_UPDATE (weight c = 2/(M1 + 4) from SF's first update on q, ignoring `weight`). With `datatypeWeight: 0`, TWO_UPDATE reproduces the two-update ranking for single-table inputs when the one-edge literal contribution is constant across scored pairs. This condition is checked in the numerical fixtures; it is not a guarantee for arbitrary graph inputs. RAW with weight 0.3 is a fixed-weight approximation.
+A value-shape class is a column's dominant value shape (≥ 50% of its non-empty values), else MIXED. With `classes: ["SEMTYPE"]` the term uses the rule-based semantic types instead (see [Similarity Flooding configuration](#similarity-flooding-configuration-presets-and-graph-information); registered γ = 0.1, so set `weight: [0.1]`). `LiteralTermMatcher` builds SF's published graph (no dependency edges, inverse-average coefficients, prefix/suffix literal similarities) with the SF graph builder and applies the propagation matrix twice to the literal similarities; L does not depend on q. Its `form` selects RESCALED (default), RAW (unrescaled L) or TWO_UPDATE (weight c = 2/(M1 + 4) from SF's first update on q, ignoring `weight`). With `datatypeWeight: 0`, TWO_UPDATE reproduces the two-update ranking for single-table inputs when the one-edge literal contribution is constant across scored pairs. This condition is checked in the numerical fixtures; it is not a guarantee for arbitrary graph inputs. RAW with weight 0.3 is a fixed-weight approximation.
 
 ```yaml
 ---
@@ -258,3 +258,91 @@ mvn -o test
 ```
 
 The matcher audit follows the Matcher superclass chain, checks the archived parameter configurations, and verifies complete named-adapter coverage of both server registries. `--check` fails on stale generated files without changing them. `MatcherCatalogTest` configures every audited seed through MatcherFactory, including inherited parameters. Offline native tests additionally check explicit PMF semantics, nested ensemble recipes, native role terms, the one-step additive terms, Python-reference Q/Sinkhorn/Hungarian values, matrix input selection, and table-pair/scenario HTTP dispatch. Transport tests use a local stub; they do not assert model availability or trained-model accuracy.
+
+## Similarity Flooding configuration, presets and graph information
+
+### Parameters instead of JVM properties
+
+Every method and graph setting of `SimilarityFlooding` that used to be a JVM-wide `-Dsmx.sf.*` property is also a matcher parameter, so one run can hold several SF configurations. The parameter name is the property name without `smx.sf.` (`gate.high` becomes `gateHigh`). A parameter that is not set falls back to its property, parsed as before, so existing configurations and their output names are unchanged; unset parameters are not part of the result identity. Values are strings; YAML numbers and booleans are accepted.
+
+| Group | Parameters |
+|---|---|
+| Fixpoint and initial similarities | `epsilon` (default 1e-4), `maxIterations` (200; k performs k + 1 updates), `literalSeed` (`NONE`, `PREFIX_SUFFIX`), `seedAttachment` (`NAME`, `ID`, `SPLIT`), `normalise` (`GLOBAL`, `COLUMN`, `SCORED`, `L2`, `CWISE`, `NONE`), `normaliseAlpha`, `relax`, `restartAlpha` (empty: off), `channelBudget`, `nonBacktracking`, `pairScope`, `pairScopeParam`, `idMatrixDir` |
+| Schema graph | `noDatatypeNodes`, `tableMembership` (`ORIGINAL`, `COLLAPSED`, `PERMUTED`), `tableMembershipDraw`, `tableRooted`, `parallelEdges` (`COLLAPSE`, `SPLIT`), `parallelEdgeRule`, `collisionRule`, `canonicalDependencyOrder`, `extraEdgesDir`, `classNodes`, `withinTable*` |
+| Dependency edges | `constantWeight`, `topK`, `topKPercent`, `topkHigh`, `topkLow`, `gateHigh`, `gateLow`, `gateIncrease`, `gateDecrease`, `uccTopK`, `uccNoNotUnique`, `uccUnweighted`, `fdRetention`, `fdRetentionSeed`, `fdRewire`, `fdRewireMode` (`RANDOM`, `DEGREE`, `EDGE`), `fdWTarget` |
+
+Diagnostics (`printTrajectory`, `debugGraph`, `export`, ...) and the data-structure switches `consistentEdgeIdentity`, `directedNodePairs` and `consistentNodePairHash` remain JVM properties.
+
+### Presets
+
+| Class | Configuration |
+|---|---|
+| `SimilarityFloodingPublished` | SF as published (Melnik et al. 2002): schema graph without dependency edges (`QUICK`, no thresholds), formula C, `INV_AVG`, `epsilon` 0.05, `NAME` attachment, `PREFIX_SUFFIX` literal similarities |
+| `SimilarityFloodingTwoUpdates` | the same, stopped after two updates (`maxIterations` 1) |
+| `SimilarityFloodingStandard` | all projected FD edges (`fdFilterThreshold` 0.0, unweighted), formula C, `INV_PROD`, `epsilon` 1e-4, `NAME`, no literal similarities; needs FD profiles |
+
+The presets pin the listed values and `maxIterations`; every value can still be overridden, and other settings keep their fallbacks. Each preset has its own name, so the three can be configured side by side:
+
+```yaml
+---
+name: "SimilarityFloodingPublished"
+packageName: "similarityFlooding"
+params:
+  initialMatrix: ["PREVIOUS"]
+---
+name: "SimilarityFloodingTwoUpdates"
+packageName: "similarityFlooding"
+params:
+  initialMatrix: ["PREVIOUS"]
+---
+name: "SimilarityFloodingStandard"
+packageName: "similarityFlooding"
+params:
+  initialMatrix: ["PREVIOUS"]
+```
+
+Without a preset, the published configuration is:
+
+```yaml
+name: "SimilarityFlooding"
+packageName: "similarityFlooding"
+params:
+  graphEncoding: ["QUICK"]
+  propCoeffPolicy: ["INV_AVG"]
+  fixpoint: ["C"]
+  fdFilterThreshold: [""]
+  uccFilterThreshold: [""]
+  indFilterThreshold: [""]
+  constraintWeighting: ["NONE"]
+  dependencyTopK: [""]
+  fdAllowListFile: [""]
+  seedAttachment: ["NAME"]
+  literalSeed: ["PREFIX_SUFFIX"]
+  epsilon: ["0.05"]
+```
+
+The configuration the SF study selected for all initial matchers together on its development data is plain as well; it is a study result, not a recommended default: `propCoeffPolicy` `INV_PROD`, `fixpoint` `C`, `fdFilterThreshold` `"0.0"`, `constraintWeighting` `CONSTANT` with `constantWeight` `"0.0"`, `seedAttachment` `ID`, no literal similarities, `epsilon` 1e-4.
+
+### Second initial matrix
+
+`idMatrixDir` attaches a second matrix to the column-identity pairs, which the output is read from, while the first initial matrix stays on the column-name pairs. The directory has the `initialMatrix: FILE` layout (`<dir>/<dataset>/<scenario>/seed.csv`); it requires `seedAttachment: NAME` and a schema-graph encoding.
+
+### Class nodes and within-table edges
+
+`classNodes` adds one class node per column, built like a datatype node, from a comma-separated list:
+
+- `SHAPE`: the dominant value shape (upper letter A, lower letter a, digit 9, runs collapsed) of at least half of the non-empty values, else `MIXED`.
+- `SEMTYPE`: rule-based semantic types (boolean, email, URL, date and time, year, percent, currency, integer, float, phone, postal code, country, US state, code, name-like, text), the majority type of at least 60% of the non-blank values, else `mixed`.
+- `SHAPE_SHUFFLED`, `SEMTYPE_SHUFFLED`: the same classes permuted within each table, seeded by dataset, scenario, side, table and class kind. This keeps the number of classes and destroys their assignment.
+
+`ClassTermMatcher` reads the same classes (`classes: ["SHAPE"]` or `["SEMTYPE"]`), so a class term and class nodes compare identical information. Sherlock classes remain an `extraEdgesDir` input.
+
+`withinTableEdges: ["KNN"]` gives each column directed edges to its `withinTableK` (default 2) nearest other columns of the same table. `withinTableMeasure` is `SORTED_PMF` (default: L1 distance between the descending value-frequency vectors, label `distsim`) or an untokenized table-pair matcher class below `de.uni_marburg.schematch.matching`, such as `similarity.label.LevenshteinMatcher`, run on the table against itself (label `sim`). For a matcher measure, columns with constant or non-finite similarities to the other columns get no edges. `withinTableTieBreak` is `POSITION` (earlier column), `RANK` (one seeded random rank per table, distances rounded to 12 decimals) or `DRAW` (seeded draws per column). `withinTableEdges: ["RANDOM"]` is the control with the same out-degree and random targets. `withinTableSeed` varies the draws, and `withinTableLabel` overrides the edge label.
+
+Generated edges use the same line format and code path as `extraEdgesDir` files and are added after any file lines. They apply only to schema-graph encodings.
+
+### Tests
+
+- `SfConfigurationTest` checks parameters, presets, side-by-side runs, generated edges against equivalent files, semantic-type rules, and the Python and NumPy random-number ports.
+- `PropositionOneTest` checks the datatype-block invariant on synthetic one-table schemas. Without dependency edges, every finite update is affine in the initial scores with one positive slope within datatype-pair blocks. This is checked for both coefficient policies, three seed attachments, literal similarities on or off, one to five updates, and convergence.
+- `SfParityTest` is opt-in through `-Dschematch.test.valentineRoot=<Valentine-layout datasets with profiles>`. On three Valentine scenarios it compares the presets and the second initial matrix bit for bit with the study's cached SF outputs. It also compares native class and within-table edges line for line with the study's edge files and checks Proposition 1 on the real tables. Expected outputs and edge files are bundled; the scenarios are not.
