@@ -403,7 +403,9 @@ The intended workflow for published assets is:
 Steps 1-2 use the preparation commands. Steps 3-5 use
 `benchmark_assets.py verify/install`, with an explicitly supplied catalog or
 archive; downloads require a published HTTPS URL and archive checksum in that
-catalog. Locally prepared bundles have no public URL until publication.
+catalog. The companion project's v1.0.0 archives are published; its updated
+catalog supplies their fixed URLs and SHA-256 checksums. Newly prepared bundles
+remain local until they receive their own published URLs.
 Do not present successful attachment as a complete reproduction of a study whose
 selected cases, annotations or profiles are missing.
 

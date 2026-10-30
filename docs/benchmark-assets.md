@@ -1,12 +1,12 @@
 # Benchmark annotations and dependency profiles
 
-The [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/schema-matching-benchmark-datasets)
+The [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets)
 is the companion project for reusable ground truth and precomputed FD/UCC/IND/DC
-profiles. The link identifies its intended publication address; the repository
-and archive downloads have not yet been published. During local
-preparation the repository contains a catalog, versioned manifests, curated
-annotations and archives under its ignored `dist/` directory. No published
-download URL is assumed until it is recorded in the catalog.
+profiles. [Release v1.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v1.0.0)
+contains eight profile/ground-truth archives covering 910 archived scenarios.
+The repository contains their catalog, versioned manifests and curated annotations;
+local ZIP copies can be stored under its ignored `dist/` directory. Archive URLs
+and SHA-256 checksums are recorded in the updated catalog.
 
 Schematch remains independent: normal matching does not require that repository.
 The optional `tools/benchmark_assets.py` command reads an explicitly selected
@@ -40,7 +40,7 @@ configuration explicit, and report missing profiles or manual source inputs.
 | Step | Command or action | Current behavior |
 |---|---|---|
 | Acquire and prepare raw data | `prepare_datasets.py prepare <source> --download` | Downloads declared files for supported sources, checks them and writes tables, truth and a relative-path dataset configuration. Other sources require local/manual inputs. |
-| Obtain metadata | `benchmark_assets.py install` with an explicit catalog | Uses an existing local ZIP, or downloads its declared HTTPS URL. Current catalog URLs are unset, so local ZIPs are required until release publication. |
+| Obtain metadata | `benchmark_assets.py install` with an explicit catalog | Uses an existing local ZIP, or downloads its fixed release URL from the updated catalog and verifies its SHA-256 checksum. |
 | Attach metadata | The same `install` command | Checks archive contents, prepared-table hashes and conflicts, then places the declared ground truth and profiles into the normal scenario directories. |
 | Configure a run | Select generated dataset entries and complete-profile scenarios | Still explicit; the tools preserve active Java configuration. |
 | Run matchers | `run_schematch.py` after build/configuration | Java methods run locally; optional Python matchers need their configured server/resources. |
@@ -72,9 +72,20 @@ python tools/benchmark_assets.py list --catalog ../Schema-Matching-Benchmark-Dat
 python tools/benchmark_assets.py verify --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1
 ```
 
-The location is not hard-coded in the tool. A fixed-version HTTPS catalog URL
-can also be supplied after publication. Each archive requires a SHA-256 checksum
+The location is not hard-coded in the tool. An HTTPS catalog URL
+can also be supplied. Each archive requires a SHA-256 checksum
 in the catalog; archives absent locally are fetched only from its explicit HTTPS URL.
+The repository's current catalog URL is
+`https://raw.githubusercontent.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/main/catalog.json`.
+For a reproducible experiment, save the catalog and its SHA-256 hash or use a
+catalog URL pinned to a verified commit. The original `v1.0.0` Git tag predates
+the addition of archive URLs; use the updated catalog rather than that tag's copy.
+The published URL update is pinned at commit `733ede555f0863bdd6a91f5b7a6afac9456d0f4f`.
+For example, metadata can be obtained without cloning its repository:
+
+```shell
+python tools/benchmark_assets.py verify --catalog https://raw.githubusercontent.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/733ede555f0863bdd6a91f5b7a6afac9456d0f4f/catalog.json --id t2dsm-readable-v1
+```
 
 ## Attach assets to prepared tables
 
@@ -140,3 +151,13 @@ profiler used that snapshot; retain that provenance limitation in the release.
 Small synthetic fixtures remain with Schematch. Reusable benchmark assets belong
 in the companion project; study-specific selections and reported results belong
 in a separate paper repository that pins the framework and asset versions.
+
+## Later experiments and dataset versions
+
+Keep existing published archives and their checksums intact. A change to table
+bytes, truth, profiling settings or profile results requires a new asset version
+and release. Recomputing experiment scores on unchanged inputs needs a new paper
+result snapshot, but does not by itself require changing the dataset release.
+Record the exact catalog, selected scenarios, framework commit and experiment
+configuration for each run. A new cluster run must not silently replace the
+cached results of an earlier paper snapshot.
