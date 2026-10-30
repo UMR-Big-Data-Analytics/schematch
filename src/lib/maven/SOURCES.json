@@ -1,6 +1,8 @@
 {
   "description": "Exact build-support artifacts already resolved by the inherited build; parent POMs retained. Not a general Maven cache. Licensing and redistribution review remains pending.",
   "upstream_repository": "https://oss.sonatype.org/content/repositories/snapshots",
+  "upstream_repository_note": "Historical provenance only: OSSRH has shut down and this endpoint returns HTTP 404. The build resolves these exact artifacts from src/lib/maven, not from this URL.",
+  "upstream_repository_status_url": "https://central.sonatype.org/pages/ossrh-eol/",
   "files": {
     "de/hpi/isg/mdms-clients/0.0.3-SNAPSHOT/mdms-clients-0.0.3-SNAPSHOT.jar": {
       "sha256": "6e3af6f4a92130af2f3d34205f31d7431f475012fb0454f66e7d0f2640448627",

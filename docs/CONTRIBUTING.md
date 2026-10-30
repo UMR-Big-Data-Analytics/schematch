@@ -9,8 +9,20 @@ a frozen expected result. For new adapters, document the actual backend,
 required resources and supported input/output contract. A named class alone
 does not establish that a published system was reproduced.
 
-Use the [development checks](tools.md#development-checks), `mvn test` and the Python
-test suite for routine development. Two learned-model subtests require optional
+Run these checks from the repository root before proposing a change:
+
+```shell
+python tools/check_project.py --working-tree
+python tools/audit_matchers.py --check
+python tools/audit_dataset_sources.py --check
+python -m unittest discover -s tools/tests -v
+mvn test
+```
+
+Use relative links to repository files so documentation works in other forks
+and branches. Check section anchors when renaming a heading.
+
+Two learned-model subtests require optional
 PyTorch and are explicitly skipped when it is absent; model weights are not
 needed by those synthetic tests. Heavy model or dataset runs are separate from
 the standard test suite.

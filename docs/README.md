@@ -21,7 +21,9 @@ relative to the repository root unless stated otherwise.
 
 - [Generated matcher catalog](reference/matcher-catalog.md): classes, packages and backends.
 - [Generated dataset catalog](reference/dataset-catalog.md): source IDs and preparation support.
-- [Tools](tools.md): launching, dataset preparation, evaluation and development checks.
+- [Benchmark assets](benchmark-assets.md): companion metadata repository, table checks and optional installation.
+- [Tools README](../tools/README.md) and [full tool guide](tools.md): launching,
+  Python servers, dataset preparation, evaluation and development checks.
 - [Contributing](CONTRIBUTING.md) and [provenance and licensing](THIRD_PARTY.md).
 
 ## Terms used in the guides

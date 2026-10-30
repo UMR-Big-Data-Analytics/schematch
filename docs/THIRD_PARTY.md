@@ -31,6 +31,10 @@ exact resolved JARs and parent POMs are therefore archived under `src/lib/maven/
 [SOURCES.json](../src/lib/maven/SOURCES.json) records every SHA-256 checksum and size;
 the original POMs and their embedded licensing information are preserved.
 This is a selected build dependency set, not a developer's Maven cache.
+The historical repository URL in the provenance record is no longer a download
+endpoint: [Sonatype has retired OSSRH](https://central.sonatype.org/pages/ossrh-eol/).
+The build uses the bundled copies. URLs in the preserved upstream POMs remain
+part of those original files.
 
 Confirm redistribution permissions and required notices for both sets of
 binaries, including their bundled dependencies. Preserving an old JAR does not

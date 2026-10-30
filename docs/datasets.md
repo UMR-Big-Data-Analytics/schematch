@@ -174,7 +174,7 @@ correspondences from schema provenance. Preserve the exact source snapshot and g
 | MusicBrainz | [Dated database dumps](https://musicbrainz.org/doc/MusicBrainz_Database/Download) | Headerless PostgreSQL TSV with the recorded schema version. `controlled` uses `medium`, `release`, `release_group`. |
 | Lahman | [SABR Lahman database](https://sabr.org/lahman-database/) | Versioned CSV export. `controlled` uses `Batting.csv`, `People.csv`, `Teams.csv`. |
 | AdventureWorks | [Microsoft SQL Server samples](https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works) | Pin the release and CSV-export policy; preserve table-qualified names such as `Sales.*` and `Person.*`. |
-| IMDb | [IMDb dataset download](https://datasets.imdbws.com/); [usage terms and format](https://developer.imdb.com/non-commercial-datasets/) | Retain a dated TSV snapshot, including `title.basics`, `name.basics`, `title.principals` and the other tables named by the recipe. |
+| IMDb | [IMDb dataset download](https://datasets.imdbws.com/); [usage terms and format](https://data.imdb.com/non-commercial-datasets/) | Retain a dated TSV snapshot, including `title.basics`, `name.basics`, `title.principals` and the other tables named by the recipe. |
 | Sakila | [MySQL Sakila documentation/download](https://dev.mysql.com/doc/sakila/en/) | Load the sample SQL database and export the declared tables with a fixed null/CSV policy. |
 | SCOPe | [SCOPe downloads](https://scop.berkeley.edu/downloads/) | The historical converter input was a relational snapshot with `scop_node`, `scop_comment`, `scop_level`; current flat files need conversion and are not that snapshot. |
 | TPC-H | [TPC-H specification/tools](https://www.tpc.org/tpch/) | Record dbgen build, scale factor and seed, then export the required tables. |
@@ -298,6 +298,114 @@ permutation keys; generated dataset names alone do not define those choices.
 Source-specific terms and attribution remain with their publishers; availability
 for download does not by itself grant permission to redistribute every data file.
 No data bytes or third-party model weights are added by this implementation.
+
+## Sharing ground truth and dependency profiles
+
+Ground truth and precomputed FD/UCC/IND profiles are useful reusable benchmark
+assets. Distribute them for the exact prepared tables to which they apply.
+Ground truth identifies columns; dependencies additionally depend on row samples,
+null handling, normalization and the profiling settings. A database name alone
+does not identify a compatible set of profiles.
+
+### Current preparation support
+
+| Step | Current behavior |
+|---|---|
+| Acquire raw data | `--download` fetches and checks the declared files for supported sources; local/manual sources need supplied inputs. |
+| Convert or generate tables | The registered adapter writes the normal source/target layout and records conversion choices. |
+| Ground truth | Converters import upstream correspondences or derive them from an explicit mapping/generation recipe. Ambiguous or unavailable truth is not inferred from matcher scores. |
+| Dataset configuration | Preparation writes relative-path `datasets.yaml`; the user selects those entries for the active run. |
+| FD/UCC/IND profiles | Preparation does not mine these. Optional `benchmark_assets.py` installation verifies a separately supplied bundle against prepared tables. Managed inputs remain `not_profiled` until compatible profiles are supplied. |
+| Validation | Table checks and optional `--validate-java` validate CSV/truth loading. They do not establish that all dependency profiles have been mined or are semantically appropriate. |
+
+`prepare_datasets.py --input` selects an acquired raw release, not a metadata
+overlay. Use the separate [benchmark asset command](benchmark-assets.md) to
+verify and attach a compatible bundle from Schema Matching Benchmark Datasets.
+A prepared matching dataset with truth is not automatically ready for
+dependency-based matchers.
+
+### Recommended distribution
+
+Keep the framework repository focused on software, its source catalog and small
+synthetic test fixtures. Keep study-specific selections and reported results
+with the paper's reproduction repository. The separate Schema Matching Benchmark
+Datasets project contains reusable curated annotations, profile provenance and
+versioned asset manifests. Its bundles are independently selectable by benchmark
+and preparation variant. Small annotation files can be ordinary versioned files
+there; large profile collections fit release archives. A paper should pin the
+asset version and its own scenario selection.
+
+[GitHub release assets](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
+can distribute files without tracking them in the code repository. A
+[versioned Zenodo record](https://help.zenodo.org/docs/deposit/manage-versions/)
+is another option for an archived dataset/profile release. Use a fixed version
+and an archive checksum rather than a moving latest URL.
+
+A Git submodule is useful when another source-code repository must be developed
+as a dependency. It is not necessary to distribute these metadata files: optional
+archives preserve a normal framework checkout and avoid making every user fetch
+every benchmark. Source-specific permissions and attribution also apply to
+annotations and profiles; distinguish upstream truth from new curated mappings.
+
+### What an asset archive should record
+
+An archive should include a manifest describing:
+
+- the benchmark release and preparation recipe/version;
+- the selected scenarios, sampling seeds and transformation settings;
+- SHA-256 hashes of every required prepared source and target CSV;
+- hashes of the supplied ground-truth and profile files;
+- profiler name, version, parameters, null policy and completeness of each profile type;
+- ground-truth origin, annotation version, corrections and attribution;
+- the compatible Schematch format and any limitations of the supplied metadata.
+
+Use paths relative to the prepared dataset root. For example, an archive can
+mirror the following layout without containing the raw source/target CSVs:
+
+```text
+bundle_manifest.json
+<dataset>/<scenario>/
+  ground_truth_full.csv
+  metadata/
+    profile-status.properties
+    source/
+      <source-table-name>/FD_results.txt
+      <source-table-name>/UCC_results.txt
+      inds.txt
+    target/
+      <target-table-name>/FD_results.txt
+      <target-table-name>/UCC_results.txt
+      inds.txt
+    source-to-target-inds.txt
+    target-to-source-inds.txt
+```
+
+The asset command packages this layout below `payload/` in each archive and
+records its exact files and required table hashes in `bundle_manifest.json`.
+Pair-block truth under `ground_truth/` can be supplied instead of the full
+matrix. Include only files corresponding to actual annotations and profiles;
+an absent profile must not be represented as a successfully empty result.
+For managed single-table FD inputs, retain the runtime status/checksum contract
+described above. Other profile types also need provenance and explicit hash
+verification; the FD guard alone does not validate them all.
+
+### Download-and-attach workflow
+
+The intended workflow for published assets is:
+
+1. Download or acquire the pinned raw release.
+2. Run the registered preparation recipe, producing tables, truth and file hashes.
+3. Fetch the optional asset archive and verify its checksum.
+4. Require its prepared-table hashes and scenario selection to match the local outputs.
+5. Attach the matching annotations/profiles without silently replacing conflicting truth.
+6. Validate loading, then enable `readDependencies` for methods requiring profiles.
+
+Steps 1-2 use the preparation commands. Steps 3-5 use
+`benchmark_assets.py verify/install`, with an explicitly supplied catalog or
+archive; downloads require a published HTTPS URL and archive checksum in that
+catalog. Locally prepared bundles have no public URL until publication.
+Do not present successful attachment as a complete reproduction of a study whose
+selected cases, annotations or profiles are missing.
 
 ## Validation of this tool
 

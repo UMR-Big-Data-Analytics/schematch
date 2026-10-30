@@ -5,6 +5,23 @@ Both servers use code bundled under
 directories for other repositories, source checkouts or virtual environments.
 The Java matchers communicate with these servers over localhost.
 
+## Choose the server
+
+| Server | Handles | Default port | Java configuration |
+|---|---|---:|---|
+| `seed_server.py` | One source/target table pair, including COMA, Cupid and sentence-embedding adapters. | 5101 | A named adapter such as `ComaMatcher` in `first_line_matchers.yaml`. |
+| `study_server.py` | A complete scenario, including multi-table refinements and standalone holistic methods. | 5102 | A named scenario adapter in `second_line_matchers.yaml`. |
+
+Start the required server before launching the Java run; the matcher adapters
+expect an existing server. Both bind to `127.0.0.1`. A `GET /health` request lists
+registered methods, but does not load every optional model or validate profiles.
+The server's Python process must be able to read the same dataset files as Java.
+
+See [the tools README](../tools/README.md#python-matcher-servers) for both startup
+commands and [scenario configuration](scenario-python.md) for base selection,
+standalone methods and second-line settings. Ordinary Java matchers run without
+a Python server; the Python launcher itself does not require one.
+
 ## Numerical methods and scenario matching
 
 Activate a Python 3.10+ environment and run from the Schematch project directory:

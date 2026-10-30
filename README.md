@@ -51,6 +51,48 @@ Java-only matching and dataset preparation do not require these Python packages.
 Neural models, vector files and external services remain optional; see
 [Python installation](docs/python-matchers.md) for their additional setup.
 
+## Python matcher servers
+
+Python-backed matchers are called through local servers: `seed_server.py`
+handles table pairs on port 5101, and `study_server.py` handles complete scenarios
+on port 5102. Java-only methods need neither server. See
+[server installation](docs/python-matchers.md),
+[scenario-server configuration](docs/scenario-python.md) and the
+[tools README](tools/README.md#python-matcher-servers) for startup commands,
+resource requirements and configuration examples.
+
+## Download or generate data
+
+The [dataset guide](docs/datasets.md) explains acquisition, conversion,
+generation and local input layouts. The [dataset catalog](docs/reference/dataset-catalog.md)
+lists the preparation support for each source. From the repository root:
+
+```shell
+python tools/prepare_datasets.py list
+
+# Generate one small synthetic scenario, including ground truth; no download.
+python tools/prepare_datasets.py prepare scale --smoke
+
+# Or download, verify and convert a supported public benchmark.
+python tools/prepare_datasets.py prepare t2dsm --download
+```
+
+Prepared data and a relative-path `datasets.yaml` are written under
+`datasets-local/prepared/<source>/`. Copy the generated entries into
+`src/main/resources/datasets.yaml` and follow the [run instructions](docs/getting-started.md).
+Preparation preserves the active configuration. Sources marked for local or
+manual preparation need the named inputs; every catalog entry is not an
+automatic download.
+
+The converters import or derive ground truth. They do not mine FD/UCC/IND
+profiles; use `readDependencies: false` until those are supplied. The companion
+**Schema Matching Benchmark Datasets** project collects reusable annotations and
+precomputed profiles separately. The [benchmark asset guide](docs/benchmark-assets.md)
+explains how to select its catalog, verify table hashes and attach compatible
+files with `tools/benchmark_assets.py`. See the
+[metadata-sharing guide](docs/datasets.md#sharing-ground-truth-and-dependency-profiles)
+for provenance and distribution requirements.
+
 ## Documentation
 
 Start with the [documentation index](docs/README.md), or go directly to:
@@ -61,8 +103,9 @@ Start with the [documentation index](docs/README.md), or go directly to:
 - [Evaluation](docs/evaluation.md): metrics, extraction and result summaries.
 
 Generated catalogs, advanced server configuration and maintainer instructions
-are grouped in `docs/`. The [tool guide](docs/tools.md) explains which commands
-are useful for running, evaluating and developing Schematch.
+are grouped in `docs/`. The [tools README](tools/README.md) provides a local
+index and examples; the [full tool guide](docs/tools.md) explains prerequisites
+for running, evaluating and developing Schematch.
 
 - [CONTRIBUTING.md](docs/CONTRIBUTING.md) explains how to propose changes and
   which checks to run.
