@@ -41,7 +41,7 @@ when it is absent. Their synthetic inputs do not need pretrained model weights.
 ## Python dependencies
 
 [requirements.txt](requirements.txt) pins the numerical packages and Valentine
-adapters used by the Python tools and CI. Install them with:
+adapters used by the Python tools. Install them with:
 
 ```shell
 python -m pip install -r requirements.txt
@@ -84,12 +84,46 @@ Preparation preserves the active configuration. Sources marked for local or
 manual preparation need the named inputs; every catalog entry is not an
 automatic download.
 
-The converters import or derive ground truth. They do not mine FD/UCC/IND
-profiles; use `readDependencies: false` until those are supplied. The companion
-**Schema Matching Benchmark Datasets** project collects reusable annotations and
-precomputed profiles separately. The [benchmark asset guide](docs/benchmark-assets.md)
-explains how to select its catalog, verify table hashes and attach compatible
-files with `tools/benchmark_assets.py`. See the
+The converters import or derive ground truth. They do not mine or install
+FD/UCC/IND profiles; use `readDependencies: false` until compatible profiles
+have been supplied.
+
+## Benchmark metadata and ground truth
+
+The companion [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/schema-matching-benchmark-datasets)
+collects reusable ground truth and precomputed FD/UCC/IND/DC profiles.
+This is the intended publication address; the repository and archive downloads
+have not yet been published. The local checkout is available during preparation.
+It is maintained independently rather than embedded as a Git submodule. Users
+select its catalog explicitly; Schematch can run without a metadata checkout.
+
+| Location | Contents |
+|---|---|
+| Metadata repository files | Catalog, versioned manifests, table/profile checksums, provenance and small curated annotation CSVs. |
+| Metadata repository's local `dist/*.zip` | The actual ground-truth matrices, FD/UCC/IND files, available DC/scored profiles and status records. These archives are ignored by Git and need separate publication as release assets. |
+| Downloaded publisher data | Raw table rows, acquired and converted by `prepare_datasets.py`. |
+
+Data preparation and profile installation are separate commands. After preparing
+T2D-SM as above, attach its metadata using an explicitly selected catalog:
+
+```shell
+# Example assumes the metadata checkout is next to this Schematch checkout.
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm --dry-run
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm
+```
+
+The installer uses a local archive if present. Otherwise it can download the
+archive from the catalog's HTTPS URL and verify its checksum before attaching
+files to the prepared tables. **Current archive URLs are unset**, so metadata
+installation currently requires the locally prepared ZIPs. Cloning the metadata
+repository alone will not retrieve them. Once published URLs are recorded, the
+same installation command can fetch the matching archive automatically.
+A combined data-and-metadata preparation command is not implemented yet.
+
+The T2D-SM bundle covers 175 of the 178 prepared pairs. Other scenarios retain
+their unprofiled status. Select scenarios with complete required profiles before
+enabling `readDependencies`. The [benchmark asset guide](docs/benchmark-assets.md)
+explains the complete workflow, table checks and configuration steps. See the
 [metadata-sharing guide](docs/datasets.md#sharing-ground-truth-and-dependency-profiles)
 for provenance and distribution requirements.
 
