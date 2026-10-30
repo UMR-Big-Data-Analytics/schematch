@@ -90,17 +90,18 @@ have been supplied.
 
 ## Benchmark metadata and ground truth
 
-The companion [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/schema-matching-benchmark-datasets)
+The companion [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets)
 collects reusable ground truth and precomputed FD/UCC/IND/DC profiles.
-This is the intended publication address; the repository and archive downloads
-have not yet been published. The local checkout is available during preparation.
+The eight archives in [release v1.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v1.0.0)
+cover 910 archived scenarios. The catalog records their fixed download URLs and
+SHA-256 checksums.
 It is maintained independently rather than embedded as a Git submodule. Users
 select its catalog explicitly; Schematch can run without a metadata checkout.
 
 | Location | Contents |
 |---|---|
 | Metadata repository files | Catalog, versioned manifests, table/profile checksums, provenance and small curated annotation CSVs. |
-| Metadata repository's local `dist/*.zip` | The actual ground-truth matrices, FD/UCC/IND files, available DC/scored profiles and status records. These archives are ignored by Git and need separate publication as release assets. |
+| Metadata release ZIP attachments; local copies under `dist/` | The actual ground-truth matrices, FD/UCC/IND files, available DC/scored profiles and status records. These archives are distributed as release assets rather than tracked in Git. |
 | Downloaded publisher data | Raw table rows, acquired and converted by `prepare_datasets.py`. |
 
 Data preparation and profile installation are separate commands. After preparing
@@ -114,10 +115,10 @@ python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-
 
 The installer uses a local archive if present. Otherwise it can download the
 archive from the catalog's HTTPS URL and verify its checksum before attaching
-files to the prepared tables. **Current archive URLs are unset**, so metadata
-installation currently requires the locally prepared ZIPs. Cloning the metadata
-repository alone will not retrieve them. Once published URLs are recorded, the
-same installation command can fetch the matching archive automatically.
+files to the prepared tables. With the updated catalog, metadata installation
+can fetch the matching archive automatically. Cloning the metadata repository
+alone does not retrieve the ZIPs; the installation command does that when needed.
+The catalog can also be supplied as an HTTPS URL, so a metadata checkout is optional.
 A combined data-and-metadata preparation command is not implemented yet.
 
 The T2D-SM bundle covers 175 of the 178 prepared pairs. Other scenarios retain

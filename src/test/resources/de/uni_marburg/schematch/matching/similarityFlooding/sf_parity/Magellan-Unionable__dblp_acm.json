@@ -1,0 +1,239 @@
+{
+"dataset": "Magellan-Unionable",
+"scenario": "dblp_acm",
+"source": "sf-matcher-study: reference/seeds/plain, tuning/results (layer1_plain, iter_plain, x60_plain), results/plain/levenshtein, data (classfull_plain, f6_plain/all, x62_plain)",
+"seeds": {
+"levenshtein": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,1.0,0.19999999,0.0,0.0,0.0\nsource.title,0.19999999,1.0,0.14285713,0.19999999,0.0\nsource.authors,0.0,0.14285713,1.0,0.0,0.14285713\nsource.venue,0.0,0.19999999,0.0,1.0,0.19999999\nsource.year,0.0,0.0,0.14285713,0.19999999,1.0\n",
+"coma": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,1.0,0.0,0.0,0.0,0.0\nsource.title,0.0,1.0,0.0,0.0,0.0\nsource.authors,0.0,0.0,1.0,0.0,0.0\nsource.venue,0.0,0.0,0.0,1.0,0.0\nsource.year,0.0,0.0,0.0,0.0,1.0\n",
+"pmf": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.99482745,0.9920357,0.9876796,0.6390161,0.77575463\nsource.title,0.9885679,0.99141616,0.99069786,0.64943737,0.78365797\nsource.authors,0.98778695,0.9921169,0.9936374,0.6486701,0.7860203\nsource.venue,0.63475096,0.63865536,0.64181477,0.97576237,0.7303773\nsource.year,0.77394795,0.77895117,0.7817578,0.7511675,0.98365355\n"
+},
+"expected": {
+"published": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.33012152,0.15170173,0.11274728,0.11274728,0.13534923\nsource.title,0.15170173,0.32606128,0.15911362,0.17024346,0.11274728\nsource.authors,0.11274728,0.15911362,0.32606128,0.131289,0.14057189\nsource.venue,0.11274728,0.17024346,0.131289,0.32606128,0.15170173\nsource.year,0.13534923,0.11274728,0.14057189,0.15170173,0.33012152\n",
+"two_updates": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.3165057,0.11062335,0.06760316,0.06760316,0.10140474\nsource.title,0.11062335,0.30114135,0.1167691,0.12906058,0.06760316\nsource.authors,0.06760316,0.1167691,0.30114135,0.086040385,0.09833187\nsource.venue,0.06760316,0.12906058,0.086040385,0.30114135,0.11062335\nsource.year,0.10140474,0.06760316,0.09833187,0.11062335,0.3165057\n",
+"standard": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.36977056,0.11932449,0.037715264,0.07683639,0.044536617\nsource.title,0.119959734,0.6301073,0.15487015,0.12694669,0.10700994\nsource.authors,0.037532516,0.16093352,0.4010548,0.044519465,0.14882828\nsource.venue,0.054972176,0.10682456,0.042551126,0.34807196,0.09278674\nsource.year,0.04412762,0.08128636,0.12662902,0.09452883,0.37868994\n",
+"x60_melnik": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.11678321,0.07234789,0.07215793,0.056953803,0.06362324\nsource.title,0.072182156,0.11756976,0.07393156,0.05905025,0.06324667\nsource.authors,0.0721481,0.07399344,0.11766662,0.059016794,0.06334969\nsource.venue,0.0567533,0.058580082,0.058717854,0.116887145,0.060923267\nsource.year,0.06354446,0.06305593,0.06317832,0.061844375,0.11629595\n",
+"x60_fd": "Source\\Target,target.id,target.title,target.authors,target.venue,target.year\nsource.id,0.23110195,0.15096104,0.10536397,0.17721637,0.09751357\nsource.title,0.15202706,0.47003222,0.2779632,0.1402731,0.26820946\nsource.authors,0.1041998,0.286032,0.24993488,0.09244637,0.2007794\nsource.venue,0.13232014,0.10638488,0.08089467,0.18672855,0.0827815\nsource.year,0.09625695,0.20794822,0.15721373,0.09486487,0.20503825\n"
+},
+"edges": {
+"class/shape": {
+"source": [
+"pattern\tsource\tid\t@class:9\t1.0",
+"pattern\tsource\ttitle\t@class:MIXED\t1.0",
+"pattern\tsource\tauthors\t@class:MIXED\t1.0",
+"pattern\tsource\tvenue\t@class:a a\t1.0",
+"pattern\tsource\tyear\t@class:9\t1.0"
+],
+"target": [
+"pattern\ttarget\tid\t@class:9\t1.0",
+"pattern\ttarget\ttitle\t@class:MIXED\t1.0",
+"pattern\ttarget\tauthors\t@class:MIXED\t1.0",
+"pattern\ttarget\tvenue\t@class:MIXED\t1.0",
+"pattern\ttarget\tyear\t@class:9\t1.0"
+]
+},
+"class/shape_shuffled": {
+"source": [
+"pattern\tsource\tid\t@class:MIXED\t1.0",
+"pattern\tsource\ttitle\t@class:9\t1.0",
+"pattern\tsource\tauthors\t@class:a a\t1.0",
+"pattern\tsource\tvenue\t@class:9\t1.0",
+"pattern\tsource\tyear\t@class:MIXED\t1.0"
+],
+"target": [
+"pattern\ttarget\tid\t@class:9\t1.0",
+"pattern\ttarget\ttitle\t@class:MIXED\t1.0",
+"pattern\ttarget\tauthors\t@class:9\t1.0",
+"pattern\ttarget\tvenue\t@class:MIXED\t1.0",
+"pattern\ttarget\tyear\t@class:MIXED\t1.0"
+]
+},
+"class/semtype": {
+"source": [
+"semtype\tsource\tid\t@class:integer_\t1.0",
+"semtype\tsource\ttitle\t@class:text_\t1.0",
+"semtype\tsource\tauthors\t@class:text_\t1.0",
+"semtype\tsource\tvenue\t@class:other_\t1.0",
+"semtype\tsource\tyear\t@class:year_\t1.0"
+],
+"target": [
+"semtype\ttarget\tid\t@class:integer_\t1.0",
+"semtype\ttarget\ttitle\t@class:text_\t1.0",
+"semtype\ttarget\tauthors\t@class:text_\t1.0",
+"semtype\ttarget\tvenue\t@class:text_\t1.0",
+"semtype\ttarget\tyear\t@class:year_\t1.0"
+]
+},
+"class/semtype_shuffled": {
+"source": [
+"semtype\tsource\tid\t@class:text_\t1.0",
+"semtype\tsource\ttitle\t@class:text_\t1.0",
+"semtype\tsource\tauthors\t@class:year_\t1.0",
+"semtype\tsource\tvenue\t@class:other_\t1.0",
+"semtype\tsource\tyear\t@class:integer_\t1.0"
+],
+"target": [
+"semtype\ttarget\tid\t@class:integer_\t1.0",
+"semtype\ttarget\ttitle\t@class:text_\t1.0",
+"semtype\ttarget\tauthors\t@class:text_\t1.0",
+"semtype\ttarget\tvenue\t@class:year_\t1.0",
+"semtype\ttarget\tyear\t@class:text_\t1.0"
+]
+},
+"f6/knn1": {
+"source": [
+"distsim\tsource\tid\ttitle\t1.0",
+"distsim\tsource\ttitle\tid\t1.0",
+"distsim\tsource\tauthors\ttitle\t1.0",
+"distsim\tsource\tvenue\tyear\t1.0",
+"distsim\tsource\tyear\tvenue\t1.0"
+],
+"target": [
+"distsim\ttarget\tid\ttitle\t1.0",
+"distsim\ttarget\ttitle\tid\t1.0",
+"distsim\ttarget\tauthors\ttitle\t1.0",
+"distsim\ttarget\tvenue\tyear\t1.0",
+"distsim\ttarget\tyear\tvenue\t1.0"
+]
+},
+"f6/knn2": {
+"source": [
+"distsim\tsource\tid\ttitle\t1.0",
+"distsim\tsource\tid\tauthors\t1.0",
+"distsim\tsource\ttitle\tid\t1.0",
+"distsim\tsource\ttitle\tauthors\t1.0",
+"distsim\tsource\tauthors\ttitle\t1.0",
+"distsim\tsource\tauthors\tid\t1.0",
+"distsim\tsource\tvenue\tyear\t1.0",
+"distsim\tsource\tvenue\tauthors\t1.0",
+"distsim\tsource\tyear\tvenue\t1.0",
+"distsim\tsource\tyear\tauthors\t1.0"
+],
+"target": [
+"distsim\ttarget\tid\ttitle\t1.0",
+"distsim\ttarget\tid\tauthors\t1.0",
+"distsim\ttarget\ttitle\tid\t1.0",
+"distsim\ttarget\ttitle\tauthors\t1.0",
+"distsim\ttarget\tauthors\ttitle\t1.0",
+"distsim\ttarget\tauthors\tid\t1.0",
+"distsim\ttarget\tvenue\tyear\t1.0",
+"distsim\ttarget\tvenue\tauthors\t1.0",
+"distsim\ttarget\tyear\tvenue\t1.0",
+"distsim\ttarget\tyear\tauthors\t1.0"
+]
+},
+"f6/knn3": {
+"source": [
+"distsim\tsource\tid\ttitle\t1.0",
+"distsim\tsource\tid\tauthors\t1.0",
+"distsim\tsource\tid\tyear\t1.0",
+"distsim\tsource\ttitle\tid\t1.0",
+"distsim\tsource\ttitle\tauthors\t1.0",
+"distsim\tsource\ttitle\tyear\t1.0",
+"distsim\tsource\tauthors\ttitle\t1.0",
+"distsim\tsource\tauthors\tid\t1.0",
+"distsim\tsource\tauthors\tyear\t1.0",
+"distsim\tsource\tvenue\tyear\t1.0",
+"distsim\tsource\tvenue\tauthors\t1.0",
+"distsim\tsource\tvenue\ttitle\t1.0",
+"distsim\tsource\tyear\tvenue\t1.0",
+"distsim\tsource\tyear\tauthors\t1.0",
+"distsim\tsource\tyear\ttitle\t1.0"
+],
+"target": [
+"distsim\ttarget\tid\ttitle\t1.0",
+"distsim\ttarget\tid\tauthors\t1.0",
+"distsim\ttarget\tid\tyear\t1.0",
+"distsim\ttarget\ttitle\tid\t1.0",
+"distsim\ttarget\ttitle\tauthors\t1.0",
+"distsim\ttarget\ttitle\tyear\t1.0",
+"distsim\ttarget\tauthors\ttitle\t1.0",
+"distsim\ttarget\tauthors\tid\t1.0",
+"distsim\ttarget\tauthors\tyear\t1.0",
+"distsim\ttarget\tvenue\tyear\t1.0",
+"distsim\ttarget\tvenue\tauthors\t1.0",
+"distsim\ttarget\tvenue\ttitle\t1.0",
+"distsim\ttarget\tyear\tvenue\t1.0",
+"distsim\ttarget\tyear\tauthors\t1.0",
+"distsim\ttarget\tyear\ttitle\t1.0"
+]
+},
+"f6/rnd2": {
+"source": [
+"distsim\tsource\tid\ttitle\t1.0",
+"distsim\tsource\tid\tvenue\t1.0",
+"distsim\tsource\ttitle\tid\t1.0",
+"distsim\tsource\ttitle\tvenue\t1.0",
+"distsim\tsource\tauthors\tvenue\t1.0",
+"distsim\tsource\tauthors\tyear\t1.0",
+"distsim\tsource\tvenue\tauthors\t1.0",
+"distsim\tsource\tvenue\tid\t1.0",
+"distsim\tsource\tyear\tid\t1.0",
+"distsim\tsource\tyear\ttitle\t1.0"
+],
+"target": [
+"distsim\ttarget\tid\ttitle\t1.0",
+"distsim\ttarget\tid\tvenue\t1.0",
+"distsim\ttarget\ttitle\tid\t1.0",
+"distsim\ttarget\ttitle\tauthors\t1.0",
+"distsim\ttarget\tauthors\ttitle\t1.0",
+"distsim\ttarget\tauthors\tyear\t1.0",
+"distsim\ttarget\tvenue\tyear\t1.0",
+"distsim\ttarget\tvenue\tauthors\t1.0",
+"distsim\ttarget\tyear\tid\t1.0",
+"distsim\ttarget\tyear\tvenue\t1.0"
+]
+},
+"f6/knn2_rnd": {
+"source": [
+"distsim\tsource\tid\ttitle\t1.0",
+"distsim\tsource\tid\tauthors\t1.0",
+"distsim\tsource\ttitle\tid\t1.0",
+"distsim\tsource\ttitle\tauthors\t1.0",
+"distsim\tsource\tauthors\ttitle\t1.0",
+"distsim\tsource\tauthors\tid\t1.0",
+"distsim\tsource\tvenue\tyear\t1.0",
+"distsim\tsource\tvenue\tauthors\t1.0",
+"distsim\tsource\tyear\tvenue\t1.0",
+"distsim\tsource\tyear\tauthors\t1.0"
+],
+"target": [
+"distsim\ttarget\tid\ttitle\t1.0",
+"distsim\ttarget\tid\tauthors\t1.0",
+"distsim\ttarget\ttitle\tid\t1.0",
+"distsim\ttarget\ttitle\tauthors\t1.0",
+"distsim\ttarget\tauthors\ttitle\t1.0",
+"distsim\ttarget\tauthors\tid\t1.0",
+"distsim\ttarget\tvenue\tyear\t1.0",
+"distsim\ttarget\tvenue\tauthors\t1.0",
+"distsim\ttarget\tyear\tvenue\t1.0",
+"distsim\ttarget\tyear\tauthors\t1.0"
+]
+},
+"x62/levenshtein": {
+"source": [
+"sim\tsource\tid\ttitle\t1.0",
+"sim\tsource\tid\tauthors\t1.0",
+"sim\tsource\ttitle\tid\t1.0",
+"sim\tsource\ttitle\tvenue\t1.0",
+"sim\tsource\tauthors\ttitle\t1.0",
+"sim\tsource\tauthors\tyear\t1.0",
+"sim\tsource\tvenue\tyear\t1.0",
+"sim\tsource\tvenue\ttitle\t1.0",
+"sim\tsource\tyear\tvenue\t1.0",
+"sim\tsource\tyear\tauthors\t1.0"
+],
+"target": [
+"sim\ttarget\tid\ttitle\t1.0",
+"sim\ttarget\tid\tauthors\t1.0",
+"sim\ttarget\ttitle\tid\t1.0",
+"sim\ttarget\ttitle\tvenue\t1.0",
+"sim\ttarget\tauthors\tyear\t1.0",
+"sim\ttarget\tauthors\ttitle\t1.0",
+"sim\ttarget\tvenue\tyear\t1.0",
+"sim\ttarget\tvenue\ttitle\t1.0",
+"sim\ttarget\tyear\tvenue\t1.0",
+"sim\ttarget\tyear\tauthors\t1.0"
+]
+}
+}
+}

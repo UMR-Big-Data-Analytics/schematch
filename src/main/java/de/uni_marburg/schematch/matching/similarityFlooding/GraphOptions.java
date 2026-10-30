@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * <p>Each value is the matcher parameter of the same name where one is set, and otherwise the JVM system property
  * that held it before it was a parameter ({@code smx.sf.*}, parsed exactly as before). Without parameters the run is
- * therefore the one the properties describe, and {@link #DEFAULTS} is that run. The parameter names are the property
+ * therefore the one the properties describe, and {@link #defaults()} is that run. The parameter names are the property
  * names without the {@code smx.sf.} prefix, with {@code gate.high} etc. written {@code gateHigh}.
  */
 final class GraphOptions {
