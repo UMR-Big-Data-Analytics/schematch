@@ -2,9 +2,10 @@
 
 [Complete source/recipe inventory](reference/dataset-catalog.md) · [Machine-readable source catalog](../tools/dataset_sources.json)
 
-The catalog has **22 source/recipe IDs**: five checked download-and-prepare
-recipes, five converters for manually acquired inputs, one generator using local
-MusicBrainz/Lahman inputs, one standalone synthetic generator, and ten sources
+The catalog has **23 source/recipe IDs**: five checked download-and-prepare
+recipes, five converters for manually acquired inputs, two generators using local
+MusicBrainz/Lahman or TPC-H/AdventureWorks/Chinook inputs, one standalone synthetic
+generator, and ten sources
 with acquisition guidance but no direct converter. These counts describe
 preparation support, not the number of independent datasets or matching tasks.
 
@@ -199,13 +200,76 @@ are preserved from the research generator; invariant checks run before import.
 It is the controlled v2 construction, not a claim to recreate every later v3 or
 final-controlled experiment with the same command.
 
+The independent-sample recipe builds multi-table scenarios from TPC-H,
+AdventureWorks and Chinook:
+
+```text
+<input>/TPCH/{region,nation,customer,supplier,part,orders,lineitem}.csv
+<input>/AdventureWorks/Sales.SalesOrderHeader.csv, Sales.SalesOrderDetail.csv, Sales.Customer.csv,
+    Production.Product.csv, Production.ProductSubcategory.csv, Production.ProductCategory.csv,
+    Person.Address.csv, Person.StateProvince.csv, Person.CountryRegion.csv, Sales.SalesTerritory.csv
+<input>/Chinook_Sqlite.sqlite          # or an existing export in <input>/chinook/
+```
+
+```powershell
+python tools/prepare_datasets.py prepare indep --input datasets-local/inputs/indep
+```
+
+The TPC-H and AdventureWorks inputs are semicolon-delimited CSV exports with a
+header row; record their export policy with the data. Each database has a
+normalized variant N and two denormalized variants D1/D2 that join referenced
+tables into the referencing table. A seeded sample of base rows (1,500 orders,
+1,500 sales orders or 150 invoices) is closed under foreign keys. The target side
+uses the same, a half-overlapping or a disjoint sample. For three seeds, three
+overlap conditions and the pairings N-D1, N-D2 and D1-D2, this gives 27 scenarios
+per database. Truth is derived from schema provenance: columns correspond when they
+hold the same base column, with roles agreeing where both carry one. It is n:m,
+because denormalized keys occur in several tables. Each scenario includes
+`provenance.json` with the column provenance. `indep-construction.json` records
+input hashes and the number of shared base rows. On the original inputs, all 81
+scenarios (3,438 files) match the historical construction byte for byte. Its
+profiling and grain checks are not part of the recipe.
+
+## Transformed variants of prepared datasets
+
+`tools/transform_dataset.py` writes recoded, relabelled or permuted copies of a
+prepared corpus root, which contains `<dataset>/<scenario>/` directories. It uses
+the standard library only, never overwrites output, selects scenarios with
+repeatable `--select <dataset>/<scenario>` globs, and records settings, per-scenario
+results and script hashes in `transformation_manifest.json`. Truth must be an
+unlabeled 0/1 matrix; labeled truth is rejected.
+
+```powershell
+python tools/transform_dataset.py md5 --input prepared/valentine --output prepared/valentine-md5
+python tools/transform_dataset.py opaque-labels --input prepared/valentine --output prepared/valentine-opaque --fraction 1.0
+python tools/transform_dataset.py opaque-tables --variant on --input prepared/synthea --output prepared/synthea-on
+python tools/transform_dataset.py permute --input prepared/synthea-on --output prepared/synthea-on-perm
+python tools/transform_dataset.py knobs --input prepared/valentine --output prepared/valentine-knobs --select "ChEMBL-*/*"
+```
+
+| Command | Transformation | Scope and caveats |
+|---|---|---|
+| `md5` | Labels and non-null values become MD5 digests with a per-side salt derived from `--seed`, dataset, scenario and side. Values in `NULLS` (empty, `null`, `none`, `nan`, `na`, `n/a`, `-`) are written empty, not hashed. FD/UCC/IND/DC label references and JSON column specs are relabelled; profile-status hashes are refreshed. | Single-table scenarios. Each side stays internally bijective, so null and distinct counts per column are verified. Cross-side value identity is removed by design. |
+| `opaque-labels` | Header names become unsalted tokens (`c` + 12 hex digits of MD5), so a label shared by both sides stays shared; values are unchanged. `--fraction` obscures a seeded share of labels. | FD/UCC files are emptied and `profile-status.properties` is set to `not_profiled`. IND, scored JSON and `manifest.json` still name the original columns. |
+| `opaque-tables` | Multi-table. Table and column names become salted digests; `--variant md5` also recodes values as `md5`. Label references in profile text, JSON and `provenance.json` are relabelled; no original qualified label may remain. | Table names keep their sorted order and truth files are unchanged, so every column keeps its readable position. Apply `permute` afterwards before relying on tie-breaking. |
+| `permute` | Per side and table, a column order from `random.Random(SHA-256(key))`, redrawn until it differs from the original. Truth blocks and `ground_truth_full.csv` are permuted; label-addressed profiles stay valid; JSON column specs, `manifest.json` and table hashes are updated. | `--key` defaults to `{dataset}/{scenario}/{side}/{table}`; the permutations are stored in the manifest for `positional_audit.py rerun`. |
+| `knobs` | Target-side controls: `base`, `K1` (seeded column order, truth follows), `K2p25..100` (a nested share of distinct values recoded, one mapping per side so dependencies hold), `K3p25..100` (a nested share of labels tokenized, profiles relabelled), `K4f50/25` (FD files thinned). Output folders are `<scenario>__<knob>`. | Single-table. `--key` defaults to `x79\|{dataset}\|{scenario}`, the case key of the original knob corpus. K1 does not renumber JSON column specs. |
+
+Parity with the original research scripts was checked on prepared Valentine
+scenarios and one multi-table bibliography scenario. Outputs of `md5`,
+`opaque-tables` `on`/`md5` and all twelve `knobs` were byte-identical, including
+the md5 cohort tables. `opaque-labels` differed only in the deliberately rewritten
+`profile-status.properties`. With key `X87/madi/{scenario}/{side}`,
+`permutation()` reproduced all 36 permuted MaDI tables and all 1,512 permuted
+initial matrices of the column-order study. The original applied it to raw
+Valentine-layout files rather than prepared scenarios.
+
 ## Repeating a published experiment
 
 Downloading a source and reproducing an analysis are separate steps. An exact
 rerun needs its selected cases, snapshots, row samples, transformations,
-annotations, profiles and evaluation settings. Historical names and construction
-notes are in the [compatibility reference](reference/dataset-compatibility.md).
-They are not additional download commands or required directories.
+annotations, profiles and evaluation settings. Record these inputs in a versioned analysis manifest; dataset names alone do
+not define an experiment.
 
 ## Dependency profiles and evaluation
 
@@ -247,12 +311,3 @@ python tools/audit_dataset_sources.py --check
 The audit checks registered preparation modes, download destinations and checksum
 formats against the local catalog. It does not contact publishers. The generated
 inventory is also checked by the normal Python test suite.
-
-On 2026-10-15, ten preparation tests and four evaluator tests passed. A real public
-T2D-SM download passed checksum verification and Java validation of all 178 pairs.
-Local-release conversion checks covered **700 scenarios** across T2D-SM, HDXSM,
-GDC-SM, MaDI, GOBY, MIMIC, Synthea, a selected Valentine subset, controlled smoke
-generation and scaling smoke generation, with zero Java parsing/truth errors.
-See [the validation record](../reports/dataset_preparation_validation.json) for exact
-counts and settings; these checks did not run matcher accuracy experiments or
-mine dependency profiles.

@@ -88,7 +88,9 @@ def publish(path, content, check):
 def main():
     project = Path(__file__).resolve().parents[1]
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--seeds", type=Path, default=project/"tools/matcher_seeds.json")
+    ap.add_argument("--configurations", "--seeds", dest="configurations", type=Path,
+                    default=project/"tools/tests/fixtures/matcher-configurations.json",
+                    help="Configuration-loading regression cases; --seeds is a compatibility alias")
     ap.add_argument("--check", action="store_true", help="Check generated inventories without changing files")
     args = ap.parse_args()
     source = project / "src/main/java/de/uni_marburg/schematch/matching"
@@ -101,7 +103,7 @@ def main():
         if served != covered:
             raise ValueError(f"{script}: missing named classes {served-covered}; unsupported adapters {covered-served}")
 
-    snapshot=json.loads(args.seeds.read_text(encoding="utf-8"))
+    snapshot=json.loads(args.configurations.read_text(encoding="utf-8"))
     parameter_cases=snapshot["parameter_cases"]
     for case in parameter_cases:
         if (case["name"],case["package"]) not in keys:
@@ -114,12 +116,10 @@ def main():
             if key == "options" and isinstance(value, str):
                 case["params"][key] = re.sub(r"[A-Za-z]:/[^\"]+", "<configured resource>", value)
 
-    deferred=snapshot["file_seeds"]
     backend_counts = dict(sorted(Counter(entry["backend"] for entry in entries).items()))
     catalog={"description":"Concrete class inventory, including presets, controls and transports; not an algorithm or installation count",
              "backend_counts": backend_counts,
-             "matchers":entries,"study_seed_count":snapshot["study_seed_count"],
-             "parameter_cases":parameter_cases,"file_seeds":deferred}
+             "matchers":entries,"parameter_cases":parameter_cases}
     publish(resources / "matcher_catalog.json", json.dumps(catalog, indent=2) + "\n", args.check)
     scenario = [e for e in entries if e["backend"] == "Python study server"]
     scenario_note = f"Scenario adapters provide {len(scenario)} presets for {len({e['method'] for e in scenario})} registered methods."
@@ -139,11 +139,9 @@ def main():
               "| Class | Package | Implementation | Scope | Purpose | Server method |", "|---|---|---|---|---|---|"]
     for entry in entries:
         lines.append(f"| [{entry['name']}](../../{entry['source']}) | `{entry['package']}` | {display_backend(entry['backend'])} | {entry['scope']} | {entry['purpose']} | `{entry.get('method','')}` |")
-    lines += ["", "## Archived score-matrix identifiers", "",
-              "These entries are **not** live API adapters, and their matrices are not bundled. Supply externally computed matrices through `FileSeedMatcher` or Similarity Flooding's FILE input.",
-              "Identifiers retain their original names for compatibility with archived files. `{regime}` denotes a user-chosen dataset variant, such as readable or recoded values.", "",
-              "| Archived identifier | Suggested local matrix directory |", "|---|---|"]
-    lines += [f"| `{row['seed']}` | `seed_in/{row['seed']}/{{regime}}` |" for row in deferred]
+    lines += ["", "## Externally computed matrices", "",
+              "Use `FileSeedMatcher` or Similarity Flooding's FILE input to read user-supplied score matrices. Those files are not bundled.",
+              "Configuration-loading fixtures live under `tools/tests/fixtures/`; they are test inputs, not a required set of algorithms or datasets."]
     publish(project / "docs/reference/matcher-catalog.md", "\n".join(lines) + "\n", args.check)
     print(f"Audited {len(entries)} concrete matcher classes and {len(parameter_cases)} configuration-loading cases. "
           "Both Python registries have complete named-adapter coverage.")

@@ -31,28 +31,25 @@ For numerical Python methods and regression checks, use a dedicated environment:
 ```shell
 python -m venv .venv
 # Activate .venv with the command appropriate for your shell.
-python -m pip install -r requirements/python.txt
+python -m pip install -r requirements.txt
 python -m unittest discover -s tools/tests -v
 ```
 
 Two optional learned-model subtests require PyTorch and are explicitly skipped
 when it is absent. Their synthetic inputs do not need pretrained model weights.
 
-## Python dependency files
+## Python dependencies
 
-These files pin the packages used by installation commands and CI. Select the
-file for the features you need; Java-only matching and dataset preparation do
-not need these Python packages.
+[requirements.txt](requirements.txt) pins the numerical packages and Valentine
+adapters used by the Python tools and CI. Install them with:
 
-| File | Purpose |
-|---|---|
-| [requirements/evaluation.txt](requirements/evaluation.txt) | NumPy and SciPy for raw-score evaluation. |
-| [requirements/python.txt](requirements/python.txt) | Numerical Python matcher servers and regression checks; includes evaluation dependencies. |
-| [requirements/valentine.txt](requirements/valentine.txt) | Optional COMA, Cupid and Valentine adapters; includes the numerical dependencies. |
+```shell
+python -m pip install -r requirements.txt
+```
 
-Install a selected file with `python -m pip install -r <file>`. Optional models
-and external systems have additional requirements in the
-[Python installation guide](docs/python-matchers.md).
+Java-only matching and dataset preparation do not require these Python packages.
+Neural models, vector files and external services remain optional; see
+[Python installation](docs/python-matchers.md) for their additional setup.
 
 ## Documentation
 
@@ -64,24 +61,21 @@ Start with the [documentation index](docs/README.md), or go directly to:
 - [Evaluation](docs/evaluation.md): metrics, extraction and result summaries.
 
 Generated catalogs, advanced server configuration and maintainer instructions
-are grouped in `docs/`.
+are grouped in `docs/`. The [tool guide](docs/tools.md) explains which commands
+are useful for running, evaluating and developing Schematch.
 
 - [CONTRIBUTING.md](docs/CONTRIBUTING.md) explains how to propose changes and
   which checks to run.
 - [THIRD_PARTY.md](docs/THIRD_PARTY.md) records the origins of bundled components
   and the licensing and attribution work required for distribution.
 
-The framework uses relative input paths and explicit external-resource settings;
-it does not discover adjacent source repositories. Downloaded data, seed
-matrices, models and run outputs stay outside the source release. The separate
-experiment record should supply its protocols, configurations and cached results,
-and identify the exact framework commit used.
+## Scope
 
-## Release status
+Schematch contains reusable matching, data preparation and evaluation capabilities.
+It uses relative input paths and explicitly configured external resources; it
+builds and runs without a paper repository or an adjacent research checkout.
 
-This is a local release candidate. Technical validation is recorded in
-[release_validation.json](reports/release_validation.json). Public redistribution
-requires the upstream and third-party permissions review described in
-[THIRD_PARTY.md](docs/THIRD_PARTY.md); no project-wide license has been assigned by
-this preparation. Optional backend availability and published-system parity are
-separate from class registration or passing transport tests.
+Study-specific configurations, registrations, selected cohorts, result snapshots,
+analyses and manuscript sources belong in separate experiment repositories.
+Those repositories identify the exact Schematch commit used. Downloaded data,
+model weights and generated run outputs stay outside the framework source tree.

@@ -63,7 +63,7 @@ def check(project=PROJECT, paper_evaluation=False):
                 checks.append({"name":name,"status":"ok","detail":package.__version__})
             except (ImportError,OSError) as exc:
                 checks.append({"name":name,"status":"missing","detail":
-                    f"{type(exc).__name__}: install requirements/evaluation.txt in the selected environment."})
+                    f"{type(exc).__name__}: install requirements.txt in the selected environment."})
     return {"checks":checks,"ready":all(item['status']=='ok' for item in checks),
             "scope":"Local prerequisites only; data, models and remote matcher availability require their own checks."}
 

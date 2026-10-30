@@ -193,6 +193,12 @@
       "homepage": "https://musicbrainz.org/doc/MusicBrainz_Database/Download",
       "acquisition": "Supply --input with Musicbrainz/medium, release, release_group headerless TSV dumps and Lahman/Batting.csv, People.csv, Teams.csv; see docs/datasets.md."
     },
+    "indep": {
+      "title": "Independent-sample TPC-H, AdventureWorks and Chinook (81 multi-table scenarios)",
+      "adapter": "indep",
+      "homepage": "https://github.com/lerocha/chinook-database/releases/tag/v1.4.5",
+      "acquisition": "Supply --input with TPCH/ and AdventureWorks/ semicolon CSV exports (see the tpch and adventureworks entries) and Chinook_Sqlite.sqlite; normalized/denormalized schema variants, seeded samples, derived provenance truth."
+    },
     "scale": {
       "title": "Deterministic synthetic scaling corpus (93 scenarios)",
       "adapter": "scale",

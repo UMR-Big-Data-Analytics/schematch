@@ -1,10 +1,10 @@
-# Standalone snapshot of this project's paper evaluation functions.
+# Standalone numerical evaluation functions with frozen reference tests.
 # Sources: harness/smx/core.py and sf-matcher-study/tuning/score_screen_metrics.py
 # No imports from the research workspace. Update only with reference parity tests.
 # Source SHA256: core=925ba3630e61d53eb81baff5d4b418d0f5bf9a23cbda693a4ae4419e26e712f0, study=8357ad2f149ce100c943177e2026e7f7607e46d2509fcfc205e761939473a01c
 """Score-matrix diagnostics, correspondence extraction, and match metrics.
 
-The harness deliberately separates two stages that matchers usually fuse:
+Evaluation separates similarity scores from extracted correspondences:
 
     schema pair --> S (score matrix) --> M (discrete correspondences)
 

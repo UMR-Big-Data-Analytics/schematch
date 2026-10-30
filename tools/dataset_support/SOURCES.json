@@ -38,5 +38,25 @@
     "source": "sf-matcher-study/data/make_scale_corpus.py",
     "source_sha256": "3f4a8e6a234f7052612114b6582cf48b0f5105a40259c098728d4c92c76e5bce",
     "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "transforms.py": {
+    "source": "harness/make_md5_audited.py",
+    "source_sha256": "611dbafc493c63e05f78209208fc20592fa9117621559bdbad382c6d5d3f89c8",
+    "additional_sources": {
+      "harness/make_opaque.py": "38405f4199e1ab73bf3292e09c1debe1f1f18361cfff19cda67caaf621200550",
+      "sf-matcher-study/data/make_opaque_multitable.py": "f4a2672687d890566310397652c1268043c3d83dd67951d46213d3dde92a4684",
+      "sf-matcher-study/layer3b/x87_perm_prepare.py": "1315da8217b9e4e05e3d86239ea7d0315660cf082fafe3a58fbfdf089ad8ada6",
+      "sf-matcher-study/data/make_knobs.py": "1e974b6ae45d685fa5b336e3e76de2dc3aa1d9c7d9bc2c152d6eb3afbffc2c3e"
+    },
+    "packaging": "Per-scenario functions with explicit input/output paths; corpus roots, cohort files and worker pools of the originals removed. Byte-identical outputs on Valentine and multi-table scenarios, except the documented profile-status rewrite of opaque labels; the permutation of prepared scenarios generalises the raw-layout x87 recipe."
+  },
+  "indep.py": {
+    "source": "harness/independent_sampling.py",
+    "source_sha256": "ee2396c000e5815614376207d812cf727e47534860f48c2b8ad84439ffdc66c4",
+    "additional_sources": {
+      "harness/grain_confirm.py": "f86f3451d6638b2e26c6b60bcfca41a4a45fbbe4ee8a8ecd9cc160dc7ea4dcc8",
+      "sf-matcher-study/data/convert_indep.py": "c5af4d885e3a601997b76f4af0c021de88b403608dde6417bec32800f4fc05bd"
+    },
+    "packaging": "Construction only (database specs, sampling, FK closure, variants, labels, provenance truth, scenario layout); the driver's grain checks, opaque recoding and matcher scoring are omitted. Input roots are explicit; byte-identical to the 81-scenario study corpus."
   }
 }

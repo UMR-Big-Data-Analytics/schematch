@@ -1,3 +1,0 @@
-# Numerical dependencies for the optional raw-score evaluator.
-numpy==2.2.6
-scipy==1.15.3

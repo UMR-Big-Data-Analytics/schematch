@@ -18,7 +18,7 @@ rerun       The matcher-side test. Run the matcher on a column-permuted copy of
             reproduces its own matrix exactly.
 
 Input is the evaluator's `paper_evaluation/input.jsonl` (raw scores, aligned
-truth). Needs NumPy and SciPy. See ../EVALUATION_AND_DATASETS.md.
+truth). Needs NumPy and SciPy. See ../docs/evaluation.md.
 """
 from __future__ import annotations
 

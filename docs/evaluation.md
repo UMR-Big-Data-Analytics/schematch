@@ -99,6 +99,75 @@ paperEvaluationTimeoutSeconds: 3600
 
 Choose a minimum group size for the analysis; this example requires five scenarios per family. Bootstrap requires the grouping manifest, resamples complete units within families, and keeps all scenarios in each sampled unit together. To reproduce a scenario-stratified bootstrap, use each scenario as its unit. Record case selections, contrasts, grouping and random seeds with the experiment. Generic summaries cannot infer those choices from filenames.
 
+### Derive resampling units from shared tables
+
+Scenarios built from the same table are not independent. `tools/cluster_units.py`
+links each scenario to the SHA-256 of each table and takes connected components.
+Linking ignores roles: a table used as a source in one scenario and as a target in
+another is the same node. It writes a grouping manifest with one `unit` per
+component and the dataset name as `family`. Hashes come from each import
+manifest's `raw_sha256` (the original release file) when present; otherwise, the
+prepared CSV files are hashed. Use `--sides source` when every scenario shares one
+target, such as a domain catalogue; the units are then conditional on that target.
+
+```powershell
+python tools/cluster_units.py --input datasets-local/prepared/goby --out configs/goby-groups.json --family GOBY
+```
+
+On the 200 prepared GOBY pairs, this gives the 124 table-sharing clusters used
+historically with either hash source and exactly the same partition. Edit the
+manifest to add regimes, splits or exclusions before using it with
+`paperEvaluationGroups`.
+
+### Positional audits
+
+Matrices can collect correctness from column order rather than from evidence.
+`linear_sum_assignment` resolves ties toward the identity, and many splits keep
+schema order. `tools/positional_audit.py` reads a run's `input.jsonl`:
+
+```powershell
+python tools/positional_audit.py alignment --records <run>/paper_evaluation/input.jsonl --out <report>
+python tools/positional_audit.py extractor --records <run>/paper_evaluation/input.jsonl --out <report>
+python tools/positional_audit.py rerun --original <run>/paper_evaluation/input.jsonl `
+  --permuted <run-on-permuted-copy>/paper_evaluation/input.jsonl `
+  --permutations <permuted-copy>/transformation_manifest.json --out <report>
+```
+
+`alignment` reports truth pairs off the diagonal and the F1 of an all-ones matrix.
+`extractor` permutes target columns of every matrix and its truth by the same
+permutations: 20 per scenario from seed 20260909, shared by all matchers and drawn
+in first-seen order. It reports Hungarian F1 before and after, the difference
+("subsidy"), tie share and spread, with a constant-matrix reference.
+Mutual top-1 is equivariant and must show zero subsidy. This mode measures the
+extractor's tie-breaking and cannot detect a matcher that reads column order.
+`rerun` does: run the matcher on a copy from `transform_dataset.py permute`, and
+require `S_permuted == S[rows, cols]`. Deviations above 1e-12 and 1e-9 are
+counted separately. On the 382-scenario Valentine protocol, the port reproduced the
+historical report exactly. COMA (schema, readable) has F1_H 0.697793 and permuted
+0.674236. The constant matrix has 0.722903 and permuted 0.036412. The alignment
+survey has 6,432 truth pairs, 10 off the diagonal.
+
+### Learned combination of first-line matchers
+
+`tools/learned_combiner.py` trains a class-balanced logistic regression on base
+matrices from other families. Its features are each base matcher's score and
+margins to the row and column best. It writes the held-out family's probabilities
+as `<out>/<dataset>/<scenario>/seed.csv`. `FileSeedMatcher` can replay them with
+`seedRoot` set to the parent of `<out>` and `seed` set to its name; Similarity
+Flooding FILE input can also read them. Families come from `--groups` or,
+explicitly, `--family-from-dataset`. With one family, it falls back to
+leave-one-scenario-out and says so. Control matchers are rejected as features.
+It requires scikit-learn.
+
+```powershell
+python tools/learned_combiner.py --records <run>/paper_evaluation/input.jsonl `
+  --bases LevenshteinMatcher,PMFMatcher --groups configs/evaluation-groups.json --out seeds/learned_lofo
+```
+
+Rebuilt from the original eight base matrices of the 382 Valentine scenarios, all
+382 learned matrices and every per-family coefficient were bit-identical to the
+historical leave-one-family-out output.
+
 Matcher `wall_ms` is a measured wall duration, with cached results marked. It is not peak RSS, CPU time, or a controlled timing benchmark. The existing timing and cluster experiment tools and SF diagnostic exports remain the route for those experiments; ordinary report generation is not a substitute timing benchmark.
 
 ## Supported dataset input
@@ -161,4 +230,4 @@ python tools/audit_datasets.py --manifest configs/dataset-inputs.json
 
 `DatasetAudit` streams every CSV record through the same Java parser as normal loading, without retaining table values. It validates truth against discovered columns and table blocks, never mines profiles, and never rewrites inputs. Reports and discovered manifests go into `target/` by default. Unreadable directories, invalid data and inference-only datasets remain visible in the reports.
 
-For historical parser validation counts, see [the dataset compatibility audit](reference/dataset-compatibility.md). Repeated/regime/self-matching variants count as separate scenarios, not independent datasets for statistical inference.
+Repeated, transformed and self-matching variants are separate scenarios, not automatically independent data sources for statistical inference.

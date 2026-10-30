@@ -153,10 +153,10 @@ def valentine():
     try:
         installed = version("valentine")
     except PackageNotFoundError as exc:
-        raise RuntimeError("Install requirements/valentine.txt in the seed server environment") from exc
+        raise RuntimeError("Install requirements.txt in the seed server environment") from exc
     if installed != "1.0.0":
         raise RuntimeError(f"Valentine 1.0.0 is required for these adapters; found {installed}. "
-                           "Use a separate environment with requirements/valentine.txt.")
+                           "Use a separate environment with requirements.txt.")
     import valentine as module
     # Resource installation is explicit; the matching server never downloads NLTK data.
     import nltk

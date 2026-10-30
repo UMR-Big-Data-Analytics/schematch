@@ -144,6 +144,7 @@ The standalone scenario matchers below read the scenario's tables themselves, ne
 | `PythonRactMatcher` | `ract` | RACT (Traeger et al.; leotraeg/RACT, variant b.I): mpnet embedding of the SerReference serialisation (column, table, type, PK/FK, 5 values, weak and strong tables), a 768-512-256-#tables sigmoid classifier (dropout 0.2, L2 0.001, focal loss alpha 0.9 gamma 2, Adam 1e-3, 100 epochs, batch 16, 5-fold stratified ensemble) trained on the target columns plus 1-hop join-path view copies labelled exp(-0.5) for the other table; cosine inside each source column's top-2 tables, 0.01 x cosine outside |
 | `PythonOmniMatchReleaseMatcher` | `omnimatch_release` | OmniMatch ported from the authors' release (amazon-science/omnimatch 515f8ce, CC BY-NC 4.0): join / non-join pairs generated from the scenario's own tables (splits, overlaps, typos), five relations (infrequent-token Jaccard, fastText cosine, header-token JS, Jaccard, containment), top-3 graph, 987 node features, 2-layer RGCN (dgl RelGraphConv semantics) with a triplet loss, 30 epochs, 256-d; score 1 - d / 2. Needs fastText cc.en.300 (`vectors` or `SCHEMATCH_FASTTEXT`; cut to 50-d by PCA as the release's cc.en.50; `vectors_cache` / `SCHEMATCH_FASTTEXT_CACHE` stores the reduction). Record the random seed and column order when comparing repeated runs |
 | `PythonOmniMatchMatcher` | `omnimatch` | Alternative OmniMatch reconstruction using sentence embeddings (five relations, mpnet value embeddings, split-and-perturbed views, plain-torch RGCN); kept for comparison, prefer `omnimatch_release` |
+| `PythonRemaMatcher` | `rema` | REMA-ARC reconstruction using an attribute-row-cell graph, random walks and skip-gram embeddings. Instance-only; one table per side; requires `gensim`. Computes its own scores without a base matrix. |
 
 Deviations to keep in mind: RACT reads declared foreign keys, which may be absent from input scenarios; this adapter uses profiled or partial (>= 0.9) INDs into keys; it drops columns outside the top-k tables, which would leave the matrix incomplete; and the original sweeps k (`top_tables`). RoBERTa-base has no trained pooler, so ALITE's `pooler_output` comes from a randomly initialised layer, in the original as here; the initialisation is seeded (`seed`) and `pooling` can be set to `cls` or `mean`. ALITE needs a local roberta-base (`options.roberta` or `SCHEMATCH_ROBERTA`); `encoder: "mpnet"` uses the sentence encoder instead. The OmniMatch port documents its own deviations in `schematch_py/omnimatch_release.py` (placeholder generator settings, seeded RNG, guards for tables of 1-2 rows, NFKD instead of unidecode, a wordninja-style splitter over the vector vocabulary).
 
@@ -230,10 +231,18 @@ params:
 
 `OneStepTermsTest` checks the terms on small synthetic schemas. With `-Dschematch.test.valentineRoot=<Valentine-layout datasets with FD/UCC/IND profiles>`, it also compares all terms with frozen Python reference matrices on three Valentine scenarios (bundled expected matrices). The scenarios themselves are not bundled.
 
-## Methods without a bundled live backend
+## Training score combinations
+
+`tools/learned_combiner.py` learns a combination of recorded base-matcher scores
+using labelled scenarios from other groups. It writes held-out matrices for
+`FileSeedMatcher` or SF FILE input. Training needs multiple labelled scenarios,
+so it is a separate tool rather than a refinement trained on the current pair.
+See [the tool guide](tools.md) for its inputs and prerequisites.
+
+## External installations and unbundled methods
 
 - **PDED** has a live scenario-server adapter (`pded`, `PdedMatcher`) and requires an explicitly configured compatible build through `options.pded_home` or `SCHEMATCH_PDED`. The PDED runner is not bundled or discovered in a neighboring checkout.
-- **PRISMA, SiMa, SemStruct reconstructions, ReMa, and externally trained score combiners:** the catalog lists available archived FILE seed names separately. Schematch can consume supplied matrices through SF FILE input; it cannot compute these methods through the bundled servers. Live integration still needs each system's preprocessing, execution and output contract.
+- **PRISMA, SiMa and SemStruct reconstructions:** Schematch can consume externally computed matrices through `FileSeedMatcher` or SF FILE input; it cannot compute these methods through the bundled servers. Live integration still needs each system's preprocessing, execution and output contract.
 - **Additional hierarchy, sibling, block, preservation and multistage graph variants:** these are not bundled implementations. They need explicit profile inputs and a validated backend; existing classes should not be treated as aliases for them.
 - **JMM-2:** no second-order implementation is bundled. `PMFMatcher` supplies the sorted marginal-distribution similarity; joint column-pair distributions and second-order assignment search remain separate work.
 - **Candidate pruning:** a configurable table/column candidate-blocking pipeline is not bundled.
@@ -249,7 +258,3 @@ mvn -o test
 ```
 
 The matcher audit follows the Matcher superclass chain, checks the archived parameter configurations, and verifies complete named-adapter coverage of both server registries. `--check` fails on stale generated files without changing them. `MatcherCatalogTest` configures every audited seed through MatcherFactory, including inherited parameters. Offline native tests additionally check explicit PMF semantics, nested ensemble recipes, native role terms, the one-step additive terms, Python-reference Q/Sinkhorn/Hungarian values, matrix input selection, and table-pair/scenario HTTP dispatch. Transport tests use a local stub; they do not assert model availability or trained-model accuracy.
-
-The [2026-10-15 inventory validation](../reports/inventory_validation.json) records
-139 passing Java tests and 29 passing Python tests, including the separate-copy
-Python run with the original research workspace unavailable.

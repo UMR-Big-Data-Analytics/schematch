@@ -8,7 +8,7 @@ node), and takes connected components. The result is a grouping manifest for
 
 Hashes come from each scenario's import manifest (`tables.<side>.raw_sha256`,
 the bytes of the original release file) when present, else from the prepared
-CSV files. Standard library only. See ../EVALUATION_AND_DATASETS.md.
+CSV files. Standard library only. See ../docs/evaluation.md.
 """
 from __future__ import annotations
 

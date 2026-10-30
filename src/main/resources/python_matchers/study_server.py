@@ -1,6 +1,6 @@
 """Scenario-level matcher server using implementations bundled with Schematch.
 Run: python src/main/resources/python_matchers/study_server.py --port 5102
-Dependencies: requirements/python.txt. No neighboring repositories are imported.
+Dependencies: requirements.txt. No neighboring repositories are imported.
 """
 from __future__ import annotations
 

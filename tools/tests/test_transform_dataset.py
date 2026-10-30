@@ -1,7 +1,7 @@
 """Contracts of the dataset transformations on small synthetic scenarios.
 
 Byte parity with the original research scripts was checked separately on
-Valentine and multi-table scenarios; see DATASETS.md.
+Valentine and multi-table scenarios; see docs/datasets.md.
 """
 import csv
 import hashlib

@@ -158,8 +158,9 @@ class BundledMatchersTest(unittest.TestCase):
         request=self.request()
         request.pop('base')
         with patch.object(holistic,'embed',side_effect=fake_embed),patch.object(holistic,'roberta_embeddings',side_effect=fake_embed):
-            # omnimatch_release needs configured vectors; pded needs a PDED build and one table per side.
-            for method in sorted(study_server.BASE_FREE-{'omnimatch_release','pded'}):
+            # omnimatch_release needs configured vectors; pded needs a PDED build and one table per side; rema needs
+            # gensim, one table per side and returns raw cosines (test_ported_matchers.py).
+            for method in sorted(study_server.BASE_FREE-{'omnimatch_release','pded','rema'}):
                 with self.subTest(method=method):
                     if method in {'omnimatch','ract'} and importlib.util.find_spec('torch') is None:
                         self.skipTest('Optional learned-model test requires torch; no model downloads are used')

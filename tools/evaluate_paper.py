@@ -1,4 +1,4 @@
-"""Evaluate raw Schematch matrices with the paper's exact ranking/tie/extraction functions.
+"""Evaluate raw Schematch matrices with ranking, tie-aware and assignment metrics.
 
 Requires numpy and scipy, with no research-tree imports. Java's paperEvaluation mode
 writes the input records and invokes this tool automatically. It can also be run later:

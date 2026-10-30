@@ -29,7 +29,8 @@ PREPARATION_MODES = {
     "valentine": "local conversion", "t2dsm": "local conversion", "hdxsm": "local conversion",
     "gdcsm": "local conversion", "madi": "local conversion", "goby": "local conversion",
     "mimic": "local conversion", "synthea": "local conversion",
-    "controlled": "generate from local inputs", "scale": "generate", "manual": "manual preparation",
+    "controlled": "generate from local inputs", "indep": "generate from local inputs", "scale": "generate",
+    "manual": "manual preparation",
 }
 
 
@@ -42,7 +43,7 @@ def preparation_support(entry):
     if adapter not in PREPARATION_MODES:
         raise ValueError(f"Unknown dataset adapter: {adapter}")
     if entry.get("downloads"):
-        if adapter in {"manual", "scale", "controlled"}:
+        if adapter in {"manual", "scale", "controlled", "indep"}:
             raise ValueError(f"Downloads do not match the preparation mode: {adapter}")
         return "download + prepare"
     return PREPARATION_MODES[adapter]
@@ -297,6 +298,10 @@ def prepare(args):
                 raise ValueError(f"Controlled transformations failed verification: {report['errors']}")
             import_raw(intermediate, prepared, args)
             shutil.copyfile(intermediate / "controlled-benchmark.json", prepared / "controlled-benchmark.json")
+        elif adapter_name == "indep":
+            from dataset_support import indep
+            report = indep.prepare(raw, prepared, work=intermediate)
+            lossless.json_write(prepared / "indep-construction.json", report)
         elif adapter_name == "scale":
             from dataset_support import scale
             cells = [(16, 16, .3, 500)] if args.smoke else scale.cells()
@@ -386,7 +391,7 @@ def main(argv=None):
         else:
             if args.rows < 4:
                 raise ValueError("--rows must be at least 4")
-            if args.select and args.source in {"mimic", "synthea"}:
+            if args.select and args.source in {"mimic", "synthea", "indep"}:
                 raise ValueError("--select is for Valentine-layout imports, not this multi-table adapter")
             prepare(args)
         return 0

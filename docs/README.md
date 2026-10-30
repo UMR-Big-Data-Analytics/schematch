@@ -17,14 +17,12 @@ relative to the repository root unless stated otherwise.
 - [Installation and resources](python-matchers.md): packages, models and external services.
 - [Scenario server](scenario-python.md): methods that need all tables in a matching task.
 
-## Reference and maintenance
+## Reference and development
 
 - [Generated matcher catalog](reference/matcher-catalog.md): classes, packages and backends.
 - [Generated dataset catalog](reference/dataset-catalog.md): source IDs and preparation support.
-- [Historical dataset compatibility](reference/dataset-compatibility.md): parser validation
-  and archived variants; these are not datasets installed by cloning Schematch.
-- [Contributing](CONTRIBUTING.md), [preparing a release](maintainers/releasing.md)
-  and [provenance and licensing](THIRD_PARTY.md).
+- [Tools](tools.md): launching, dataset preparation, evaluation and development checks.
+- [Contributing](CONTRIBUTING.md) and [provenance and licensing](THIRD_PARTY.md).
 
 ## Terms used in the guides
 

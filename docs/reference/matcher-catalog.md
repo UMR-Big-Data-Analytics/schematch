@@ -171,17 +171,7 @@ OracleMatcher reads ground truth and is only a control. Java ensembles/refinemen
 | [EmbdiMatcher](../../src/main/java/de/uni_marburg/schematch/matching/sota/EmbdiMatcher.java) | `sota` | External HTTP service | scenario | matcher | `` |
 | [RandomMatcher](../../src/main/java/de/uni_marburg/schematch/matching/sota/RandomMatcher.java) | `sota` | Java | scenario | control | `` |
 
-## Archived score-matrix identifiers
+## Externally computed matrices
 
-These entries are **not** live API adapters, and their matrices are not bundled. Supply externally computed matrices through `FileSeedMatcher` or Similarity Flooding's FILE input.
-Identifiers retain their original names for compatibility with archived files. `{regime}` denotes a user-chosen dataset variant, such as readable or recoded values.
-
-| Archived identifier | Suggested local matrix directory |
-|---|---|
-| `learned_lofo` | `seed_in/learned_lofo/{regime}` |
-| `prisma` | `seed_in/prisma/{regime}` |
-| `rema` | `seed_in/rema/{regime}` |
-| `rema_shuffled` | `seed_in/rema_shuffled/{regime}` |
-| `semstruct` | `seed_in/semstruct/{regime}` |
-| `semstruct_lm_only` | `seed_in/semstruct_lm_only/{regime}` |
-| `sima_tpcdi` | `seed_in/sima_tpcdi/{regime}` |
+Use `FileSeedMatcher` or Similarity Flooding's FILE input to read user-supplied score matrices. Those files are not bundled.
+Configuration-loading fixtures live under `tools/tests/fixtures/`; they are test inputs, not a required set of algorithms or datasets.

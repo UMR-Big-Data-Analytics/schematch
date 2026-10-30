@@ -78,7 +78,7 @@ For ranking and assignment metrics computed from raw similarity scores, install 
 your selected environment:
 
 ```shell
-python -m pip install -r requirements/evaluation.txt
+python -m pip install -r requirements.txt
 python tools/check_setup.py --paper-evaluation
 ```
 

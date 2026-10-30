@@ -2,7 +2,7 @@
 
 Python 3.10+, standard library only. Input is a corpus root containing
 `<dataset>/<scenario>/` directories, such as the output of prepare_datasets.py.
-See ../DATASETS.md ("Transformed variants") for the recipes and their caveats.
+See ../docs/datasets.md ("Transformed variants") for the recipes and their caveats.
 """
 from __future__ import annotations
 

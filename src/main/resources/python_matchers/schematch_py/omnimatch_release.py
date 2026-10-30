@@ -675,6 +675,9 @@ def _read_tables(ctx, side, max_rows):
 def omnimatch(ctx: dict, options: dict) -> np.ndarray:
     """|rows| x |cols| similarity 1 - d/2 from the release's rgcn_margin OmniMatch trained on self-generated pairs."""
     options = dict(options or {})
+    arm = str(options.get("arm", "full"))
+    if arm not in ARMS:
+        raise ValueError(f"unknown OmniMatch arm {arm!r}; choose from {ARMS}")
     vecs = _vectors_from(options)
     import torch
     if not ctx["rows"] or not ctx["cols"]:
@@ -744,9 +747,6 @@ def omnimatch(ctx: dict, options: dict) -> np.ndarray:
     te_edges = topk_edges(te_pairs, te_feats, k)
     te_graph = _graph(*te_edges)
 
-    arm = str(options.get("arm", "full"))
-    if arm not in ARMS:
-        raise ValueError(f"unknown OmniMatch arm {arm!r}; choose from {ARMS}")
     if arm == "random_forest":
         return _random_forest(tr_pairs, tr_feats, join_by_pair, te_feats, ns, len(cols_), seed)
 

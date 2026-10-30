@@ -14,7 +14,7 @@ See [Python installation](python-matchers.md) for dependencies and
 Run from the repository root in your selected Python environment:
 
 ```shell
-python -m pip install -r requirements/python.txt
+python -m pip install -r requirements.txt
 python src/main/resources/python_matchers/study_server.py --port 5102
 ```
 
@@ -54,9 +54,9 @@ For `SERVER` compositions, recipes `val`, `iv`, `iv+0.1val` and `c3` refer to
 these are not bundled. `RAW_FIRST_LINE` needs no archived matrix files.
 
 `PythonAliteMatcher`, `PythonRactMatcher`, `PythonOmniMatchMatcher`,
-`PythonOmniMatchReleaseMatcher` and `PdedMatcher` can compute scores from scenario
+`PythonOmniMatchReleaseMatcher`, `PythonRemaMatcher` and `PdedMatcher` can compute scores from scenario
 tables without a base. They default to `SERVER` and still need their declared
-external resources.
+external resources. REMA accepts one source table and one target table.
 
 ## Refinement methods
 

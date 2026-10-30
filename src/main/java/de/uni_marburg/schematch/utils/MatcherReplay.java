@@ -29,7 +29,7 @@ import java.util.Map;
  * java -cp target/classes;&lt;deps&gt; de.uni_marburg.schematch.utils.MatcherReplay &lt;scenarioPath&gt; &lt;cases.json&gt; &lt;outDir&gt;
  * </pre>
  *
- * cases.json: a list of {"seed", "name", "package", "params"} (the shape of tools/matcher_seeds.json). For each case the
+ * cases.json: a list of {"seed", "name", "package", "params"} (the shape of tools/tests/fixtures/matcher-configurations.json). For each case the
  * file &lt;outDir&gt;/&lt;seed&gt;.tsv holds the source labels, the target labels (tab-separated, "table.column") and one matrix
  * row per line. Matchers that are not table-pair matchers, or need a tokenizer, are reported as skipped in
  * &lt;outDir&gt;/status.tsv, as are failures (with the exception message).

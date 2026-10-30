@@ -1,3 +1,0 @@
-# Install in the seed server environment for COMA, Cupid and Valentine adapters.
--r python.txt
-valentine==1.0.0

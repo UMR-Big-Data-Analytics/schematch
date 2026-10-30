@@ -66,6 +66,5 @@ dependency-reduced-pom.xml
 hs_err_pid*
 replay_pid*
 
-# Git
-.github/workflows/checks.yml
-
+# Locally generated evaluation reports.
+/reports/

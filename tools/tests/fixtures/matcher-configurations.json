@@ -1,5 +1,5 @@
 {
-  "study_seed_count": 92,
+  "description": "Parameter variants used to check matcher configuration loading without running optional backends",
   "parameter_cases": [
     {
       "seed": "bert_base",
@@ -939,43 +939,6 @@
       "params": {
         "measure": "WUP"
       }
-    }
-  ],
-  "file_seeds": [
-    {
-      "seed": "learned_lofo",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/learned_lofo/{regime}"
-    },
-    {
-      "seed": "prisma",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/prisma/{regime}"
-    },
-    {
-      "seed": "rema",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/rema/{regime}"
-    },
-    {
-      "seed": "rema_shuffled",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/rema_shuffled/{regime}"
-    },
-    {
-      "seed": "semstruct",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/semstruct/{regime}"
-    },
-    {
-      "seed": "semstruct_lm_only",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/semstruct_lm_only/{regime}"
-    },
-    {
-      "seed": "sima_tpcdi",
-      "status": "Existing study FILE seed; no live named matcher backend",
-      "path_pattern": "seed_in/sima_tpcdi/{regime}"
     }
   ]
 }

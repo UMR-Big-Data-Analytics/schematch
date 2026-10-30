@@ -256,5 +256,23 @@
       "read_columns"
     ],
     "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "rema": {
+    "source": "harness/smx/rema.py",
+    "source_sha256": "337c6b323a3717202b820fdfa6cd9885db30354f15399ce3b3940b899b608516",
+    "functions": [
+      "is_null",
+      "build_arc_graph",
+      "walk_starts",
+      "_walk_block",
+      "walk_chunks",
+      "WalkCorpus",
+      "stable_hash",
+      "train_embeddings",
+      "column_vectors",
+      "cosine_scores",
+      "rema_arc"
+    ],
+    "packaging": "Only required computational functions and constants; table reading (harness/valentine_sweep.py strict_columns, without the manifest checks) and the study-server entry point added."
   }
 }

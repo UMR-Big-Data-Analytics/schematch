@@ -1,7 +1,7 @@
 """Positional audits and table-sharing bootstrap units on synthetic inputs.
 
 Parity with the original research scripts (382 Valentine scenarios, 200 GOBY
-pairs) is recorded in EVALUATION_AND_DATASETS.md.
+pairs) is recorded in docs/evaluation.md.
 """
 from __future__ import annotations
 

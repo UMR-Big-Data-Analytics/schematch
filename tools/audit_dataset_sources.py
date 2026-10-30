@@ -60,9 +60,8 @@ def inventory(sources):
         lines.append(f"| `{row['source']}` | {title} | {row['support']} | `{entry['adapter']}` | {note} |")
     lines += ["", "## Validation coverage", "",
               "Preparation emits normal CSV/truth inputs and relative-path dataset configuration; it does not mine dependency profiles.",
-              "The [preparation validation record](../../reports/dataset_preparation_validation.json) covers 700 converted/generated scenarios.",
-              "The separate [historical compatibility audit](dataset-compatibility.md) covers 111 installed corpora, 384 dataset directories and 9,931 scenarios (9,927 evaluable, four inference-only).",
-              "Those include transformed, repeated and self-matching variants; they are not 111 public releases or a new download verification.",
+              "Run `python tools/audit_datasets.py --dataset <dataset-directory>` to validate a prepared dataset with the Java parsers.",
+              "The regression suite checks preparation on generated inputs; it does not download the catalog or certify the availability of every publisher's files.",
               "Repeating a published experiment additionally requires its source snapshots, selections, generation manifests, annotations and dependency profiles. The acquisition catalog alone does not define an experiment."]
     return "\n".join(lines) + "\n", counts
 

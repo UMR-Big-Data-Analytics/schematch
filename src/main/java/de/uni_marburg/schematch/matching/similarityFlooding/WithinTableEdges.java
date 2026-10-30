@@ -197,7 +197,7 @@ final class WithinTableEdges {
         return edges;
     }
 
-    /** Sorted-PMF L1 distances between the columns of a table, summed as numpy does (pairwise). */
+    /** Sorted-PMF L1 distances between the columns of a table, summed as numpy sums (numpySum). */
     static double[][] sortedPmfDistances(Table table) {
         List<Column> columns = table.getColumns();
         int n = columns.size();
@@ -217,7 +217,7 @@ final class WithinTableEdges {
         Arrays.sort(v);
         for (int a = 0, b = v.length - 1; a < b; a++, b--) { double t = v[a]; v[a] = v[b]; v[b] = t; }
         if (v.length == 0) return v;
-        double total = pairwiseSum(v, 0, v.length);
+        double total = numpySum(v);
         for (int i = 0; i < v.length; i++) v[i] = v[i] / total;
         return v;
     }
@@ -227,8 +227,22 @@ final class WithinTableEdges {
         int n = Math.max(a.length, b.length);
         double[] diff = new double[n];
         for (int i = 0; i < n; i++) diff[i] = Math.abs((i < a.length ? a[i] : 0.0) - (i < b.length ? b[i] : 0.0));
-        return pairwiseSum(diff, 0, n);
+        return numpySum(diff);
     }
+
+    /**
+     * ndarray.sum() of a contiguous float64 vector: numpy reduces it in buffer-sized chunks of 8192 elements, each
+     * summed pairwise, and adds the chunk sums in order. The edge choice between near-tied columns depends on it.
+     */
+    static double numpySum(double[] a) {
+        double total = 0.0;
+        for (int start = 0; start < a.length; start += NUMPY_BUFFER) {
+            total += pairwiseSum(a, start, Math.min(NUMPY_BUFFER, a.length - start));
+        }
+        return total;
+    }
+
+    private static final int NUMPY_BUFFER = 8192;
 
     /** numpy's pairwise summation (8 accumulators up to blocks of 128, halving above). */
     static double pairwiseSum(double[] a, int offset, int n) {
