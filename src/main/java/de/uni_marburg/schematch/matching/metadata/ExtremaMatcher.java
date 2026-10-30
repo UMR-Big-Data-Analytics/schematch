@@ -118,14 +118,15 @@ public class ExtremaMatcher extends TablePairMatcher {
             if (t < targetMin) targetMin = t;
         }
 
+        if (sourceMin > sourceMax || targetMin > targetMax) return 0;  // a side without parsable values
         return calculateMatchPercentage(sourceMax, targetMax, sourceMin, targetMin);
     }
 
     private float floatExtrema(Column sourceRaw, Column targetRaw) {
         float sourceMin = Float.MAX_VALUE;
-        float sourceMax = Float.MIN_VALUE;
+        float sourceMax = -Float.MAX_VALUE;
         float targetMin = Float.MAX_VALUE;
-        float targetMax = Float.MIN_VALUE;
+        float targetMax = -Float.MAX_VALUE;
 
         List<Float> source = Datatype.castToFloat(sourceRaw);
         List<Float> target = Datatype.castToFloat(targetRaw);
@@ -146,6 +147,7 @@ public class ExtremaMatcher extends TablePairMatcher {
             if (t < targetMin) targetMin = t;
         }
 
+        if (sourceMin > sourceMax || targetMin > targetMax) return 0;  // a side without parsable values
         return calculateMatchPercentage(sourceMax, targetMax, sourceMin, targetMin);
     }
 
@@ -170,18 +172,19 @@ public class ExtremaMatcher extends TablePairMatcher {
             if (t == null) {
                 continue;
             }
-            if (t.after(targetMax)) sourceMax = t;
-            if (t.before(targetMin)) sourceMin = t;
+            if (t.after(targetMax)) targetMax = t;
+            if (t.before(targetMin)) targetMin = t;
         }
 
+        if (sourceMin.after(sourceMax) || targetMin.after(targetMax)) return 0;  // a side without parsable dates
         return calculateMatchPercentage(sourceMax, targetMax, sourceMin, targetMin);
     }
 
     private float geoExtrema(Column sourceRaw, Column targetRaw) {
         float sourceMin = Float.MAX_VALUE;
-        float sourceMax = Float.MIN_VALUE;
+        float sourceMax = -Float.MAX_VALUE;
         float targetMin = Float.MAX_VALUE;
-        float targetMax = Float.MIN_VALUE;
+        float targetMax = -Float.MAX_VALUE;
 
         GeoLocation reference = new GeoLocation(0.0d, 0.0d);
 
@@ -198,6 +201,7 @@ public class ExtremaMatcher extends TablePairMatcher {
             if (distance < targetMin) targetMin = distance;
         }
 
+        if (sourceMin > sourceMax || targetMin > targetMax) return 0;  // a side without values
         return calculateMatchPercentage(sourceMax, targetMax, sourceMin, targetMin);
     }
 
@@ -219,6 +223,7 @@ public class ExtremaMatcher extends TablePairMatcher {
             if (length < targetMin) targetMin = length;
         }
 
+        if (sourceMin > sourceMax || targetMin > targetMax) return 0;  // a side without values
         return calculateMatchPercentage(sourceMax, targetMax, sourceMin, targetMin);
     }
 
@@ -253,8 +258,8 @@ public class ExtremaMatcher extends TablePairMatcher {
     private float calculateMatchPercentage(Date sourceMax, Date targetMax, Date sourceMin, Date targetMin) {
         long max = sourceMax.after(targetMax) ? sourceMax.getTime() : targetMax.getTime();
         long min = sourceMin.before(targetMin) ? sourceMin.getTime() : targetMin.getTime();
-        long maxDif = sourceMax.getTime() - targetMax.getTime();
-        long minDif = sourceMin.getTime() - targetMin.getTime();
+        long maxDif = Math.abs(sourceMax.getTime() - targetMax.getTime());
+        long minDif = Math.abs(sourceMin.getTime() - targetMin.getTime());
         long dif = maxDif + minDif;
         long full = max - min + 1;
         long common = full - dif;

@@ -70,7 +70,7 @@ public class MatchTask {
                 this.performances.get(metric).put(matchStep, new HashMap<>());
             }
             matchStep.run(this);
-            if (matchStep instanceof TablePairGenerationStep && ConfigUtils.anyEvaluate()) {
+            if (matchStep instanceof TablePairGenerationStep && (ConfigUtils.anyEvaluate() || Configuration.getInstance().isPaperEvaluation())) {
                 this.readGroundTruth();
                 this.evaluator = new Evaluator(this.metrics, this.scenario, this.groundTruthMatrix);
             }
@@ -91,27 +91,13 @@ public class MatchTask {
      * as their ground truth matrix
      */
     public void readGroundTruth() {
-        log.debug("Reading ground truth for scenario: " + this.scenario.getPath());
-        String basePath = scenario.getPath() + File.separator + Configuration.getInstance().getDefaultGroundTruthDir();
-
-        this.groundTruthMatrix = new int[this.numSourceColumns][this.numTargetColumns];
-
-        for (TablePair tablePair : this.tablePairs) {
-            String pathToTablePairGT = basePath + File.separator + tablePair.toString() + ".csv";
-            int[][] gtMatrix = InputReader.readGroundTruthFile(pathToTablePairGT);
-            if (gtMatrix == null) {
-                gtMatrix = tablePair.getEmptyGTMatrix();
-            }
-            else if (gtMatrix.length != tablePair.getSourceTable().getNumColumns()) {
-                throw new IllegalStateException("Number of rows in ground truth does not match number of columns in source table: " + pathToTablePairGT);
-            }
-            else if (gtMatrix[0].length != tablePair.getTargetTable().getNumColumns()) {
-                throw new IllegalStateException("Number of columns in ground truth does not match number of columns in target table: " + pathToTablePairGT);
-            }
-
-            int sourceTableOffset = tablePair.getSourceTable().getOffset();
-            int targetTableOffset = tablePair.getTargetTable().getOffset();
-            ArrayUtils.insertSubmatrixInMatrix(gtMatrix, this.groundTruthMatrix, sourceTableOffset, targetTableOffset);
+        this.groundTruthMatrix = GroundTruthReader.read(this.scenario);
+        for (TablePair pair : this.tablePairs) {
+            int[][] block = new int[pair.getSourceTable().getNumColumns()][pair.getTargetTable().getNumColumns()];
+            for (int i = 0; i < block.length; i++)
+                for (int j = 0; j < block[i].length; j++)
+                    block[i][j] = groundTruthMatrix[pair.getSourceTable().getOffset()+i][pair.getTargetTable().getOffset()+j];
+            pair.setGroundTruth(block);
         }
     }
 
@@ -137,6 +123,16 @@ public class MatchTask {
             }
         }
         return this.getSimMatrix(previousMatchStep, matcher);
+    }
+
+    public float[][] getFirstLineSimMatrix(Matcher matcher) {
+        for (MatchStep matchStep : this.matchSteps) {
+            if (matchStep instanceof MatchingStep matchingStep
+                    && matchingStep.getLine() == 1) {
+                return this.getSimMatrix(matchStep, matcher);
+            }
+        }
+        throw new IllegalStateException("No first-line matching step found");
     }
 
     public List<Matcher> getFirstLineMatchers() {

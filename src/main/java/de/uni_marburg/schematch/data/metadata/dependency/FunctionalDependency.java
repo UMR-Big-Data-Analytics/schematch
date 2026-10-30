@@ -2,12 +2,24 @@ package de.uni_marburg.schematch.data.metadata.dependency;
 
 import de.uni_marburg.schematch.data.Column;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.util.*;
 
 @Data
 public class FunctionalDependency implements Dependency {
     Collection<Column> determinant;
     Column dependant;
+
+    // gpdep depends only on the column values, which do not change once the
+    // database is read, but calculateNGPDEPScore recomputes the score of every
+    // FD sharing its dependent in order to normalise. Without memoisation that
+    // makes scoring quadratic in the number of FDs per dependent.
+    // Excluded from equals/hashCode: FDs live in hash sets, and a derived
+    // score must not affect their identity.
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Double gpdepScoreCache;
 
     //{left1, left2,...} -> {right}
     public FunctionalDependency(Collection<Column> left, Column right) {
@@ -73,7 +85,22 @@ public class FunctionalDependency implements Dependency {
         return probabilityMapGivenX;
     }
 
+    /**
+     * Which excess measure {@link #computeGPDEPScore()} returns. Read once, so
+     * a run cannot change measure halfway through and leave the cache holding a
+     * mixture. See SF_FD_MEASURE.md.
+     */
+    private static final boolean MU_PLUS_MEASURE =
+            "MU_PLUS".equalsIgnoreCase(System.getProperty("smx.sf.fdMeasure", "GPDEP"));
+
     public double calculateGPDEPScore() {
+        if (this.gpdepScoreCache == null) {
+            this.gpdepScoreCache = computeGPDEPScore();
+        }
+        return this.gpdepScoreCache;
+    }
+
+    private double computeGPDEPScore() {
 
         int rowCount = this.dependant.getValues().size();
 
@@ -92,9 +119,16 @@ public class FunctionalDependency implements Dependency {
             double pdepAGivenX = 0;
             Map<String, Double> probabilitiesForAGivenXMap = probabilitiesForAGivenX.get(x);
 
-            for(String a : probabilitiesForA.keySet()) {
-                double probabilityForAGivenX = probabilitiesForAGivenXMap.getOrDefault(a, 0.0);
-                pdepAGivenX = pdepAGivenX + probabilityForAGivenX * probabilityForAGivenX;
+            // Sum P(a|x)^2 over the values of A that actually occur with x.
+            // Iterating every distinct value of A instead and defaulting the
+            // rest to zero adds nothing to the sum but makes this loop
+            // O(|distinct X| * |distinct A|); on high-cardinality columns that
+            // is quadratic in the number of rows. Iterating the co-occurring
+            // values only is mathematically identical and linear overall.
+            if (probabilitiesForAGivenXMap != null) {
+                for (double probabilityForAGivenX : probabilitiesForAGivenXMap.values()) {
+                    pdepAGivenX = pdepAGivenX + probabilityForAGivenX * probabilityForAGivenX;
+                }
             }
 
             pdepXA = pdepXA + probabilityForX * pdepAGivenX;
@@ -105,6 +139,25 @@ public class FunctionalDependency implements Dependency {
                 .sum();
 
         double epdepXA = selfDependencyScoreA + ((probabilitiesForX.keySet().size() - 1.0) / (rowCount - 1.0)) * (1 - selfDependencyScoreA);
+
+        // gpdep is the raw excess of pdep over its expectation under
+        // independence. mu+ divides that excess by the headroom the expectation
+        // leaves, (1 - epdep), which is the correction Parciak et al. (VLDB J
+        // 2025) recommend after comparing AFD measures by ranking quality:
+        // "our recommendation for linear AFD discovery is therefore the
+        // little-known measure mu+".
+        //
+        // Selected by -Dsmx.sf.fdMeasure=MU_PLUS. Absent the property the value
+        // is the unchanged gpdep, so every prior run is reproduced exactly.
+        // Matches this project's own Python definition in
+        // afd_measure_mechanism.py: mu_plus = max((pdep - epdep)/(1 - epdep), 0).
+        if (MU_PLUS_MEASURE) {
+            double headroom = 1.0 - epdepXA;
+            // epdep at or above 1 means independence already explains
+            // everything; there is no excess to normalise and the dependency
+            // carries no information.
+            return headroom <= 0.0 ? 0.0 : (pdepXA - epdepXA) / headroom;
+        }
 
         return pdepXA - epdepXA;
     }

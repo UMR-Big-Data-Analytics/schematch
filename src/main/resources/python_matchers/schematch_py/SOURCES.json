@@ -1,0 +1,278 @@
+{
+  "assignment": {
+    "source": "harness/graduated_assignment.py",
+    "source_sha256": "e7ba44fcc6b55ae13faae40977b426fac01ee3fa414493e7725ea1f283c50572",
+    "functions": [
+      "sinkhorn"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "kang_naughton": {
+    "source": "harness/kang_naughton.py",
+    "source_sha256": "dcb7a5331220fbb78274757d79aab31b2d51a9448bceb709bec219a2bb9fc4e1",
+    "functions": [
+      "codes",
+      "entropy",
+      "mi_matrix",
+      "kn_profile_scores",
+      "kn_graph_scores"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "soft_overlap": {
+    "source": "harness/smx/soft_overlap.py",
+    "source_sha256": "458778dfb0311b49d3a3cdb5fb306d6ac6840643e4e3698b29ce5df7a5de325d",
+    "functions": [
+      "normalise",
+      "sample_values",
+      "exact_matrix",
+      "features",
+      "vectorise",
+      "fuzzy_matrix",
+      "value_matrices"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "role_features": {
+    "source": "harness/encrypted_feature_ablation.py",
+    "source_sha256": "fbb1b64baa9570591c73fb7c3a2a9cb1cc3c6432677d894aa094313a6c111786",
+    "functions": [
+      "binomial_significance",
+      "within_ind_evidence",
+      "within_ind_role_profile",
+      "vector_similarity",
+      "profile_quantiles",
+      "quantile_scores",
+      "read_table",
+      "scalar_similarity",
+      "pmf",
+      "pmf_scores",
+      "shared_hmac_sets",
+      "psi_containment_scores",
+      "shared_hmac_genuine_scores",
+      "bottom_k_sketches",
+      "bottom_k_containment_scores",
+      "local_name",
+      "read_uccs",
+      "unary_ucc_flags",
+      "fuse",
+      "scale_aligned_fuse",
+      "non_null_plain_columns"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "relational_roles": {
+    "source": "harness/smx/relational_roles.py",
+    "source_sha256": "e7942955dd68d1aee4126849fc4e2ccaadab509e1e7bccdb77b41ca53201bfd4",
+    "functions": [
+      "aligned_values",
+      "_entropy",
+      "_codes",
+      "uncertainty_relations",
+      "relation_matrices",
+      "role_scores"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "valentine_dense": {
+    "source": "harness/valentine_matchers_corpus.py",
+    "source_sha256": "a40bdc4abd51aa242329c7e77085a5894d84cff83452f678d0b52c7471d59d6b",
+    "functions": [
+      "run_coma",
+      "run_cupid"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "features": {
+    "source": "sf-matcher-study/layer3b/x102_siblings.py",
+    "source_sha256": "c099c0596a463c1f78affdf4c674de263a498dd045ddfd44b201fa6002e65983",
+    "functions": [
+      "tokens",
+      "num",
+      "mutual_top1",
+      "gpdep"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "multitable": {
+    "source": "sf-matcher-study/layer3b/x105_multitable.py",
+    "source_sha256": "91b548a037fe1a32d3b2738b3795fede996701905c8fa05ae2cd9901d2b6704b",
+    "functions": [
+      "lab",
+      "table_of",
+      "profiles",
+      "read_all",
+      "entities",
+      "unit_graph",
+      "unit_term",
+      "fk_refs",
+      "m3_term",
+      "fan",
+      "pair_features",
+      "m4_term",
+      "qtokens",
+      "q_term",
+      "mask",
+      "add"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "preservation": {
+    "source": "sf-matcher-study/layer3b/score_x107.py",
+    "source_sha256": "c56fa7749dfbdd78cbaa71652a1c803cc6b2455c8436900ed64e97f5af9209f4",
+    "functions": [
+      "preserve"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "entities": {
+    "source": "sf-matcher-study/layer3b/x109_entity.py",
+    "source_sha256": "721c4690f1001da577039821502533772fb077e7d3923f73edcc5471c81056b7",
+    "functions": [
+      "side_graph",
+      "ent_tokens",
+      "align",
+      "output"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "dependency": {
+    "source": "sf-matcher-study/layer3b/score_xtest.py",
+    "source_sha256": "befc12a10d13869b5be26343c5c4d6a2dae0ba1d5bbfb95dae3e06d567cec0bf",
+    "functions": [
+      "x105_dep"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "matrices": {
+    "source": "harness/smx/adapters.py",
+    "source_sha256": "8c4ce38f8c3f6b47711229a0dcc4d3f834063d995384022935332167b82bb6b1",
+    "functions": [
+      "_parse_numeric",
+      "_looks_numeric",
+      "read_matrix"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "composite": {
+    "source": "sf-matcher-study/explore_composite.py",
+    "source_sha256": "df4156bd71ea0d86b67a0e130c57b1742def5630f4873fad4e6b396bbcb34ed6",
+    "functions": [
+      "unit",
+      "load"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "anchors": {
+    "source": "harness/anchors.py",
+    "source_sha256": "68acd8df5f2eae6fe241a066ec1793c931289fff39d269179e813aabb35c2f5d",
+    "functions": [
+      "column_values",
+      "anchor_score"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "anchor_generalization": {
+    "source": "harness/anchor_generalization.py",
+    "source_sha256": "bc9796a6d15f53a28813acb96ad018d6f801cb4f39b3532bfd8a7426bb7a801a",
+    "functions": [
+      "bare",
+      "anchor_matrix"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "afd_measures": {
+    "source": "harness/smx/afd_measures.py",
+    "source_sha256": "145baafa50d82b97a4e50ae8607b6a6f1d5b1989067f8ed279cbca29cf49f6aa",
+    "functions": [
+      "_log_factorial",
+      "expected_mutual_information",
+      "rfi_cells",
+      "_positive_ratio",
+      "afd_matrices"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "dependence_measures": {
+    "source": "harness/smx/dependence_corruption.py",
+    "source_sha256": "a6eae8e75391f5404af10fba1f2681e8365527511c664476e246076347322127",
+    "functions": [
+      "dependence_matrices"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "role_tables": {
+    "source": "harness/relational_role_ablation.py",
+    "source_sha256": "bcf1c8b2a326611e8268986b793dfe2502e1aa7ad51f044933b4ed1df88f6303",
+    "functions": [
+      "strict_table"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "order_constraints": {
+    "source": "harness/od_role.py",
+    "source_sha256": "a21efa0a4423e1686ceca109c82ec6c20c7ba682460bfb5951d804cdcad5cb12",
+    "functions": [
+      "parse_ods",
+      "parse_dcs",
+      "parse_lima_dcs",
+      "dc_profile",
+      "od_profile",
+      "cosine_similarity",
+      "scale_align"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "label_lev": {
+    "source": "harness/regime_tables.py",
+    "source_sha256": "11d91056efd4d83f342ec45c3a8e688ecfd561fccaab75959e38735f521ca471",
+    "functions": [
+      "levenshtein",
+      "label_matrix"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "order_relations": {
+    "source": "harness/order_relation.py",
+    "source_sha256": "e4012912f11cb0b1acce67e86de983b2729cbf818347c03e0ceeb0615588a95c",
+    "functions": [
+      "to_ordered",
+      "order_matrix"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "order_roles": {
+    "source": "harness/order_role.py",
+    "source_sha256": "0d39100ab03984cf516a00c9181a43ef46d247b127ca0376f20ecdb1a5912dcf",
+    "functions": [
+      "role_profile"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "class_columns": {
+    "source": "harness/class_comparison_conditioned.py",
+    "source_sha256": "f51a40025a89f2b13135c31862dafdbea5dd73c497023a347d7eb1bf9b176e61",
+    "functions": [
+      "read_columns"
+    ],
+    "packaging": "Only required computational functions and constants; imports resolve inside this package or installed dependencies."
+  },
+  "rema": {
+    "source": "harness/smx/rema.py",
+    "source_sha256": "337c6b323a3717202b820fdfa6cd9885db30354f15399ce3b3940b899b608516",
+    "functions": [
+      "is_null",
+      "build_arc_graph",
+      "walk_starts",
+      "_walk_block",
+      "walk_chunks",
+      "WalkCorpus",
+      "stable_hash",
+      "train_embeddings",
+      "column_vectors",
+      "cosine_scores",
+      "rema_arc"
+    ],
+    "packaging": "Only required computational functions and constants; table reading (harness/valentine_sweep.py strict_columns, without the manifest checks) and the study-server entry point added."
+  }
+}

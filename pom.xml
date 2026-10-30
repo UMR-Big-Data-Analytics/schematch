@@ -10,8 +10,10 @@
 
     <repositories>
         <repository>
-            <id>snapshots-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>bundled-profiling-snapshots</id>
+            <url>file://${project.basedir}/src/lib/maven</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled><updatePolicy>never</updatePolicy></snapshots>
         </repository>
     </repositories>
 
@@ -89,6 +91,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
             <version>1.10.0</version>
+        </dependency>
+        <!-- phonetic encoders (Soundex, Metaphone, NYSIIS, Cologne) for PhoneticMatcher -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

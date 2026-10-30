@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 @NoArgsConstructor
@@ -42,31 +43,46 @@ public abstract class Matcher {
             Method setter;
             Class<?> fieldType;
             try {
-                fieldType = this.getClass().getDeclaredField(key).getType();
+                fieldType = configurationField(key).getType();
             } catch (NoSuchFieldException e) {
                 getLogger().error("Configuration error: Could not find field " + key + " for " + this);
                 throw new RuntimeException(e);
             }
             try {
                 String setterName = "set" + key.substring(0, 1).toUpperCase() + key.substring(1);
-                setter = this.getClass().getDeclaredMethod(setterName, fieldType);
+                setter = this.getClass().getMethod(setterName, fieldType);
             } catch (NoSuchMethodException e) {
                 getLogger().error("Configuration error: Could not find setter for field " + key + " for " + this);
                 throw new RuntimeException(e);
             }
             try {
-                if (value instanceof Integer) {
-                    setter.invoke(this, value);
-                } else if (value instanceof Double) {
-                    setter.invoke(this, ((Double) value).floatValue());
-                } else {
-                    setter.invoke(this, fieldType.cast(value));
+                Object converted = value;
+                if (value instanceof Number number) {
+                    if (fieldType == Float.class || fieldType == float.class) converted = number.floatValue();
+                    else if (fieldType == Double.class || fieldType == double.class) converted = number.doubleValue();
+                    else if (fieldType == Integer.class || fieldType == int.class) converted = number.intValue();
+                    else if (fieldType == Long.class || fieldType == long.class) converted = number.longValue();
                 }
+                setter.invoke(this, converted);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 getLogger().error("Configuration error: Failed to invoke setter for field " + key + " for " + this);
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /** Named algorithm adapters inherit transport/configuration fields from their bridge. */
+    private Field configurationField(String name) throws NoSuchFieldException {
+        for (Class<?> type = getClass(); type != null && type != Object.class; type = type.getSuperclass()) {
+            try {
+                Field field = type.getDeclaredField(name);
+                if (Modifier.isStatic(field.getModifiers())) throw new NoSuchFieldException(name);
+                return field;
+            } catch (NoSuchFieldException ignored) {
+                // Continue through the hierarchy; the public setter is resolved separately.
+            }
+        }
+        throw new NoSuchFieldException(name);
     }
 
     @Override

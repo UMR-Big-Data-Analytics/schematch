@@ -12,6 +12,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +98,25 @@ public class Configuration {
 
     // FIXME: read dependencies on demand, atm this boolean gets set to true whenenver runSimMatrixBoosting is set to true
     private boolean readDependencies;
+    @lombok.Getter(lombok.AccessLevel.NONE)
+    @lombok.Setter(lombok.AccessLevel.NONE)
+    @lombok.ToString.Exclude
+    private boolean dependencyReadingExplicit;
+
+    public void setReadDependencies(boolean value) {
+        this.readDependencies = value;
+        this.dependencyReadingExplicit = true;
+    }
+
+    // Optional raw-score evaluation using the paper's standalone NumPy/SciPy functions.
+    private boolean paperEvaluation = false;
+    private String paperEvaluationPython = "python";
+    private String paperEvaluationScript = "tools/evaluate_paper.py";
+    private String paperEvaluationGroups = "";
+    private int paperEvaluationMinFamilySize = 1;
+    private int paperEvaluationBootstrap = 0;
+    private int paperEvaluationBootstrapSeed = 20261014;
+    private int paperEvaluationTimeoutSeconds = 3600;
 
     @Data
     @NoArgsConstructor
@@ -201,7 +221,8 @@ public class Configuration {
         }
         Configuration config = yaml.load(inputStream);
         // FIXME: read dependencies on demand
-        config.setReadDependencies(config.isRunSimMatrixBoostingOnFirstLineMatchers() || config.isRunSimMatrixBoostingOnSecondLineMatchers());
+        if (!config.dependencyReadingExplicit) config.setReadDependencies(config.isRunSimMatrixBoostingOnFirstLineMatchers()
+                || config.isRunSimMatrixBoostingOnSecondLineMatchers());
         log.debug("General configuration: " + config.toString());
 
         // load datasets configuration
@@ -214,11 +235,10 @@ public class Configuration {
         Iterable<Object> datasetConfigs = yaml.loadAll(inputStream);
 
         for (Object datasetConfig : datasetConfigs) {
+            if (datasetConfig == null) continue;
             DatasetConfiguration datasetConfiguration = (DatasetConfiguration) datasetConfig;
             // ensure absolute path in path field
-            if (!(datasetConfiguration.getPath().startsWith(File.separator))) {
-                datasetConfiguration.setPath(config.getDefaultDatasetBasePath() + File.separator + datasetConfiguration.getPath());
-            }
+            datasetConfiguration.setPath(resolveDatasetPath(config.getDefaultDatasetBasePath(), datasetConfiguration.getPath()).toString());
             config.datasetConfigurations.add(datasetConfiguration);
             log.debug(datasetConfiguration.toString());
         }
@@ -306,5 +326,10 @@ public class Configuration {
         }
 
         return config;
+    }
+
+    public static Path resolveDatasetPath(String base, String configuredPath) {
+        Path path = Path.of(configuredPath);
+        return (path.isAbsolute() ? path : Path.of(base).resolve(path)).toAbsolutePath().normalize();
     }
 }

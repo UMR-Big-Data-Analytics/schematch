@@ -31,6 +31,14 @@ public enum Datatype {
     final static SimpleDateFormat sdfDots = new SimpleDateFormat("dd.MM");
     final static SimpleDateFormat[] sdfs = {sdfDashes, sdfSlashes, sdfDots};
 
+    // Parse dates in UTC, not in the JVM default zone: otherwise every date-based score (ExtremaMatcher) depends on the
+    // machine's time zone; the study's stored seeds differ by exactly the CEST offset between local and cluster runs.
+    static {
+        for (SimpleDateFormat sdf : sdfs) {
+            sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        }
+    }
+
     /**
      * Determines the definitive data type from a list of scores
      *

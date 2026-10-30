@@ -1,0 +1,62 @@
+{
+  "lossless.py": {
+    "source": "harness/smx/datasets.py",
+    "source_sha256": "19fd1cd9556bf9aecfec8ae8876ba5a8f9908c8a486da0d0e013a1ed395070b9",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "external.py": {
+    "source": "sf-matcher-study/data/convert_external_raw.py",
+    "source_sha256": "2cce5e39e2c3e994fb057c93544eff5cb4e0c3be089ecfd37c88f345f73091f0",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "unified.py": {
+    "source": "sf-matcher-study/data/convert_external_raw_c.py",
+    "source_sha256": "27b090d58551d20f553d9a5031f3fb2dc8ff8a89019029ef7d72e6fcb385236a",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "xlsx_read.py": {
+    "source": "sf-matcher-study/data/xlsx_read.py",
+    "source_sha256": "9a885862c43bab44fc5f01f6400f1750e941d3ad09de49cef0651dacc0f8bb1c",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "mimic.py": {
+    "source": "sf-matcher-study/data/convert_mimic_omop.py",
+    "source_sha256": "78673327072ffc06639b37dacc544de46ccffcd5c618a8b27aee82305f0fadde",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "synthea.py": {
+    "source": "sf-matcher-study/data/convert_synthea.py",
+    "source_sha256": "06bf4cb1299f1433db936f8e437d82a9de62668e2c0b112bf34fb6a99bf4d033",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "controlled.py": {
+    "source": "harness/smx/controlled.py",
+    "source_sha256": "297debc0398d454cd5a175a966f4ac431623e1f5f12e84370242c66a8d0a6ee4",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "scale.py": {
+    "source": "sf-matcher-study/data/make_scale_corpus.py",
+    "source_sha256": "3f4a8e6a234f7052612114b6582cf48b0f5105a40259c098728d4c92c76e5bce",
+    "packaging": "Explicit input/output paths and relative imports; algorithm policies retained, resource handles closed. The lossless importer exposes explicit empty-truth support for GOBY; MIMIC rejects ragged CSV instead of padding/truncating."
+  },
+  "transforms.py": {
+    "source": "harness/make_md5_audited.py",
+    "source_sha256": "611dbafc493c63e05f78209208fc20592fa9117621559bdbad382c6d5d3f89c8",
+    "additional_sources": {
+      "harness/make_opaque.py": "38405f4199e1ab73bf3292e09c1debe1f1f18361cfff19cda67caaf621200550",
+      "sf-matcher-study/data/make_opaque_multitable.py": "f4a2672687d890566310397652c1268043c3d83dd67951d46213d3dde92a4684",
+      "sf-matcher-study/layer3b/x87_perm_prepare.py": "1315da8217b9e4e05e3d86239ea7d0315660cf082fafe3a58fbfdf089ad8ada6",
+      "sf-matcher-study/data/make_knobs.py": "1e974b6ae45d685fa5b336e3e76de2dc3aa1d9c7d9bc2c152d6eb3afbffc2c3e"
+    },
+    "packaging": "Per-scenario functions with explicit input/output paths; corpus roots, cohort files and worker pools of the originals removed. Byte-identical outputs on Valentine and multi-table scenarios, except the documented profile-status rewrite of opaque labels; the permutation of prepared scenarios generalises the raw-layout x87 recipe."
+  },
+  "indep.py": {
+    "source": "harness/independent_sampling.py",
+    "source_sha256": "ee2396c000e5815614376207d812cf727e47534860f48c2b8ad84439ffdc66c4",
+    "additional_sources": {
+      "harness/grain_confirm.py": "f86f3451d6638b2e26c6b60bcfca41a4a45fbbe4ee8a8ecd9cc160dc7ea4dcc8",
+      "sf-matcher-study/data/convert_indep.py": "c5af4d885e3a601997b76f4af0c021de88b403608dde6417bec32800f4fc05bd"
+    },
+    "packaging": "Construction only (database specs, sampling, FK closure, variants, labels, provenance truth, scenario layout); the driver's grain checks, opaque recoding and matcher scoring are omitted. Input roots are explicit; byte-identical to the 81-scenario study corpus."
+  }
+}

@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.jar binary
+*.npz binary
+src/lib/maven/** -text -whitespace
+src/lib/maven/SOURCES.json text eol=lf

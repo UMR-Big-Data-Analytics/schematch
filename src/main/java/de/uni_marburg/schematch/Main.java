@@ -2,6 +2,7 @@ package de.uni_marburg.schematch;
 
 import de.uni_marburg.schematch.boosting.*;
 import de.uni_marburg.schematch.evaluation.metric.Metric;
+import de.uni_marburg.schematch.evaluation.PaperEvaluationRecorder;
 import de.uni_marburg.schematch.evaluation.metric.MetricFactory;
 import de.uni_marburg.schematch.matchtask.matchstep.*;
 import de.uni_marburg.schematch.matchtask.tablepair.generators.NaiveTablePairsGenerator;
@@ -76,6 +77,7 @@ public class Main {
         }
 
         START_TIMESTAMP = new Date(); //Start time measurement before SimilarityFlooding Algorithm runs
+        PaperEvaluationRecorder.start(ResultsUtils.getBaseResultsPath());
         // loop over datasets
         for (Configuration.DatasetConfiguration datasetConfiguration : config.getDatasetConfigurations()) {
             Dataset dataset = new Dataset(datasetConfiguration);
@@ -109,7 +111,8 @@ public class Main {
             evalWriter.writeOverallPerformance(config.getDatasetConfigurations().size());
         }
 
-        Date END_TIMESTAMP = new Date(); //End time measurement after last SelectThreshold
+        PaperEvaluationRecorder.finish();
+        Date END_TIMESTAMP = new Date(); //End time measurement after evaluation
         log.info("See results directory for more detailed performance and similarity matrices results.");
 
         long durationInMillis = END_TIMESTAMP.getTime() - START_TIMESTAMP.getTime();

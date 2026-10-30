@@ -1,6 +1,7 @@
 package de.uni_marburg.schematch.matchtask.matchstep;
 
 import de.uni_marburg.schematch.evaluation.metric.Metric;
+import de.uni_marburg.schematch.evaluation.PaperEvaluationRecorder;
 import de.uni_marburg.schematch.evaluation.performance.Performance;
 import de.uni_marburg.schematch.matching.Matcher;
 import de.uni_marburg.schematch.matchtask.MatchTask;
@@ -41,16 +42,19 @@ public class MatchingStep extends MatchStep {
         log.debug("Running " + this.line + ". line matching on scenario: " + matchTask.getScenario().getPath());
 
         for (Matcher matcher : this.matchers) {
+            long started = System.nanoTime();
             float[][] simMatrix = null;
             if ((line == 1 && Configuration.getInstance().isReadCacheFirstLineMatchers()) ||
                     line == 2 && Configuration.getInstance().isReadCacheSecondLineMatchers()) {
                 simMatrix = InputReader.readCache(matchTask,this, matcher);
             }
+            boolean fromCache = simMatrix != null;
             if (simMatrix == null) {
                 log.debug("Processing " + this.line + ". line matcher " + matcher.toString());
                 simMatrix = matcher.match(matchTask, this);
             }
             matchTask.setSimMatrix(this, matcher, simMatrix);
+            PaperEvaluationRecorder.record(matchTask,this,matcher,(System.nanoTime()-started)/1e6,fromCache);
         }
     }
 

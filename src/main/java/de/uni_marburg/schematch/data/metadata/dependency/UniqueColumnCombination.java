@@ -24,6 +24,9 @@ public class UniqueColumnCombination implements Dependency {
     }
 
     public double cardinalityScore() { //range (0,1]: 1 is best because most keys have few attributes, 0 is worst
+        if (columnCombination.isEmpty()) {
+            return 0.0;
+        }
         return 1.0 / (double) columnCombination.size();
     }
 

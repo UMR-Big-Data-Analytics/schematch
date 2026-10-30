@@ -34,7 +34,7 @@ evaluateAttributes: True
 saveOutputPerTablePair: False
 # adds header and index with attribute names to output files
 # applies to all matching steps for which output saving is enabled (see below)
-saveOutputVerbose: False
+saveOutputVerbose: True
 
 # MatchSteps configuration
 # run: execute this match step
@@ -47,30 +47,31 @@ saveOutputVerbose: False
 saveOutputTablePairGeneration: False
 evaluateTablePairGeneration: False
 # Step 2: run first line matchers (i.e., matchers that use table data to match)
-saveOutputFirstLineMatchers: False
+saveOutputFirstLineMatchers: True
 evaluateFirstLineMatchers: False
 readCacheFirstLineMatchers: False
 writeCacheFirstLineMatchers: False
 # Step 3: run similarity matrix boosting on the output of first line matchers
-runSimMatrixBoostingOnFirstLineMatchers: True
+runSimMatrixBoostingOnFirstLineMatchers: False
 saveOutputSimMatrixBoostingOnFirstLineMatchers: False
-evaluateSimMatrixBoostingOnFirstLineMatchers: True # Should be true
+evaluateSimMatrixBoostingOnFirstLineMatchers: False
 readCacheSimMatrixBoostingOnFirstLineMatchers: False
 writeCacheSimMatrixBoostingOnFirstLineMatchers: False
 # Step 4: run second line matchers (ensemble matchers and other matchers using output of first line matchers)
-runSecondLineMatchers: True
-saveOutputSecondLineMatchers: False
+runSecondLineMatchers: False
+saveOutputSecondLineMatchers: True
 evaluateSecondLineMatchers: False
 readCacheSecondLineMatchers: False
 writeCacheSecondLineMatchers: False
 # Step 5: run similarity matrix boosting on the output of second line matchers
-runSimMatrixBoostingOnSecondLineMatchers: True
+runSimMatrixBoostingOnSecondLineMatchers: False
 saveOutputSimMatrixBoostingOnSecondLineMatchers: False
-evaluateSimMatrixBoostingOnSecondLineMatchers: True
+evaluateSimMatrixBoostingOnSecondLineMatchers: False
 readCacheSimMatrixBoostingOnSecondLineMatchers: False
 writeCacheSimMatrixBoostingOnSecondLineMatchers: False
 
 # FIXME: do not set this parameter in this file, it is set to true whenever runSimMatrixBoosting is set to true
 # FIXME: eventually, dependencies should be read on demand
 # flag indicating whether to read functional and inclusion dependencies and unique column combinations from metadata folder in scenarios
-# readDependencies: True
+readDependencies: False
+paperEvaluation: False

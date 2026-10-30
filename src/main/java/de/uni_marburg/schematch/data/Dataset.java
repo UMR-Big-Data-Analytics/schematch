@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
@@ -21,11 +23,20 @@ public class Dataset {
 
         File dir = new File(this.path);
 
-        for (File subdir : dir.listFiles()) {
-            if (subdir.isDirectory()) {
+        File[] children = dir.listFiles();
+        if (children == null) throw new IllegalArgumentException("Cannot read dataset directory: " + this.path);
+        Arrays.sort(children);
+        Configuration config = Configuration.getInstance();
+        for (File subdir : children) {
+            boolean source = subdir.isDirectory() && Files.isDirectory(subdir.toPath().resolve(config.getDefaultSourceDatabaseDir()));
+            boolean target = subdir.isDirectory() && Files.isDirectory(subdir.toPath().resolve(config.getDefaultTargetDatabaseDir()));
+            if (source != target) throw new IllegalArgumentException("Incomplete source/target scenario: " + subdir);
+            if (source && target) {
                 this.scenarioNames.add(subdir.getName());
             }
         }
+        if (scenarioNames.isEmpty()) throw new IllegalArgumentException("No source/target scenarios in dataset: " + this.path
+                + "; configure a dataset directory, not a corpus root or raw benchmark release");
     }
 
     public String getStats() {
