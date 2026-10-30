@@ -185,13 +185,13 @@
       "title": "Synthea to OMOP (OMAP truth)",
       "adapter": "synthea",
       "homepage": "https://github.com/JZCS2018/SMAT",
-      "acquisition": "Acquire omop_synthea_data.xlsx, Synthea CSV sample, and OHDSI Eunomia GiBleed_5.3. Layout and historical hashes are in DATASETS.md."
+      "acquisition": "Acquire omop_synthea_data.xlsx, Synthea CSV sample, and OHDSI Eunomia GiBleed_5.3. Layout and historical hashes are in docs/datasets.md."
     },
     "controlled": {
       "title": "Controlled MusicBrainz and Lahman (16 scenarios)",
       "adapter": "controlled",
       "homepage": "https://musicbrainz.org/doc/MusicBrainz_Database/Download",
-      "acquisition": "Supply --input with Musicbrainz/medium, release, release_group headerless TSV dumps and Lahman/Batting.csv, People.csv, Teams.csv; see DATASETS.md."
+      "acquisition": "Supply --input with Musicbrainz/medium, release, release_group headerless TSV dumps and Lahman/Batting.csv, People.csv, Teams.csv; see docs/datasets.md."
     },
     "scale": {
       "title": "Deterministic synthetic scaling corpus (93 scenarios)",
@@ -203,19 +203,19 @@
       "title": "Amalgam bibliographic schemas",
       "adapter": "manual",
       "homepage": "https://www.cs.toronto.edu/~miller/amalgam/",
-      "acquisition": "Obtain original instances and a separately versioned correspondence set. Published schema pages alone do not reproduce study C+L annotations."
+      "acquisition": "Obtain original instances and a separately versioned correspondence set. Published schema pages do not supply separately curated correspondence annotations."
     },
     "efes": {
       "title": "EFES bibliography/music integration scenarios",
       "adapter": "manual",
       "homepage": "https://hpi.de/naumann/projects/repeatability/data-integration/estimating-data-integration-and-cleaning-effort.html",
-      "acquisition": "Download Integration scenarios; retain published mappings. Match local schema/table names explicitly before converting. Study final_indep uses its own C+L truth."
+      "acquisition": "Download Integration scenarios; retain published mappings. Match local schema/table names explicitly before converting. Separately curated annotations must be supplied explicitly if those are the intended ground truth."
     },
     "musicbrainz": {
       "title": "MusicBrainz raw database dump",
       "adapter": "manual",
       "homepage": "https://musicbrainz.org/doc/MusicBrainz_Database/Download",
-      "acquisition": "Download a dated dump. Controlled adapter handles the three required tables; other paper variants need the recorded generation recipes."
+      "acquisition": "Download a dated dump. Controlled adapter handles the three required tables; other generated variants need explicit generation recipes."
     },
     "lahman": {
       "title": "Lahman baseball database",
@@ -227,13 +227,13 @@
       "title": "AdventureWorks sample database",
       "adapter": "manual",
       "homepage": "https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works",
-      "acquisition": "Acquire pinned release and export CSV with declared order/delimiter/null policy. Study uses a local CSV snapshot; newer releases are not byte-identical."
+      "acquisition": "Acquire pinned release and export CSV with declared order/delimiter/null policy. Pin the exported CSV snapshot; newer releases are not byte-identical."
     },
     "imdb": {
       "title": "IMDb non-commercial datasets",
       "adapter": "manual",
       "homepage": "https://datasets.imdbws.com/",
-      "acquisition": "Acquire a dated TSV snapshot under IMDb terms. Study uses basics, name, principals and other declared tables; latest snapshots are not the frozen paper input."
+      "acquisition": "Acquire a dated TSV snapshot under IMDb terms. Select basics, name, principals and any other declared tables explicitly; a moving latest snapshot is not a reproducible input."
     },
     "sakila": {
       "title": "MySQL Sakila sample database",

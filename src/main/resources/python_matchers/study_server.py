@@ -1,6 +1,6 @@
 """Scenario-level matcher server using implementations bundled with Schematch.
 Run: python src/main/resources/python_matchers/study_server.py --port 5102
-Dependencies: requirements-python.txt. No neighboring repositories are imported.
+Dependencies: requirements/python.txt. No neighboring repositories are imported.
 """
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from schematch_py import multitable as x105
 from schematch_py import entities as x109
 from schematch_py import holistic
 from schematch_py import omnimatch_release
+from schematch_py import rema
 from schematch_py.composite import load, unit
 
 IV = ("coma", "char3_soft", "cupid", "sbert_mpnet")
@@ -100,6 +101,10 @@ def m_omnimatch_release(ctx, options):
     return omnimatch_release.omnimatch(ctx, options)
 
 
+def m_rema(ctx, options):
+    return rema.rema(ctx, options)
+
+
 def m_pded(ctx, options):
     """PDED (graduated-assignment matching of the two FD graphs) through PDED's own runner, unchanged:
     de.cleaning.integration.PdedSchematchRunner on a temporary copy of this scenario, distribution weight options.weight
@@ -141,9 +146,9 @@ def m_pded(ctx, options):
 
 METHODS = {"base": m_base, "q": m_q, "dep": m_dep, "entity_alignment": m_entity_alignment,
            "alite": m_alite, "ract": m_ract, "omnimatch": m_omnimatch, "omnimatch_release": m_omnimatch_release,
-           "pded": m_pded}
+           "pded": m_pded, "rema": m_rema}
 # Standalone matchers: they read the scenario's tables themselves and need no base (a sent base is ignored).
-BASE_FREE = {"alite", "ract", "omnimatch", "omnimatch_release", "pded"}
+BASE_FREE = {"alite", "ract", "omnimatch", "omnimatch_release", "pded", "rema"}
 
 
 def compute(request: dict) -> np.ndarray:

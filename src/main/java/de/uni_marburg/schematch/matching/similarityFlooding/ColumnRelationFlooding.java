@@ -52,8 +52,17 @@ final class ColumnRelationFlooding {
                            String encoding, PropagationCoefficientPolicy policy,
                            FixpointFormula formula, String fdThreshold, String weighting,
                            String topK, String allowList, String nullMaskDir) {
-        List<Channel> left = build(source, encoding, fdThreshold, weighting, topK, allowList, nullMaskDir);
-        List<Channel> right = build(target, encoding, fdThreshold, weighting, topK, allowList, nullMaskDir);
+        return match(source, target, seed, encoding, policy, formula, fdThreshold, weighting, topK, allowList,
+                nullMaskDir, GraphOptions.defaults());
+    }
+
+    /** As above, with the dependency settings (thinning, rewiring, weighting constants) of one SF run. */
+    static float[][] match(Database source, Database target, float[][] seed,
+                           String encoding, PropagationCoefficientPolicy policy,
+                           FixpointFormula formula, String fdThreshold, String weighting,
+                           String topK, String allowList, String nullMaskDir, GraphOptions options) {
+        List<Channel> left = build(source, encoding, fdThreshold, weighting, topK, allowList, nullMaskDir, options);
+        List<Channel> right = build(target, encoding, fdThreshold, weighting, topK, allowList, nullMaskDir, options);
         double[][] initial = new double[seed.length][];
         for (int i = 0; i < seed.length; i++) {
             initial[i] = new double[seed[i].length];
@@ -70,13 +79,13 @@ final class ColumnRelationFlooding {
 
     private static List<Channel> build(Database db, String encoding, String fdThreshold,
                                        String weighting, String topK, String allowList,
-                                       String nullMaskDir) {
+                                       String nullMaskDir, GraphOptions options) {
         int width = db.getNumColumns();
         if ("COLUMN_ONLY".equals(encoding)) {
             // Extract precisely the projected FD evidence in QUICK. In
             // particular, do not silently turn this control into unary-only FDs.
             Graph<Node, LabelEdge> quick = new SchemaGraphBuilder("", "", fdThreshold,
-                    weighting, "QUICK", topK, allowList).transformIntoGraphRepresentationSchema(db);
+                    weighting, "QUICK", topK, allowList, options).transformIntoGraphRepresentationSchema(db);
             IdentityHashMap<Column, Integer> index = new IdentityHashMap<>();
             for (Table table : db.getTables()) {
                 for (int i = 0; i < table.getNumColumns(); i++) index.put(table.getColumn(i), table.getOffset() + i);
@@ -94,7 +103,7 @@ final class ColumnRelationFlooding {
 
         if (encoding.startsWith("RELATIONAL_FD_")) {
             Graph<Node, LabelEdge> quick = new SchemaGraphBuilder("", "", fdThreshold,
-                    weighting, "QUICK", topK, allowList).transformIntoGraphRepresentationSchema(db);
+                    weighting, "QUICK", topK, allowList, options).transformIntoGraphRepresentationSchema(db);
             IdentityHashMap<Column, Integer> index = new IdentityHashMap<>();
             for (Table table : db.getTables()) {
                 for (int i = 0; i < table.getNumColumns(); i++) {

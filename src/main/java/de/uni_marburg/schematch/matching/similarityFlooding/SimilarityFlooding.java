@@ -8,6 +8,7 @@ import de.uni_marburg.schematch.matchtask.MatchTask;
 import de.uni_marburg.schematch.matchtask.matchstep.MatchStep;
 import de.uni_marburg.schematch.matchtask.matchstep.MatchingStep;
 import de.uni_marburg.schematch.similarity.string.Levenshtein;
+import de.uni_marburg.schematch.utils.Configuration;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -295,8 +296,173 @@ public class SimilarityFlooding extends Matcher {
     private String initialMatrixDir = "";
     private String relationalNullMaskDir = "";
 
+    // Method and graph settings as matcher parameters. Each one left unset (null) falls back to the smx.sf.*
+    // system property of the same name, parsed as before: the static fields above for the method, GraphOptions for
+    // the graph. Unset parameters are not part of the result identity (toString), so configurations that do not use
+    // them keep their names and outputs. See Run.
+    private String seedAttachment;
+    private String literalSeed;
+    private String epsilon;
+    private String maxIterations;
+    private String normalise;
+    private String normaliseAlpha;
+    private String restartAlpha;
+    private String channelBudget;
+    private String nonBacktracking;
+    private String relax;
+    private String pairScope;
+    private String pairScopeParam;
+    /** X60: a second initial matrix on the column-ID pairs, &lt;idMatrixDir&gt;/&lt;dataset&gt;/&lt;scenario&gt;/seed.csv. */
+    private String idMatrixDir;
+    private String noDatatypeNodes;
+    private String tableMembership;
+    private String tableMembershipDraw;
+    private String tableRooted;
+    private String parallelEdges;
+    private String parallelEdgeRule;
+    private String collisionRule;
+    private String canonicalDependencyOrder;
+    private String extraEdgesDir;
+    /** Native class nodes: comma-separated SHAPE, SEMTYPE, SHAPE_SHUFFLED, SEMTYPE_SHUFFLED (ColumnClasses). */
+    private String classNodes;
+    /** Native within-table edges: NONE, KNN or RANDOM, and their measure, k, tie-break, seed and label. */
+    private String withinTableEdges;
+    private String withinTableMeasure;
+    private String withinTableK;
+    private String withinTableTieBreak;
+    private String withinTableSeed;
+    private String withinTableLabel;
+    private String constantWeight;
+    private String topK;
+    private String topKPercent;
+    private String topkHigh;
+    private String topkLow;
+    private String gateHigh;
+    private String gateLow;
+    private String gateIncrease;
+    private String gateDecrease;
+    private String uccTopK;
+    private String uccNoNotUnique;
+    private String uccUnweighted;
+    private String fdRetention;
+    private String fdRetentionSeed;
+    private String fdRewire;
+    private String fdRewireMode;
+    private String fdWTarget;
+
+    /**
+     * The method settings of one run: the matcher parameter where set, else the system property already held in
+     * the static field of the same meaning above. Built once per match() call, so one JVM can run several SF
+     * configurations side by side.
+     */
+    static final class Run {
+        final double epsilon;
+        final int maxIterations;
+        final String literalSeed;
+        final Normalise normalise;
+        final double normaliseAlpha;
+        final SeedAttachment seedAt;
+        final boolean restart;
+        final double restartAlpha;
+        final ChannelBudget budget;
+        final boolean nonBacktracking;
+        final PairScope pairScope;
+        final double pairScopeParam;
+        final String relaxRaw;
+        final double relax;
+        final String idMatrixDir;
+        /** X60: the second initial matrix keyed by column-name pairs, set by match() when idMatrixDir is. */
+        Map<NodePair, Double> idSeed;
+
+        Run(SimilarityFlooding m) {
+            epsilon = m.epsilon != null ? Double.parseDouble(m.epsilon.trim()) : PRECISION_OF_CONVERGENCE;
+            maxIterations = m.maxIterations != null ? Integer.parseInt(m.maxIterations.trim()) : MAX_ITERATIONS;
+            literalSeed = m.literalSeed != null ? m.literalSeed.trim().toUpperCase() : LITERAL_SEED;
+            normalise = m.normalise != null ? Normalise.valueOf(m.normalise.trim().toUpperCase()) : NORMALISE;
+            normaliseAlpha = m.normaliseAlpha != null ? Double.parseDouble(m.normaliseAlpha.trim()) : NORM_ALPHA;
+            seedAt = m.seedAttachment != null ? SeedAttachment.valueOf(m.seedAttachment.trim().toUpperCase()) : SEED_AT;
+            if (m.restartAlpha != null) {
+                restart = !m.restartAlpha.isBlank();
+                restartAlpha = restart ? Double.parseDouble(m.restartAlpha.trim()) : 0.0;
+            } else {
+                restart = RESTART;
+                restartAlpha = RESTART_ALPHA;
+            }
+            budget = m.channelBudget != null ? ChannelBudget.valueOf(m.channelBudget.trim().toUpperCase()) : BUDGET;
+            nonBacktracking = m.nonBacktracking != null ? Boolean.parseBoolean(m.nonBacktracking.trim()) : NON_BACKTRACKING;
+            pairScope = m.pairScope != null ? PairScope.valueOf(m.pairScope.trim().toUpperCase()) : PAIR_SCOPE;
+            pairScopeParam = m.pairScopeParam != null ? Double.parseDouble(m.pairScopeParam.trim()) : PAIR_SCOPE_PARAM;
+            relaxRaw = m.relax != null ? m.relax.trim() : System.getProperty("smx.sf.relax", "1.0");
+            relax = Double.parseDouble(relaxRaw);
+            idMatrixDir = m.idMatrixDir != null ? m.idMatrixDir : System.getProperty("smx.sf.idMatrixDir", "");
+            if (m.literalSeed != null && !List.of("NONE", "PREFIX_SUFFIX").contains(literalSeed)) {
+                throw new IllegalArgumentException("literalSeed must be NONE or PREFIX_SUFFIX, not " + m.literalSeed);
+            }
+            if (m.maxIterations != null && maxIterations < 0) {
+                throw new IllegalArgumentException("maxIterations must not be negative (k performs k + 1 updates)");
+            }
+            if (m.restartAlpha != null && restart && (restartAlpha < 0.0 || restartAlpha >= 1.0)) {
+                throw new IllegalArgumentException("restartAlpha must lie in [0,1); alpha >= 1 is not a contraction");
+            }
+            if (m.pairScope != null || m.pairScopeParam != null) {
+                checkPairScope(pairScope, pairScopeParam);
+            }
+        }
+
+        private static void checkPairScope(PairScope scope, double param) {
+            boolean integer = param >= 1.0 && param == Math.rint(param);
+            String problem = switch (scope) {
+                case QUANTILE -> param < 0.0 || param >= 1.0 ? "lie in [0,1)" : null;
+                case TOPK, ROWTOPK, COLTOPK, MUTUALTOPK -> integer ? null : "be a positive integer";
+                case GLOBALTOPK -> param <= 0.0 ? "be positive" : null;
+                case ROWREL -> param <= 0.0 || param > 1.0 ? "lie in (0,1]" : null;
+                case NONE -> null;
+            };
+            if (problem != null) {
+                throw new IllegalArgumentException("pairScopeParam must " + problem + " for " + scope);
+            }
+        }
+    }
+
+    /**
+     * Names of the optional parameters above. A nested class, because every field SimilarityFlooding itself declares
+     * is printed by toString (the result identity), and a new field there would rename existing results.
+     */
+    private static final class OptionalParameters {
+        static final List<String> METHOD = List.of("seedAttachment", "literalSeed", "epsilon", "maxIterations",
+                "normalise", "normaliseAlpha", "restartAlpha", "channelBudget", "nonBacktracking", "relax", "pairScope",
+                "pairScopeParam", "idMatrixDir");
+        static final List<String> GRAPH = List.of("noDatatypeNodes", "tableMembership", "tableMembershipDraw",
+                "tableRooted", "parallelEdges", "parallelEdgeRule", "collisionRule", "canonicalDependencyOrder",
+                "extraEdgesDir", "classNodes", "withinTableEdges", "withinTableMeasure", "withinTableK",
+                "withinTableTieBreak", "withinTableSeed", "withinTableLabel", "constantWeight", "topK", "topKPercent",
+                "topkHigh", "topkLow", "gateHigh", "gateLow", "gateIncrease", "gateDecrease", "uccTopK", "uccNoNotUnique",
+                "uccUnweighted", "fdRetention", "fdRetentionSeed", "fdRewire", "fdRewireMode", "fdWTarget");
+        static final Set<String> ALL = new HashSet<>();
+
+        static {
+            ALL.addAll(METHOD);
+            ALL.addAll(GRAPH);
+        }
+    }
+
+    /** The graph parameters that are set, by name (GraphOptions falls back to the properties for the others). */
+    private Map<String, String> graphParameters() {
+        Map<String, String> p = new HashMap<>();
+        for (String key : OptionalParameters.GRAPH) {
+            try {
+                Object value = SimilarityFlooding.class.getDeclaredField(key).get(this);
+                if (value != null) p.put(key, value.toString());
+            } catch (ReflectiveOperationException impossible) {
+                throw new IllegalStateException(impossible);
+            }
+        }
+        return p;
+    }
+
     private static Map<NodePair, Double> similarityFlooding
-            (Graph<NodePair, CoefficientEdge> propagationGraph, Map<NodePair, Double> initialMapping, FixpointFormula formula) {
+            (Graph<NodePair, CoefficientEdge> propagationGraph, Map<NodePair, Double> initialMapping, FixpointFormula formula,
+             Run o) {
 
         //Termination conditions
         boolean convergence = false;
@@ -322,7 +488,7 @@ public class SimilarityFlooding extends Matcher {
         boolean[] isScoredPair = new boolean[nodeCount];
         for (int i = 0; i < nodeCount; i++) {
             NodePair node = nodes.get(i);
-            sigma_0[i] = seedOf(node, initialMapping);
+            sigma_0[i] = seedOf(node, initialMapping, o);
             isDependencyPair[i] = node.getFirstNode().getNodeType().equals(NodeType.CONSTRAINT)
                     && node.getSecondNode().getNodeType().equals(NodeType.CONSTRAINT);
             isColumnPair[i] = node.getFirstNode().getNodeType().equals(NodeType.COLUMN)
@@ -561,15 +727,15 @@ public class SimilarityFlooding extends Matcher {
                     + " coeffSorted=" + coeffDigest.toString().hashCode());
         }
 
-        if (SfExport.ENABLED && !RESTART) {  // off by default (SfExport)
-            SfExport.graph(nodes, sigma_0, rowPtr, src, coeff, channelOf, channelNames, SEED_AT, LITERAL_SEED);
+        if (SfExport.ENABLED && !o.restart) {  // off by default (SfExport)
+            SfExport.graph(nodes, sigma_0, rowPtr, src, coeff, channelOf, channelNames, o.seedAt, o.literalSeed);
         }
 
         double[] sigma_i = sigma_0.clone();
         double[] sigma_i_plus_1 = new double[nodeCount];
 
-        if (RESTART) {
-            if (BUDGET == ChannelBudget.OFF) {
+        if (o.restart) {
+            if (o.budget == ChannelBudget.OFF) {
                 // Row-normalise the incoming coefficients so every receiver's
                 // incoming mass is at most one. Rows already at or below one are
                 // left alone: scaling them up would invent mass the graph does not
@@ -612,29 +778,29 @@ public class SimilarityFlooding extends Matcher {
                     boolean dependency = channelNames.get(c).startsWith("determines")
                             || channelNames.get(c).startsWith("contains")
                             || channelNames.get(c).startsWith("ucc");
-                    beta[c] = (BUDGET == ChannelBudget.NO_FD && dependency) ? 0.0 : share;
+                    beta[c] = (o.budget == ChannelBudget.NO_FD && dependency) ? 0.0 : share;
                 }
                 for (int k = 0; k < coeff.length; k++) {
                     coeff[k] *= beta[channelOf[k]];
                 }
-                log.info("Channel budget {} over {} channels: {}", BUDGET, channels, channelNames);
+                log.info("Channel budget {} over {} channels: {}", o.budget, channels, channelNames);
             }
 
-            if (NON_BACKTRACKING) {
+            if (o.nonBacktracking) {
                 return nonBacktracking(nodes, nodeCount, sigma_0, rowPtr, src, coeff,
-                                       initialMapping);
+                                       initialMapping, o);
             }
 
-            while (!convergence && iterationCount <= MAX_ITERATIONS) {
+            while (!convergence && iterationCount <= o.maxIterations) {
                 for (int node = 0; node < nodeCount; node++) {
                     double propagated = 0.0;
                     for (int k = rowPtr[node]; k < rowPtr[node + 1]; k++) {
                         propagated += coeff[k] * sigma_i[src[k]];
                     }
                     sigma_i_plus_1[node] =
-                            (1.0 - RESTART_ALPHA) * sigma_0[node] + RESTART_ALPHA * propagated;
+                            (1.0 - o.restartAlpha) * sigma_0[node] + o.restartAlpha * propagated;
                 }
-                convergence = hasConverged(sigma_i, sigma_i_plus_1, PRECISION_OF_CONVERGENCE);
+                convergence = hasConverged(sigma_i, sigma_i_plus_1, o.epsilon);
                 System.arraycopy(sigma_i_plus_1, 0, sigma_i, 0, nodeCount);
                 iterationCount++;
             }
@@ -677,7 +843,7 @@ public class SimilarityFlooding extends Matcher {
      * coordinates participate, and the rank-one term they induce -- is
      * untouched, which is what separates this from swapping normaliser.
      */
-        final double RELAX = Double.parseDouble(System.getProperty("smx.sf.relax", "1.0"));
+        final double RELAX = o.relax;
         double[] resid_pre = RELAX < 1.0 ? new double[nodeCount] : null;
         final boolean TRAJ = Boolean.getBoolean("smx.sf.printTrajectory");
         double[] sigma_prev = TRAJ ? sigma_i.clone() : null;
@@ -722,7 +888,7 @@ public class SimilarityFlooding extends Matcher {
             System.out.println("PENDANTS scored=" + count(isScoredPair) + " paired=" + paired);
         }
 
-        while (!convergence && iterationCount <= MAX_ITERATIONS) {
+        while (!convergence && iterationCount <= o.maxIterations) {
 
             // Double.MIN_VALUE is the smallest POSITIVE double, not the most
             // negative one, so this is only a safe starting point while every
@@ -735,7 +901,7 @@ public class SimilarityFlooding extends Matcher {
             // them; 0.0 is a safe floor while every sigma stays non-negative,
             // and a component that never exceeds it is left undivided below.
             double[] componentMax = null;
-            if (NORMALISE == Normalise.CWISE) {
+            if (o.normalise == Normalise.CWISE) {
                 componentMax = new double[componentCount];
             }
 
@@ -747,8 +913,8 @@ public class SimilarityFlooding extends Matcher {
                 // pair; COLUMN restricts to COLUMN-typed pairs (which includes
                 // name pairs); SCORED restricts to the pairs the output is
                 // actually read from.
-                boolean eligible = (NORMALISE != Normalise.COLUMN || isColumnPair[node])
-                        && (NORMALISE != Normalise.SCORED || isScoredPair[node]);
+                boolean eligible = (o.normalise != Normalise.COLUMN || isColumnPair[node])
+                        && (o.normalise != Normalise.SCORED || isScoredPair[node]);
                 if (newValue > maxValueCurrentIteration && eligible) {
                     maxValueCurrentIteration = newValue;
                     argmaxNode = node;
@@ -772,27 +938,27 @@ public class SimilarityFlooding extends Matcher {
             // degenerate state is now detected explicitly and left alone.
             boolean degenerate = (argmaxNode < 0 && sumOfSquares == 0.0);
             double normConstant;
-            switch (NORMALISE) {
+            switch (o.normalise) {
                 case NONE: normConstant = 1.0; break;
                 case L2:   normConstant = Math.sqrt(sumOfSquares); break;
                 default:   normConstant = maxValueCurrentIteration; break;
             }
 
             //Normalisieren für die aktuelle Iteration
-            double divisor = normConstant * NORM_ALPHA;
-            if (NORMALISE == Normalise.CWISE) {
+            double divisor = normConstant * o.normaliseAlpha;
+            if (o.normalise == Normalise.CWISE) {
                 // Each component by its own maximum. A component whose update is
                 // identically zero keeps a divisor of 0 and is left alone, which
                 // is the same guard the shared path applies via `degenerate`.
                 if (!degenerate) {
                     for (int node = 0; node < nodeCount; node++) {
-                        double d = componentMax[componentOf[node]] * NORM_ALPHA;
+                        double d = componentMax[componentOf[node]] * o.normaliseAlpha;
                         if (d > 0.0) {
                             sigma_i_plus_1[node] = sigma_i_plus_1[node] / d;
                         }
                     }
                 }
-            } else if (NORMALISE != Normalise.NONE && !degenerate && divisor > 0.0) {
+            } else if (o.normalise != Normalise.NONE && !degenerate && divisor > 0.0) {
                 for (int node = 0; node < nodeCount; node++) {
                     sigma_i_plus_1[node] = sigma_i_plus_1[node] / divisor;
                 }
@@ -822,10 +988,10 @@ public class SimilarityFlooding extends Matcher {
             }
 
             if (SfExport.ENABLED) {  // off by default (SfExport); reads only, changes nothing
-                double applied = NORMALISE == Normalise.CWISE ? Double.NaN
-                        : (NORMALISE == Normalise.NONE || degenerate || !(divisor > 0.0)) ? 1.0 : divisor;
+                double applied = o.normalise == Normalise.CWISE ? Double.NaN
+                        : (o.normalise == Normalise.NONE || degenerate || !(divisor > 0.0)) ? 1.0 : divisor;
                 double res = SimilarityFloodingUtils.calcResidualVector(sigma_i, RELAX < 1.0 ? resid_pre : sigma_i_plus_1);
-                SfExport.step(iterationCount + 1, applied, res, res < PRECISION_OF_CONVERGENCE, sigma_i_plus_1);
+                SfExport.step(iterationCount + 1, applied, res, res < o.epsilon, sigma_i_plus_1);
             }
 
             if (TRAJ) {
@@ -909,7 +1075,7 @@ public class SimilarityFlooding extends Matcher {
 
             //Prüfen ob Residuum(sigma_i, sigma_i+1) konvergiert
             convergence = hasConverged(sigma_i,
-                    RELAX < 1.0 ? resid_pre : sigma_i_plus_1, PRECISION_OF_CONVERGENCE);
+                    RELAX < 1.0 ? resid_pre : sigma_i_plus_1, o.epsilon);
             System.arraycopy(sigma_i_plus_1, 0, sigma_i, 0, nodeCount);
             iterationCount++;
         }
@@ -1164,7 +1330,7 @@ public class SimilarityFlooding extends Matcher {
     private static Map<NodePair, Double> nonBacktracking(
             List<NodePair> nodes, int nodeCount, double[] sigma_0,
             int[] rowPtr, int[] src, double[] coeff,
-            Map<NodePair, Double> initialMapping) {
+            Map<NodePair, Double> initialMapping, Run o) {
 
         int edgeCount = coeff.length;
         // opposite[k] is the entry carrying the message back along the same
@@ -1194,7 +1360,7 @@ public class SimilarityFlooding extends Matcher {
         boolean convergence = false;
         int iterationCount = 0;
 
-        while (!convergence && iterationCount <= MAX_ITERATIONS) {
+        while (!convergence && iterationCount <= o.maxIterations) {
             for (int node = 0; node < nodeCount; node++) {
                 double sum = 0.0;
                 for (int k = rowPtr[node]; k < rowPtr[node + 1]; k++) {
@@ -1207,8 +1373,8 @@ public class SimilarityFlooding extends Matcher {
                     int from = src[k];
                     double returning = opposite[k] < 0 ? 0.0
                             : coeff[opposite[k]] * message[opposite[k]];
-                    next[k] = (1.0 - RESTART_ALPHA) * sigma_0[from]
-                            + RESTART_ALPHA * (incoming[from] - returning);
+                    next[k] = (1.0 - o.restartAlpha) * sigma_0[from]
+                            + o.restartAlpha * (incoming[from] - returning);
                 }
             }
             System.arraycopy(next, 0, message, 0, edgeCount);
@@ -1218,9 +1384,9 @@ public class SimilarityFlooding extends Matcher {
                 for (int k = rowPtr[node]; k < rowPtr[node + 1]; k++) {
                     sum += coeff[k] * message[k];
                 }
-                x[node] = (1.0 - RESTART_ALPHA) * sigma_0[node] + RESTART_ALPHA * sum;
+                x[node] = (1.0 - o.restartAlpha) * sigma_0[node] + o.restartAlpha * sum;
             }
-            convergence = hasConverged(previous, x, PRECISION_OF_CONVERGENCE);
+            convergence = hasConverged(previous, x, o.epsilon);
             iterationCount++;
         }
 
@@ -1240,15 +1406,25 @@ public class SimilarityFlooding extends Matcher {
      * reaches its own seed entry through the name node it was built with, which
      * is the same route {@code filterMapping} uses to read the answer back out.
      */
-    private static double seedOf(NodePair node, Map<NodePair, Double> initialMapping) {
-        if (SEED_AT == SeedAttachment.NAME) {
+    private static double seedOf(NodePair node, Map<NodePair, Double> initialMapping, Run o) {
+        if (o.idSeed != null) {
+            // X60: name pairs (and every other pair) as under NAME; column-ID pairs from the second matrix.
+            Node f = node.getFirstNode();
+            Node s = node.getSecondNode();
+            boolean colId = f.isIDNode() && s.isIDNode()
+                    && f.getNodeType().equals(NodeType.COLUMN) && s.getNodeType().equals(NodeType.COLUMN)
+                    && f.getNameNode() != null && s.getNameNode() != null;
+            return colId ? o.idSeed.getOrDefault(new NodePair(f.getNameNode(), s.getNameNode()), 0.0)
+                         : initialMapping.getOrDefault(node, 0.0);
+        }
+        if (o.seedAt == SeedAttachment.NAME) {
             return initialMapping.getOrDefault(node, 0.0);
         }
         Node first = node.getFirstNode();
         Node second = node.getSecondNode();
         // With literal seeds, attachment moves only the column seed: other literal pairs (table,
         // type and cross-kind name pairs) keep their string similarity under ID and SPLIT too.
-        if ("PREFIX_SUFFIX".equals(LITERAL_SEED) && !first.isIDNode() && !second.isIDNode()
+        if ("PREFIX_SUFFIX".equals(o.literalSeed) && !first.isIDNode() && !second.isIDNode()
                 && !(isColumnName(first) && isColumnName(second))) {
             return initialMapping.getOrDefault(node, 0.0);
         }
@@ -1259,10 +1435,10 @@ public class SimilarityFlooding extends Matcher {
         if (columnIdPair) {
             double atId = initialMapping.getOrDefault(
                     new NodePair(first.getNameNode(), second.getNameNode()), 0.0);
-            return SEED_AT == SeedAttachment.ID ? atId : 0.5 * atId;
+            return o.seedAt == SeedAttachment.ID ? atId : 0.5 * atId;
         }
         double atName = initialMapping.getOrDefault(node, 0.0);
-        return SEED_AT == SeedAttachment.ID ? 0.0 : 0.5 * atName;
+        return o.seedAt == SeedAttachment.ID ? 0.0 : 0.5 * atName;
     }
 
     private static boolean isColumnName(Node n) {
@@ -1280,6 +1456,8 @@ public class SimilarityFlooding extends Matcher {
     @Override
     public float[][] match(MatchTask matchTask, MatchingStep matchStep) {
 
+        Run o = new Run(this);
+        GraphOptions graphOptions = GraphOptions.resolve(graphParameters());
         PropagationCoefficientPolicy policy;
         FixpointFormula formula;
 
@@ -1332,39 +1510,53 @@ public class SimilarityFlooding extends Matcher {
         };
 
         if (ColumnRelationFlooding.supports(graphEncoding)) {
-            if (PAIR_SCOPE != PairScope.NONE) {
+            if (o.pairScope != PairScope.NONE) {
                 throw new IllegalArgumentException("smx.sf.pairScope applies to schema-graph encodings only, not "
                         + graphEncoding);
+            }
+            if (!o.idMatrixDir.isBlank() || !graphOptions.classNodes.isEmpty() || graphOptions.withinTable.enabled()) {
+                throw new IllegalArgumentException("idMatrixDir, classNodes and withinTableEdges apply to schema-graph "
+                        + "encodings only, not " + graphEncoding);
             }
             return ColumnRelationFlooding.match(sourceDb, targetDb, prevMatrix,
                     graphEncoding, policy, formula, fdFilterThreshold,
                     constraintWeighting, dependencyTopK, fdAllowListFile,
-                    relationalNullMaskDir);
+                    relationalNullMaskDir, graphOptions);
         }
 
         long sfStart = System.nanoTime();
-        SchemaGraphBuilder schemaGraphBuilder = new SchemaGraphBuilder(this.uccFilterThreshold, this.indFilterThreshold, this.fdFilterThreshold, this.constraintWeighting, this.graphEncoding, this.dependencyTopK, this.fdAllowListFile);
+        SchemaGraphBuilder schemaGraphBuilder = new SchemaGraphBuilder(this.uccFilterThreshold, this.indFilterThreshold, this.fdFilterThreshold, this.constraintWeighting, this.graphEncoding, this.dependencyTopK, this.fdAllowListFile, graphOptions);
 
         Graph<Node, LabelEdge> sourceGraph = schemaGraphBuilder.transformIntoGraphRepresentationSchema(sourceDb);
         Graph<Node, LabelEdge> targetGraph = schemaGraphBuilder.transformIntoGraphRepresentationSchema(targetDb);
 
         //Combine both Graphs into a connectivity-graph
         Graph<NodePair, LabelEdge> connectivityGraph = createConnectivityGraph(sourceGraph, targetGraph);
-        if (PAIR_SCOPE != PairScope.NONE) {
+        if (o.pairScope != PairScope.NONE) {
             int[] kept = new int[2];
-            connectivityGraph = pruneColumnPairs(connectivityGraph, prevMatrix, sourceDb, targetDb, kept);
+            connectivityGraph = pruneColumnPairs(connectivityGraph, prevMatrix, sourceDb, targetDb, kept, o);
             System.out.println("PAIRSCOPE\t" + matchTask.getDataset().getName() + "\t" + matchTask.getScenario().getName()
-                    + "\t" + PAIR_SCOPE + "\t" + PAIR_SCOPE_PARAM + "\t" + kept[0] + "\t" + kept[1]);
+                    + "\t" + o.pairScope + "\t" + o.pairScopeParam + "\t" + kept[0] + "\t" + kept[1]);
         }
 
         //Transform the connectivity-graph into the propagation-graph on which the algorithm executes
-        Graph<NodePair, CoefficientEdge> propagationGraph = inducePropagationGraph(connectivityGraph, sourceGraph, targetGraph, policy);
+        Graph<NodePair, CoefficientEdge> propagationGraph = inducePropagationGraph(connectivityGraph, sourceGraph, targetGraph, policy, graphOptions);
 
         //Calculate the initial mapping (similarity) values
         Map<NodePair, Double> initialMapping = buildInitialMappingFromMatrix(prevMatrix,sourceDb, targetDb);
         java.util.Set<NodePair> exportMatrixKeys = SfExport.ENABLED ? new java.util.HashSet<>(initialMapping.keySet()) : null;
-        if ("PREFIX_SUFFIX".equals(LITERAL_SEED)) {
+        if ("PREFIX_SUFFIX".equals(o.literalSeed)) {
             addLiteralSeeds(propagationGraph, initialMapping);
+        }
+        if (!o.idMatrixDir.isBlank()) {
+            // X60: a second initial matrix on the column-ID pairs (the name pairs keep the first).
+            if (o.seedAt != SeedAttachment.NAME) {
+                throw new IllegalArgumentException("idMatrixDir needs seedAttachment=NAME");
+            }
+            float[][] idMatrix = readSeedMatrixFrom(o.idMatrixDir, matchTask, sourceDb, targetDb);
+            o.idSeed = buildInitialMappingFromMatrix(idMatrix, sourceDb, targetDb);
+            System.out.println("IDSEED\t" + matchTask.getDataset().getName() + "\t" + matchTask.getScenario().getName()
+                    + "\t" + o.idMatrixDir);
         }
         if (SfExport.ENABLED) {  // off by default: -Dsmx.sf.export=<dir> (SfExport)
             java.util.Set<NodePair> literalKeys = new java.util.HashSet<>(initialMapping.keySet());
@@ -1375,16 +1567,16 @@ public class SimilarityFlooding extends Matcher {
             s.put("fixpoint", fixpoint);
             s.put("propCoeffPolicy", propCoeffPolicy);
             s.put("graphEncoding", graphEncoding);
-            s.put("seedAttachment", SEED_AT.toString());
-            s.put("literalSeed", LITERAL_SEED);
-            s.put("epsilon", Double.toString(PRECISION_OF_CONVERGENCE));
-            s.put("maxIterations", Integer.toString(MAX_ITERATIONS));
-            s.put("normalise", NORMALISE.toString());
-            s.put("normaliseAlpha", Double.toString(NORM_ALPHA));
-            s.put("relax", System.getProperty("smx.sf.relax", "1.0"));
-            s.put("restart", Boolean.toString(RESTART));
-            s.put("pairScope", PAIR_SCOPE.toString());
-            s.put("unpruned", Boolean.toString(PAIR_SCOPE == PairScope.NONE));
+            s.put("seedAttachment", o.seedAt.toString());
+            s.put("literalSeed", o.literalSeed);
+            s.put("epsilon", Double.toString(o.epsilon));
+            s.put("maxIterations", Integer.toString(o.maxIterations));
+            s.put("normalise", o.normalise.toString());
+            s.put("normaliseAlpha", Double.toString(o.normaliseAlpha));
+            s.put("relax", o.relaxRaw);
+            s.put("restart", Boolean.toString(o.restart));
+            s.put("pairScope", o.pairScope.toString());
+            s.put("unpruned", Boolean.toString(o.pairScope == PairScope.NONE));
             s.put("initialMatrix", initialMatrix);
             s.put("edge_semantics", "incoming CSR: u_dst += coefficient * (sigma0 + x)[src] (formula C, Value = SIGMA_0_PLUS_I)");
             s.put("update_rule", "formula " + fixpoint + ": FORMULA_C u = sigma0 + x_t + P(sigma0 + x_t); x_{t+1} = u / M_t;"
@@ -1393,13 +1585,13 @@ public class SimilarityFlooding extends Matcher {
             s.put("output_link", "MatchingStepLine2[row][col] = (float) x_final on nodes.tsv rows with scored = true"
                     + " (both column ID nodes; filterMapping keys them by their name nodes; no other selection)");
             SfExport.begin(matchTask.getDataset().getName(), matchTask.getScenario().getName(), s, exportMatrixKeys,
-                    literalKeys, PAIR_SCOPE != PairScope.NONE);
+                    literalKeys, o.pairScope != PairScope.NONE);
         }
 
         //Run the similarity-flooding algorithm
         long sfBuilt = System.nanoTime();
         LAST_RUN.set(new int[]{-1, -1});
-        Map<NodePair, Double> floodingResults = similarityFlooding(propagationGraph, initialMapping, formula);
+        Map<NodePair, Double> floodingResults = similarityFlooding(propagationGraph, initialMapping, formula, o);
         long sfDone = System.nanoTime();
         int[] run = LAST_RUN.get();
         // One machine-readable line per scenario; remote_runner.py keeps these in sf_stats.tsv.
@@ -1471,21 +1663,43 @@ public class SimilarityFlooding extends Matcher {
         StringBuilder result = new StringBuilder(getClass().getSimpleName());
         result.append("(");
 
-        Field[] fields = getClass().getDeclaredFields();
+        // SimilarityFlooding's own fields also for the presets, which declare none. Optional parameters appear
+        // only when set, so a configuration without them keeps the name it always had.
+        Field[] fields = SimilarityFlooding.class.getDeclaredFields();
 
         for (int i = 1; i < fields.length; i++) {
             try {
                 fields[i].setAccessible(true);
-                result.append(fields[i].getName()).append("=").append(fields[i].get(this)).append(" &  ");
+                Object value = fields[i].get(this);
+                if (value == null && OptionalParameters.ALL.contains(fields[i].getName())) {
+                    continue;
+                }
+                result.append(fields[i].getName()).append("=").append(value).append(" &  ");
                 fields[i].setAccessible(false);
             } catch (IllegalAccessException ignored) {
             } // Cannot happen, we have set the field to be accessible
         }
         String res = result.toString();
-        if (getClass().getDeclaredFields().length > 0) {
+        if (fields.length > 0) {
             res = res.substring(0, res.length() - 4);
         }
         return res + ")";
+    }
+
+    /**
+     * Every SF parameter is a string field; YAML numbers and booleans (epsilon: [0.05], maxIterations: [1]) are
+     * passed as their text, which is what the quoted form ["0.05"] would have set.
+     */
+    @Override
+    public void configure(Configuration.MatcherConfiguration matcherConfiguration) {
+        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> given = matcherConfiguration.getParams() == null ? Map.of() : matcherConfiguration.getParams();
+        for (Map.Entry<String, Object> e : given.entrySet()) {
+            Object v = e.getValue();
+            params.put(e.getKey(), v instanceof Number || v instanceof Boolean ? String.valueOf(v) : v);
+        }
+        super.configure(new Configuration.MatcherConfiguration(matcherConfiguration.getName(),
+                matcherConfiguration.getPackageName(), params));
     }
 
     public Map<String, String> getParameters() {
@@ -1534,11 +1748,16 @@ public class SimilarityFlooding extends Matcher {
         if (this.initialMatrixDir == null || this.initialMatrixDir.isBlank()) {
             throw new IllegalArgumentException("initialMatrix=FILE needs initialMatrixDir");
         }
+        return readSeedMatrixFrom(this.initialMatrixDir, matchTask, sourceDb, targetDb);
+    }
+
+    /** readSeedMatrix's reader for any directory (the second initial matrix, idMatrixDir, uses it too). */
+    private static float[][] readSeedMatrixFrom(String dir, MatchTask matchTask, Database sourceDb, Database targetDb) {
         java.nio.file.Path scenarioPath = java.nio.file.Paths.get(
                 matchTask.getScenario().getPath());
         String scenario = scenarioPath.getFileName().toString();
         String dataset = scenarioPath.getParent().getFileName().toString();
-        java.nio.file.Path seedPath = java.nio.file.Paths.get(this.initialMatrixDir)
+        java.nio.file.Path seedPath = java.nio.file.Paths.get(dir)
                 .resolve(dataset).resolve(scenario).resolve("seed.csv");
 
         List<String> lines;
@@ -1670,8 +1889,8 @@ public class SimilarityFlooding extends Matcher {
     }
 
     /** Melnik et al.'s StringMatch seed on every pair of non-ID nodes not seeded by the matrix. */
-    private static void addLiteralSeeds(Graph<NodePair, CoefficientEdge> propagationGraph,
-                                        Map<NodePair, Double> initialMapping) {
+    static void addLiteralSeeds(Graph<NodePair, CoefficientEdge> propagationGraph,
+                                Map<NodePair, Double> initialMapping) {
         de.uni_marburg.schematch.similarity.string.PrefixSuffix stringMatch =
                 new de.uni_marburg.schematch.similarity.string.PrefixSuffix();
         for (NodePair pair : propagationGraph.vertexSet()) {
@@ -1787,8 +2006,8 @@ public class SimilarityFlooding extends Matcher {
      */
     private static Graph<NodePair, LabelEdge> pruneColumnPairs(Graph<NodePair, LabelEdge> connectivityGraph,
                                                                float[][] q, Database sourceDb, Database targetDb,
-                                                               int[] counts) {
-        boolean[][] keep = pairScopeKeep(q, PAIR_SCOPE, PAIR_SCOPE_PARAM);
+                                                               int[] counts, Run o) {
+        boolean[][] keep = pairScopeKeep(q, o.pairScope, o.pairScopeParam);
         Map<NodePair, Boolean> columnPairs = new HashMap<>();
         for (Table sourceTable : sourceDb.getTables()) {
             for (Table targetTable : targetDb.getTables()) {
@@ -1819,7 +2038,7 @@ public class SimilarityFlooding extends Matcher {
         counts[1] = columnPairs.size();
         counts[0] = (int) columnPairs.values().stream().filter(Boolean::booleanValue).count();
         log.info("Pair scope {} {}: kept {} of {} column pairs; pair graph {} -> {} vertices, {} edges dropped",
-                PAIR_SCOPE, PAIR_SCOPE_PARAM, counts[0], counts[1], connectivityGraph.vertexSet().size(),
+                o.pairScope, o.pairScopeParam, counts[0], counts[1], connectivityGraph.vertexSet().size(),
                 pruned.vertexSet().size(), dropped);
         return pruned;
     }
@@ -1846,7 +2065,7 @@ public class SimilarityFlooding extends Matcher {
         return kept != null && !kept;
     }
 
-    private Map<NodePair, Double> buildInitialMappingFromMatrix(float[][] simMatrix, Database sourceDb, Database targetDb) {
+    static Map<NodePair, Double> buildInitialMappingFromMatrix(float[][] simMatrix, Database sourceDb, Database targetDb) {
         Map<NodePair, Double> initialMapping = new HashMap<>();
 
         for (Table sourceTable : sourceDb.getTables()) {

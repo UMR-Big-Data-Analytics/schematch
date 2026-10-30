@@ -1,5 +1,5 @@
 # Numerical table-pair and scenario matcher servers.
--r requirements-evaluation.txt
+-r evaluation.txt
 pandas==2.3.3
 # Simple label/value measures (simple_matchers.py); imported lazily, so a missing package fails only its methods.
 rapidfuzz==3.14.5

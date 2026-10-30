@@ -1,18 +1,20 @@
-# Paper evaluation and dataset loading
+# Evaluation and dataset loading
 
-Schematch now has an optional raw-score evaluation path using the paper's standalone Python functions. It complements the original binary Precision/Recall/F1/Overall evaluator. It needs NumPy and SciPy, not a matcher server or the surrounding research repository.
+Schematch evaluates raw similarity matrices with ranking and assignment metrics. This optional Python evaluator complements the Java binary Precision/Recall/F1/Overall evaluator. It requires NumPy and SciPy and works independently of matcher servers.
+
+The prefix `paperEvaluation`, script names `paper_metrics.py` and `evaluate_paper.py`, and output directory `paper_evaluation/` are legacy names kept for compatibility. They work with any supported dataset and require no particular paper or experiment project. See the [glossary](README.md#terms-used-in-the-guides) for the basic terms.
 
 ## Metrics and extraction
 
-| Paper measurement | Supported behavior |
+| Measurement | Supported behavior |
 |---|---|
 | Global Recall@GT | Exact expected, pessimistic, and optimistic tie treatments |
 | Row MRR | Exact expected and pessimistic primary metrics; optimistic diagnostics |
 | F1_H | Maximum-score Hungarian assignment, dropping scores <= 1e-9 |
-| F1_Hr | Mean over the same 50 seeded random row/column permutations as `score_screen_metrics.py` |
+| F1_Hr | Mean Hungarian F1 over 50 seeded random row/column permutations, reducing positional tie-breaking effects |
 | F1_M | Mutual top-1, retaining tied positive maxima |
-| J_tf | (R_exp + F1_Hr) / 2; paired differences give the paper's delta objective |
-| Earlier objective J | (R_pess + F1_H) / 2; separately named `J_preregistered` |
+| J_tf | (R_exp + F1_Hr) / 2; an equal-weight ranking/assignment summary |
+| Legacy objective J | (R_pess + F1_H) / 2; separately named `J_preregistered` |
 | Extraction diagnostics | Precision, recall, F1, Overall, TP/FP/FN, number of matches, match/GT ratio |
 | Ranking/tie diagnostics | Rank bounds, margins, entropy, zero-score share, ties at maxima |
 | Comparisons | Per-scenario paired differences, family-macro summaries, descriptive wins/losses/ties |
@@ -20,7 +22,9 @@ Schematch now has an optional raw-score evaluation path using the paper's standa
 
 All nine existing extraction policies are available: source top-1, mutual top-1, relative thresholds 1.0 and 0.95, global threshold 0.5, Hungarian, and partial Hungarian with penalties 0.3/0.5/0.7.
 
-`tools/paper_metrics.py` is a standalone snapshot of the project's original evaluation module and the six reusable functions from the original paper scorer. Source hashes are in its header. It has no imports from those folders. The validation checks all seven primary metrics and every permutation against the original implementation on 30 matrices, including ties, negatives, rectangular shapes and many-to-many truth.
+`tools/paper_metrics.py` contains the bundled numerical implementation and source-provenance hashes. Regression checks cover all seven primary metrics and every seeded permutation on 30 reference matrices, including ties, negatives, rectangular shapes and many-to-many truth. No external scorer checkout is imported.
+
+Global Recall@GT selects as many cells from the complete scenario matrix as there are true correspondences. It differs from a per-source-column Recall@GT definition. `R_exp` averages over ties at that cutoff; pessimistic and optimistic variants use worst and best tied selections. Row MRR evaluates each source column's ranking. Report the definition when comparing tools.
 
 ## Enable evaluation during a normal run
 
@@ -31,7 +35,7 @@ paperEvaluation: true
 paperEvaluationPython: "python"
 paperEvaluationScript: "tools/evaluate_paper.py"
 
-# Paper evaluation receives raw matrices and performs extraction itself.
+# Raw-score evaluation performs extraction itself.
 evaluateFirstLineMatchers: false
 evaluateSecondLineMatchers: false
 evaluateSimMatrixBoostingOnFirstLineMatchers: false
@@ -62,11 +66,11 @@ You can rescore the captured matrices without rerunning the matcher:
 python tools/evaluate_paper.py --records <run>/paper_evaluation/input.jsonl --out <report>
 ```
 
-The primary metrics use scenario key `dataset/scenario` for the same deterministic permutations as the paper. A grouping manifest can override `permutation_key` if the configured dataset uses a different alias. The evaluator records NumPy/SciPy versions because solver behavior can matter for tied assignments.
+The primary metrics use scenario key `dataset/scenario` to seed deterministic permutations. A grouping manifest can override `permutation_key` if the configured dataset uses a different alias. The evaluator records NumPy/SciPy versions because solver behavior can matter for tied assignments.
 
-## Match the paper's aggregation and selected cases explicitly
+## Configure grouping and resampling
 
-Without a grouping manifest the report groups by configured dataset, with a minimum size of one. This is descriptive, not an automatic reproduction of a particular preregistered analysis. To reproduce a paper table, supply that analysis's cases, families, independent units, regimes and splits. For example:
+Without a grouping manifest the report groups by configured dataset, with a minimum size of one. A family is a named collection of related scenarios; a unit identifies the independent source kept together during resampling. Dataset variants and train/test splits can be separated. Repeating a published analysis requires its exact case selection and grouping. For example:
 
 ```json
 {
@@ -78,7 +82,7 @@ Without a grouping manifest the report groups by configured dataset, with a mini
   },
   "ChEMBL-Unionable/excluded-case": {
     "include": false,
-    "reason": "Outside the registered case set"
+    "reason": "Excluded from this comparison"
   }
 }
 ```
@@ -86,20 +90,20 @@ Without a grouping manifest the report groups by configured dataset, with a mini
 Every evaluated case must occur in an explicitly supplied manifest. There is no guess for the source table or an independent unit. Summaries keep regime, split, corpus and group strata separate. Family means are averaged equally, after excluding families below the chosen size.
 
 ```yaml
-paperEvaluationGroups: "configs/paper-groups.json"
+paperEvaluationGroups: "configs/evaluation-groups.json"
 paperEvaluationMinFamilySize: 5
 paperEvaluationBootstrap: 10000
 paperEvaluationBootstrapSeed: 20261014
 paperEvaluationTimeoutSeconds: 3600
 ```
 
-The SF paper's primary family minimum is five; other analyses use their own registered rules. Bootstrap requires the grouping manifest, resamples complete units within families, and keeps all scenarios in each sampled unit together. To reproduce a scenario-stratified bootstrap, use each scenario as its unit. Use the frozen analysis scripts for the exact original experiment contrasts, sample selection, preregistered seeds and figure checks; a generic summary cannot infer those decisions from filenames.
+Choose a minimum group size for the analysis; this example requires five scenarios per family. Bootstrap requires the grouping manifest, resamples complete units within families, and keeps all scenarios in each sampled unit together. To reproduce a scenario-stratified bootstrap, use each scenario as its unit. Record case selections, contrasts, grouping and random seeds with the experiment. Generic summaries cannot infer those choices from filenames.
 
-Matcher `wall_ms` is a measured wall duration, with cached results marked. It is not peak RSS, CPU time, or the paper's dedicated timing protocol. The existing timing and cluster experiment tools and SF diagnostic exports remain the route for those experiments; ordinary report generation is not a substitute timing benchmark.
+Matcher `wall_ms` is a measured wall duration, with cached results marked. It is not peak RSS, CPU time, or a controlled timing benchmark. The existing timing and cluster experiment tools and SF diagnostic exports remain the route for those experiments; ordinary report generation is not a substitute timing benchmark.
 
 ## Supported dataset input
 
-See [dataset acquisition and preparation](DATASETS.md) for source links, checked download
+See [dataset acquisition and preparation](datasets.md) for source links, checked download
 manifests, standalone import commands and preparation of local releases.
 
 Normal layout, for both single- and multi-table scenarios:
@@ -141,7 +145,7 @@ An unlabeled full matrix has only a positional contract: sorted table filenames,
 
 Datasets without truth can be used for inference with all evaluation disabled. They cannot produce accuracy metrics. CSV/GT readability does not certify semantic ground-truth correctness or profile readiness. Existing managed-profile checks still reject unavailable/changed FD profiles; domain catalogues do not become ordinary row tables merely because their CSV is readable.
 
-Raw Valentine JSON mappings, GDC releases and other external formats still need their explicit existing import adapters. See [dataset preparation](DATASETS.md); importing preserves strings and records corrections rather than guessing column identities. Pubs/ORIG_/ENC_ layouts require conversion or supplied truth before evaluation.
+Raw Valentine JSON mappings, GDC releases and other external formats still need their explicit existing import adapters. See [dataset preparation](datasets.md); importing preserves strings and records corrections rather than guessing column identities. Pubs/ORIG_/ENC_ layouts require conversion or supplied truth before evaluation.
 
 The importer's SHA-256 implementation now works in the existing Python 3.10 matcher environment as well as newer Python versions; hashes and cache identities remain byte-for-byte compatible.
 
@@ -157,4 +161,4 @@ python tools/audit_datasets.py --manifest configs/dataset-inputs.json
 
 `DatasetAudit` streams every CSV record through the same Java parser as normal loading, without retaining table values. It validates truth against discovered columns and table blocks, never mines profiles, and never rewrites inputs. Reports and discovered manifests go into `target/` by default. Unreadable directories, invalid data and inference-only datasets remain visible in the reports.
 
-For this pass's complete counts, see [the dataset compatibility audit](reports/DATASET_COMPATIBILITY.md). Repeated/regime/self-matching variants count as separate scenarios, not independent datasets for statistical inference.
+For historical parser validation counts, see [the dataset compatibility audit](reference/dataset-compatibility.md). Repeated/regime/self-matching variants count as separate scenarios, not independent datasets for statistical inference.

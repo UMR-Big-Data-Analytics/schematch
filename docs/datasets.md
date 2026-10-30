@@ -1,17 +1,16 @@
 # Dataset acquisition and preparation
 
-[Complete source/recipe inventory](DATASET_INVENTORY.md) · [Machine-readable source catalog](tools/dataset_sources.json)
+[Complete source/recipe inventory](reference/dataset-catalog.md) · [Machine-readable source catalog](../tools/dataset_sources.json)
 
 The catalog has **22 source/recipe IDs**: five checked download-and-prepare
 recipes, five converters for manually acquired inputs, one generator using local
 MusicBrainz/Lahman inputs, one standalone synthetic generator, and ten sources
 with acquisition guidance but no direct converter. These counts describe
-preparation support, not the number of independent datasets or paper scenarios.
+preparation support, not the number of independent datasets or matching tasks.
 
 Keep dataset bytes outside Git. Commit this guide, the scripts, source URLs,
 checksums, conversion rules and analysis manifests. The default working directory
-`datasets-local/` is ignored by Git; `--work` can point to another drive. Existing
-tracked datasets are not removed or untracked by this change.
+`datasets-local/` is ignored by Git; `--work` can point to another drive. Raw dataset files and derived matrices are not included in this source release.
 
 The tool runs from a **standalone Schematch checkout**, using Python 3.10+ and only
 the standard library. It does not require Valentine, pandas, NumPy, a matcher
@@ -62,7 +61,7 @@ and configure the same base for Schematch. Relative paths cannot span Windows
 drive roots. Exported provenance paths are relative to the prepared dataset root;
 `conversion-input/` denotes a temporary conversion stage identified by its hashes.
 
-Downloads use the URLs and checksums in [dataset_sources.json](tools/dataset_sources.json).
+Downloads use the URLs and checksums in [dataset_sources.json](../tools/dataset_sources.json).
 All supplied downloads have recorded SHA-256 checksums except Valentine's fixed
 Zenodo release, which is checked against its published MD5; prepared CSV files
 always receive SHA-256 hashes. URL/checksum changes require a deliberate catalog
@@ -76,17 +75,17 @@ The names in the first column are the script's source IDs. A source family can
 produce many datasets and transformed corpora; the 111 audited corpora are not
 111 separately downloadable public releases.
 
-| Source ID | Official acquisition source | Preparation and study relationship |
+| Source ID | Official acquisition source | Preparation and limitations |
 |---|---|---|
 | `valentine` | [Valentine v1, Zenodo 5084605](https://zenodo.org/records/5084605), approximately 602 MB ZIP | Download + import. Includes ChEMBL, TPC-DI, OpenData, Magellan and Wikidata. Unionable, View-Unionable, Joinable and Semantically-Joinable are scenario types within the release. |
 | `t2dsm` | [WDC Schema Matching Benchmark](https://webdatacommons.org/structureddata/smb/), WH archive linked by [wdc-smb](https://github.com/wbsg-uni-mannheim/wdc-smb) | Download + convert all 178 WH pairs. Original train/valid/test membership is retained in `conversion_manifest.json`. No model is trained by this tool. |
-| `hdxsm` | [SMUTF/HDXSM authors' repository](https://github.com/MAGICS-LAB/SMUTF); recorded `hdx_datasets_0.2.zip` Drive URL in catalog | Download + convert 204 release pairs. The study's `hdxsm-usable` subset has 199 cases and requires its separate selection manifest. |
+| `hdxsm` | [SMUTF/HDXSM authors' repository](https://github.com/MAGICS-LAB/SMUTF); recorded `hdx_datasets_0.2.zip` Drive URL in catalog | Download + convert 204 release pairs. A historical 199-case subset requires a separate selection manifest; full conversion includes 204 pairs. |
 | `gdcsm` | [Magneto GDC benchmark, Zenodo 14963588](https://zenodo.org/records/14963588); [Magneto repository](https://github.com/VIDA-NYU/magneto-matcher) | Download target/mappings and ten original supplementary XLSX files, then convert all ten studies. Supplement URLs and hashes are pinned individually. |
-| `gdc` | Same Magneto release, already prepared CSV variant | Offline import from `<input>/gdc/{source-tables,target-tables,ground-truth}`. This retains the existing CSV-adapter behavior; use `gdcsm` for the original-supplement conversion used in later study runs. |
-| `madi` | [MaDI-Bench](https://github.com/wbsg-uni-mannheim/MaDI-Bench), study commit `655faa751536b0c33150f681adc1a305c570a114` | Obtain the checkout manually, then convert five **base** tasks to 18 unordered source pairs through their unified-schema mappings. Its whole pipeline need not be installed. |
-| `goby` | [GOBY official download page](https://goby-benchmark.github.io/), approximately 1.53 GB ZIP, password published there: `GOBY2025` | Acquire/extract manually, then prepare the frozen seeded 200-wrapper-pair sample. The catalog retains the study archive hash. |
+| `gdc` | Same Magneto release, already prepared CSV variant | Offline import from `<input>/gdc/{source-tables,target-tables,ground-truth}`. This retains the existing CSV-adapter behavior; use `gdcsm` for the original-supplement conversion from the original supplementary files. |
+| `madi` | [MaDI-Bench](https://github.com/wbsg-uni-mannheim/MaDI-Bench), pinned commit `655faa751536b0c33150f681adc1a305c570a114` | Obtain the checkout manually, then convert five **base** tasks to 18 unordered source pairs through their unified-schema mappings. Its whole pipeline need not be installed. |
+| `goby` | [GOBY official download page](https://goby-benchmark.github.io/), approximately 1.53 GB ZIP, password published there: `GOBY2025` | Acquire/extract manually, then prepare the frozen seeded 200-wrapper-pair sample. The catalog pins the input archive hash. |
 | `mimic` | [MIMIC-IV demo 2.2](https://physionet.org/content/mimic-iv-demo/2.2/), [OMOP demo 0.9](https://physionet.org/content/mimic-iv-demo-omop/0.9/), [Parciak ground truth](https://github.com/UHasselt-DSI-Data-Systems-Lab/code-schema-matching-LLMs-artefacs/blob/main/benchmark/ground_truth.csv) | Download + convert one multi-table scenario, 7 source/6 target tables and 49 positive correspondences. Uses public demos. The OMOP rows derive from the same patients; this is not independent-instance evidence. |
-| `synthea` | [OMAP/SMAT truth](https://github.com/JZCS2018/SMAT), [Synthea sample data](https://synthetichealth.github.io/synthea-sample-data/), [OHDSI Eunomia](https://github.com/OHDSI/Eunomia) GiBleed 5.3 | Acquire three inputs manually; portable converter produces the study's 39 full/pair scenarios across three seeds. Historical archive hashes are below. |
+| `synthea` | [OMAP/SMAT truth](https://github.com/JZCS2018/SMAT), [Synthea sample data](https://synthetichealth.github.io/synthea-sample-data/), [OHDSI Eunomia](https://github.com/OHDSI/Eunomia) GiBleed 5.3 | Acquire three inputs manually; portable converter produces 39 full/pair scenarios across three seeds. Historical archive hashes are below. |
 
 Examples:
 
@@ -103,7 +102,7 @@ python tools/prepare_datasets.py prepare synthea --input datasets-local/inputs/s
 ```
 
 `--skip-invalid` is an explicit choice, not a default. The original Valentine/GDC
-snapshot contains missing files or unresolved mapping labels; the older research
+snapshot contains missing files or unresolved mapping labels; a historical
 bulk import selected 390 of 547 discovered candidates. Counts depend on the exact
 input release and corrections. The tool writes an external audit report even if
 it refuses import. Select individual cases with repeatable scenario-ID globs:
@@ -133,10 +132,9 @@ recorded, never inferred from matcher scores.
 GOBY's input directory must contain `wrappers/goby_<id>.csv`,
 `goby_schema_mappings.csv`, `unified_schema.csv`, and
 `goby_data_csv_files.tar.gz`. Extract the latter to `wrappers/` with your archive
-tool. Eligibility is 20â€“50,000 rows and at least three mapped displayed columns;
+tool. Eligibility is 20-50,000 rows and at least three mapped displayed columns;
 unknown/`NO_DISPLAY` fields are excluded. Pair selection uses seed `20261006`.
-Pairs with no shared unified attribute remain all-negative cases, as in the
-original design. Derived pairwise truth is not a new manual annotation.
+Pairs with no shared unified attribute remain all-negative cases, under the converter's sampling policy. Derived pairwise truth is not a new manual annotation.
 
 Synthea's input layout is:
 
@@ -159,29 +157,29 @@ exact rerun; obtain the matching archive or record a new dataset version):
 The Synthea adapter records predefined header aliases, unavailable attributes,
 lost truth, the 5,000-row child-table cap, whole parent tables and seeds
 20261005/20261006/20261007 in its conversion report. GDC conversion reproduces
-the study supplement cleaning and marks its target as a **domain catalogue**,
+the supplementary-table cleaning rules and marks its target as a **domain catalogue**,
 whose rows do not represent joint observations. HDXSM conversion records removed
 empty columns, header normalization and truth references absent from a table;
 these conversions are not advertised as byte-preserving raw releases.
 
 ## Relational sources used to generate matching tasks
 
-Downloading these databases does not provide the paper's matching truth. The
-study constructs normalized/denormalized views, samples rows and derives truth
-from schema provenance. Preserve the exact source snapshot and generation recipe.
+Raw databases do not include schema-matching ground truth. Generating tasks
+requires creating normalized or denormalized views, sampling rows and deriving
+correspondences from schema provenance. Preserve the exact source snapshot and generation recipe.
 
 | Source | Official acquisition | Required preparation |
 |---|---|---|
 | MusicBrainz | [Dated database dumps](https://musicbrainz.org/doc/MusicBrainz_Database/Download) | Headerless PostgreSQL TSV with the recorded schema version. `controlled` uses `medium`, `release`, `release_group`. |
 | Lahman | [SABR Lahman database](https://sabr.org/lahman-database/) | Versioned CSV export. `controlled` uses `Batting.csv`, `People.csv`, `Teams.csv`. |
-| AdventureWorks | [Microsoft SQL Server samples](https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works) | Pin the release and CSV-export policy; preserve the study's `Sales.*` and `Person.*` names. |
+| AdventureWorks | [Microsoft SQL Server samples](https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/adventure-works) | Pin the release and CSV-export policy; preserve table-qualified names such as `Sales.*` and `Person.*`. |
 | IMDb | [IMDb dataset download](https://datasets.imdbws.com/); [usage terms and format](https://developer.imdb.com/non-commercial-datasets/) | Retain a dated TSV snapshot, including `title.basics`, `name.basics`, `title.principals` and the other tables named by the recipe. |
 | Sakila | [MySQL Sakila documentation/download](https://dev.mysql.com/doc/sakila/en/) | Load the sample SQL database and export the declared tables with a fixed null/CSV policy. |
-| SCOPe | [SCOPe downloads](https://scop.berkeley.edu/downloads/) | The study used a local relational snapshot with `scop_node`, `scop_comment`, `scop_level`; current flat files need conversion and are not that snapshot. |
+| SCOPe | [SCOPe downloads](https://scop.berkeley.edu/downloads/) | The historical converter input was a relational snapshot with `scop_node`, `scop_comment`, `scop_level`; current flat files need conversion and are not that snapshot. |
 | TPC-H | [TPC-H specification/tools](https://www.tpc.org/tpch/) | Record dbgen build, scale factor and seed, then export the required tables. |
 | Chinook | [Chinook v1.4.5 SQLite release](https://github.com/lerocha/chinook-database/releases/tag/v1.4.5) | Keep `Chinook_Sqlite.sqlite`; the independent-sampling recipe constructs matching schemas from it. |
-| Amalgam bibliography | [Original Amalgam suite](https://www.cs.toronto.edu/~miller/amalgam/) | Acquire instances and the exact correspondence annotation separately. The schema page alone supplies neither our final C+L truth nor an interchangeable mapping. |
-| EFES bibliography/music | [HPI repeatability page, Integration scenarios](https://hpi.de/naumann/projects/repeatability/data-integration/estimating-data-integration-and-cleaning-effort.html) | Retain its published mappings. The study's curated `final_gt` C+L annotations are a separately versioned input; do not silently substitute EFES truth. |
+| Amalgam bibliography | [Original Amalgam suite](https://www.cs.toronto.edu/~miller/amalgam/) | Acquire instances and the exact correspondence annotation separately. The schema page alone supplies neither a separately curated correspondence set nor an interchangeable mapping. |
+| EFES bibliography/music | [HPI repeatability page, Integration scenarios](https://hpi.de/naumann/projects/repeatability/data-integration/estimating-data-integration-and-cleaning-effort.html) | Retain its published mappings. Separately curated `final_gt` correspondence annotations are a separately versioned input; do not silently substitute EFES truth. |
 
 The portable controlled generator handles MusicBrainz + Lahman:
 
@@ -201,41 +199,13 @@ are preserved from the research generator; invariant checks run before import.
 It is the controlled v2 construction, not a claim to recreate every later v3 or
 final-controlled experiment with the same command.
 
-## Generated paper variants and remaining research recipes
+## Repeating a published experiment
 
-These are generated artifacts, not additional public downloads. The authoritative
-workspace inventory is retained in [the compatibility audit](reports/DATASET_COMPATIBILITY.md).
-These historical variants require the corresponding frozen input snapshots,
-selection manifests and annotations. The portable preparation commands above
-cover the listed release adapters; they do not infer unpublished annotations or
-load construction code from another repository. Acquisition-only sources are
-marked `manual preparation` by the `list` command.
-
-| Indexed corpus/variant | Base inputs and original recipe |
-|---|---|
-| `benchmark-full`, `benchmark-smoke` | Valentine/GDC import; portable `valentine`/`gdc` plus frozen selected cases/corrections. |
-| `controlled-imported*` | MusicBrainz/Lahman joined views; `tools/dataset_support/controlled.py` and the version's design manifest. Portable `controlled` reproduces v2. |
-| `final-controlled` | AdventureWorks/IMDb/Sakila/SCOPe, 96 tasks; the frozen joined-view design, source hashes, 5,000-row samples, three seeds. |
-| `indep_plain`, `indep_prof*` | TPC-H/AdventureWorks/Chinook; normalized/denormalized schema provenance and frozen independent samples; 81 tasks. Profiles are a separate step. |
-| `indep2_*` | Lahman/MusicBrainz; normalized/denormalized schema provenance; 54 tasks across seeds/overlap/schema views. |
-| `test_*` | Sakila/IMDb/SCOPe; frozen schema-view and sampling manifests; 27 disjoint-instance multi-table tasks. |
-| `final_indep*` | Amalgam/music instances plus the curated correspondence CSVs; use C+L truth and the declared MusicBrainz table restriction. Nine tasks. |
-| `synthea_*`, `mimic_*` | Portable `synthea`/`mimic` for readable bases; original hashes, sampling and conversion reports define the exact variants. |
-| `t2d-usable`, `hdxsm-usable` | Frozen subsets of 175/199 pairs; importing all 178/204 is not the same case selection. Keep exclusions and analysis manifests as code/data-free JSON. |
-| `*_md5`, `*_md5_encrypted`, `*_on` | Original readable inputs plus their frozen transformation manifests, salts/seeds, null/strip policies and label maps. `_on` hashes names; `_md5` also recodes values. |
-| `*_opaque*`, `*_partial*`, `*_corrupt*`, `*_revalue*` | Original bases plus the corresponding frozen perturbation recipe/settings. Preserve the manifest identifying affected cells/columns and truth. |
-| `knobs` | Frozen perturbation settings; derived perturbation grid, not a separately acquired dataset. |
-| `self_*` | Construct two within-side self-matches per original case, identity/provenance truth. |
-| `x87-*-perm*` | Apply recorded column permutations, truth/profile remapping. |
-| `scale-imported` | Portable `scale`; 31 size/density/row settings × three repetitions = 93 cases. `--smoke` creates one case only. |
-| `_ref_clean_exact`, `DeNorm`, thesis examples | Preserve their generation recipe or small original fixture if redistribution permits; their names alone are insufficient provenance. |
-
-The historical opaque multi-table builder preserves readable table/column order.
-That order can affect tied assignment results; use the paper's permutation/tie
-protocol for replication. Changing order or null policies creates a new dataset
-version. These recipes and curated annotations must be published alongside the
-paper for a complete exact rerun; downloading current raw databases cannot
-recover them. This guide makes that remaining release work visible.
+Downloading a source and reproducing an analysis are separate steps. An exact
+rerun needs its selected cases, snapshots, row samples, transformations,
+annotations, profiles and evaluation settings. Historical names and construction
+notes are in the [compatibility reference](reference/dataset-compatibility.md).
+They are not additional download commands or required directories.
 
 ## Dependency profiles and evaluation
 
@@ -256,10 +226,10 @@ receive invented tuple-level FDs.
 
 For Recall@GT, MRR, Hungarian F1 (`F1_H`), permutation-averaged Hungarian F1
 (`F1_Hr`), mutual matching and the other extraction rules, enable the optional
-paper evaluator as described in [EVALUATION_AND_DATASETS.md](EVALUATION_AND_DATASETS.md).
-Evaluation needs NumPy/SciPy even though dataset preparation does not. Exact paper
-summaries additionally require their frozen selected cases/families/units and
-permutation keys; generated dataset names are not automatically paper aliases.
+raw-score evaluator described in [evaluation](evaluation.md).
+Evaluation needs NumPy/SciPy even though dataset preparation does not. Reproducing a published
+summary also requires its selected cases, grouping, independent units and
+permutation keys; generated dataset names alone do not define those choices.
 
 Source-specific terms and attribution remain with their publishers; availability
 for download does not by itself grant permission to redistribute every data file.
@@ -283,6 +253,6 @@ T2D-SM download passed checksum verification and Java validation of all 178 pair
 Local-release conversion checks covered **700 scenarios** across T2D-SM, HDXSM,
 GDC-SM, MaDI, GOBY, MIMIC, Synthea, a selected Valentine subset, controlled smoke
 generation and scaling smoke generation, with zero Java parsing/truth errors.
-See [the validation record](reports/dataset_preparation_validation.json) for exact
+See [the validation record](../reports/dataset_preparation_validation.json) for exact
 counts and settings; these checks did not run matcher accuracy experiments or
 mine dependency profiles.

@@ -133,6 +133,8 @@ class SchemaGraphBuilder {
     private double[] fdRankScores = null;
     private double[] uccRankScores = null;
     private double[] indRankScores = null;
+    /** Construction settings of this run (parameters, else the smx.sf.* properties). */
+    private final GraphOptions options;
 
     SchemaGraphBuilder(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold) {
         this(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, "NONE", "COMPLETE");
@@ -147,20 +149,27 @@ class SchemaGraphBuilder {
     }
 
     SchemaGraphBuilder(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold, String constraintWeighting, String graphEncoding, String dependencyTopK, String fdAllowListFile) {
-        this.dependencyFilter = new DependencyFilter(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, dependencyTopK);
+        this(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, constraintWeighting, graphEncoding, dependencyTopK,
+                fdAllowListFile, GraphOptions.defaults());
+    }
+
+    SchemaGraphBuilder(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold, String constraintWeighting, String graphEncoding, String dependencyTopK, String fdAllowListFile,
+                       GraphOptions options) {
+        this.options = options;
+        this.dependencyFilter = new DependencyFilter(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, dependencyTopK, options);
         this.qualityWeightedConstraints = "QUALITY".equalsIgnoreCase(Objects.toString(constraintWeighting, "NONE"));
         this.gatedConstraints = "GATED".equalsIgnoreCase(Objects.toString(constraintWeighting, "NONE"));
         this.rankWeightedConstraints =
                 "QUALITY_RANK".equalsIgnoreCase(Objects.toString(constraintWeighting, "NONE"));
         this.constantWeightedConstraints =
                 "CONSTANT".equalsIgnoreCase(Objects.toString(constraintWeighting, "NONE"));
-        this.constantWeight = Double.parseDouble(System.getProperty("smx.sf.constantWeight", "0.35"));
+        this.constantWeight = options.constantWeight;
         this.topkHybridConstraints =
                 "TOPK_HYBRID".equalsIgnoreCase(Objects.toString(constraintWeighting, "NONE"));
-        this.topK = Integer.getInteger("smx.sf.topK", 1);
-        this.topKPercent = Double.parseDouble(System.getProperty("smx.sf.topKPercent", "0"));
-        this.topkHigh = Double.parseDouble(System.getProperty("smx.sf.topkHigh", "0.20"));
-        this.topkLow = Double.parseDouble(System.getProperty("smx.sf.topkLow", "0.05"));
+        this.topK = options.topK;
+        this.topKPercent = options.topKPercent;
+        this.topkHigh = options.topkHigh;
+        this.topkLow = options.topkLow;
         if (this.constantWeightedConstraints
                 && (this.constantWeight < 0.0 || this.constantWeight > 1.0)) {
             throw new IllegalArgumentException(
@@ -169,10 +178,10 @@ class SchemaGraphBuilder {
         }
         this.uccThresholdRaw = Objects.toString(uccFilterThreshold, "");
         this.indThresholdRaw = Objects.toString(indFilterThreshold, "");
-        this.gateHigh = Double.parseDouble(System.getProperty("smx.sf.gate.high", "0.6"));
-        this.gateLow = Double.parseDouble(System.getProperty("smx.sf.gate.low", "0.35"));
-        this.gateIncrease = Double.parseDouble(System.getProperty("smx.sf.gate.inc", "1.2"));
-        this.gateDecrease = Double.parseDouble(System.getProperty("smx.sf.gate.dec", "0.9"));
+        this.gateHigh = options.gateHigh;
+        this.gateLow = options.gateLow;
+        this.gateIncrease = options.gateIncrease;
+        this.gateDecrease = options.gateDecrease;
         if (this.gatedConstraints
                 && (this.gateIncrease <= 0 || this.gateDecrease <= 0)) {
             throw new IllegalArgumentException(
@@ -260,8 +269,8 @@ class SchemaGraphBuilder {
      * This switch sorts them by table and column position instead, which no
      * relabelling can move. The default path is unchanged.
      */
-    private static boolean canonicalDependencyOrder() {
-        return Boolean.getBoolean("smx.sf.canonicalDependencyOrder");
+    private boolean canonicalDependencyOrder() {
+        return options.canonicalDependencyOrder;
     }
 
     /** Position of every column in database order; invariant under relabelling. */
@@ -423,9 +432,8 @@ class SchemaGraphBuilder {
      */
     private enum CollisionRule { FIRST, MAX }
 
-    private static CollisionRule collisionRule() {
-        return CollisionRule.valueOf(
-                System.getProperty("smx.sf.collisionRule", "FIRST").toUpperCase());
+    private CollisionRule collisionRule() {
+        return CollisionRule.valueOf(options.collisionRule);
     }
 
     /**
@@ -435,7 +443,7 @@ class SchemaGraphBuilder {
      * carrying the strongest confidence any dependency offered for it rather
      * than the first one the iteration happened to reach.
      */
-    private static void addDependencyEdge(Graph<Node, LabelEdge> graph, Node source,
+    private void addDependencyEdge(Graph<Node, LabelEdge> graph, Node source,
                                           Node target, String label, double confidence) {
         if (collisionRule() == CollisionRule.MAX) {
             LabelEdge held = graph.getEdge(source, target);
@@ -490,8 +498,8 @@ class SchemaGraphBuilder {
     private enum ParallelEdgeRule {
         DROP, MAX, AVG, SUM;
 
-        static ParallelEdgeRule current() {
-            return valueOf(System.getProperty("smx.sf.parallelEdgeRule", "DROP").toUpperCase());
+        static ParallelEdgeRule current(GraphOptions options) {
+            return valueOf(options.parallelEdgeRule);
         }
     }
 
@@ -547,15 +555,21 @@ class SchemaGraphBuilder {
     private enum ParallelEdges {
         COLLAPSE, SPLIT;
 
-        static ParallelEdges current() {
-            return valueOf(System.getProperty("smx.sf.parallelEdges", "COLLAPSE").toUpperCase());
+        static ParallelEdges current(GraphOptions options) {
+            return valueOf(options.parallelEdges);
         }
     }
 
     static Graph<NodePair, CoefficientEdge> inducePropagationGraph
             (Graph<NodePair, LabelEdge> connectivityGraph, Graph<Node, LabelEdge> graph1, Graph<Node, LabelEdge> graph2, PropagationCoefficientPolicy policy) {
+        return inducePropagationGraph(connectivityGraph, graph1, graph2, policy, GraphOptions.defaults());
+    }
 
-        ParallelEdges container = ParallelEdges.current();
+    static Graph<NodePair, CoefficientEdge> inducePropagationGraph
+            (Graph<NodePair, LabelEdge> connectivityGraph, Graph<Node, LabelEdge> graph1, Graph<Node, LabelEdge> graph2, PropagationCoefficientPolicy policy,
+             GraphOptions options) {
+
+        ParallelEdges container = ParallelEdges.current(options);
         Graph<NodePair, CoefficientEdge> propagationGraph =
                 container == ParallelEdges.SPLIT
                         ? new DirectedWeightedPseudograph<>(CoefficientEdge.class)
@@ -567,7 +581,7 @@ class SchemaGraphBuilder {
         // longer share a slot -- so the accumulator is bypassed and an explicit
         // rule alongside SPLIT is a configuration error rather than a silent
         // precedence.
-        ParallelEdgeRule rule = ParallelEdgeRule.current();
+        ParallelEdgeRule rule = ParallelEdgeRule.current(options);
         if (container == ParallelEdges.SPLIT && rule != ParallelEdgeRule.DROP) {
             throw new IllegalArgumentException(
                     "smx.sf.parallelEdges=SPLIT keeps the colliding messages apart, so "
@@ -793,18 +807,43 @@ class SchemaGraphBuilder {
      * type node "<label>Class". Literal seeds therefore compare class names across schemas as they compare
      * datatype names. Node.equals compares values only when a node has no table, so a class literal equal to
      * any other node of the graph would merge with it; that is refused with an exception.
+     *
+     * The same lines can be generated instead of read (parameters classNodes and withinTableEdges; ColumnClasses,
+     * WithinTableEdges): they are appended after the file's lines, if any, and go through the same code, so a
+     * generated line builds exactly the graph the same line in a file builds.
      */
-    private static final String EXTRA_EDGES_DIR = System.getProperty("smx.sf.extraEdgesDir", "");
+    static final String EXTRA_EDGES_DIR = System.getProperty("smx.sf.extraEdgesDir", "");
+
+    private boolean hasExtraEdges() {
+        return !options.extraEdgesDir.isEmpty() || !options.classNodes.isEmpty() || options.withinTable.enabled();
+    }
 
     private void extraEdges(Database db, Graph<Node, LabelEdge> graphRepresentation) {
         Path schema = Paths.get(db.getPath());
         Path scenario = schema.getParent();
-        Path file = Paths.get(EXTRA_EDGES_DIR, scenario.getParent().getFileName().toString(),
-                scenario.getFileName().toString(), schema.getFileName().toString() + ".tsv");
-        if (!Files.isRegularFile(file)) {
-            log.info("Extra edges: none for {}", file);
+        String datasetName = scenario.getParent().getFileName().toString();
+        String scenarioName = scenario.getFileName().toString();
+        String side = schema.getFileName().toString();
+        List<String> lines = new ArrayList<>();
+        Object file = "generated edges of " + schema;
+        if (!options.extraEdgesDir.isEmpty()) {
+            Path path = Paths.get(options.extraEdgesDir, datasetName, scenarioName, side + ".tsv");
+            if (Files.isRegularFile(path)) {
+                try {
+                    lines.addAll(Files.readAllLines(path));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                file = path;
+            } else {
+                log.info("Extra edges: none for {}", path);
+            }
+        }
+        List<String> generated = generatedEdgeLines(db, datasetName, scenarioName, side);
+        if (lines.isEmpty() && !(file instanceof Path) && generated.isEmpty()) {
             return;
         }
+        lines.addAll(generated);
         Map<String, Map<String, Column>> columns = new HashMap<>();
         for (Table table : db.getTables()) {
             Map<String, Column> byLabel = new HashMap<>();
@@ -817,12 +856,6 @@ class SchemaGraphBuilder {
         Map<String, Node> classIds = new HashMap<>();
         Map<String, Node> typeNodes = new HashMap<>();
         Set<Node> before = new HashSet<>(graphRepresentation.vertexSet());
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         for (String line : lines) {
             if (line.isBlank() || line.startsWith("#")) {
                 continue;
@@ -874,6 +907,19 @@ class SchemaGraphBuilder {
         }
         log.info("Extra edges from {}: {} added, {} not added (pair already has an edge); {} class nodes",
                 file, added, collided, classIds.size());
+    }
+
+    /** Native class-node and within-table edge lines of one schema, per table in table order. */
+    private List<String> generatedEdgeLines(Database db, String dataset, String scenario, String side) {
+        List<String> lines = new ArrayList<>();
+        for (Table table : db.getTables()) {
+            for (String kind : options.classNodes) {
+                ColumnClasses.Kind k = ColumnClasses.Kind.valueOf(kind.replace("_SHUFFLED", ""));
+                lines.addAll(ColumnClasses.edgeLines(dataset, scenario, side, table, k, kind.endsWith("_SHUFFLED")));
+            }
+        }
+        lines.addAll(WithinTableEdges.lines(options.withinTable, dataset, scenario, side, db));
+        return lines;
     }
 
     Graph<Node, LabelEdge> transformIntoGraphRepresentationSchema(Database db) {
@@ -928,7 +974,7 @@ class SchemaGraphBuilder {
             }
         }
 
-        if (!EXTRA_EDGES_DIR.isEmpty()) {
+        if (hasExtraEdges()) {
             extraEdges(db, graphRepresentation);
         }
 
@@ -1242,10 +1288,10 @@ class SchemaGraphBuilder {
      * COLLAPSED makes it constant (the single-table regime), PERMUTED keeps its shape and breaks its meaning.
      * One TABLEMEMBERSHIP line per schema reports the mode and the assignment.
      */
-    private static final String TABLE_MEMBERSHIP =
+    static final String TABLE_MEMBERSHIP =
             System.getProperty("smx.sf.tableMembership", "ORIGINAL").toUpperCase();
     /** PERMUTED draw: 0 (default) uses the key itself, k > 0 the key + "#k", so draw 0 is the T1 screen's permutation. */
-    private static final int TABLE_MEMBERSHIP_DRAW =
+    static final int TABLE_MEMBERSHIP_DRAW =
             Integer.parseInt(System.getProperty("smx.sf.tableMembershipDraw", "0"));
 
     static {
@@ -1254,7 +1300,7 @@ class SchemaGraphBuilder {
         }
     }
 
-    private static final boolean TABLE_ROOTED =
+    static final boolean TABLE_ROOTED =
             Boolean.getBoolean("smx.sf.tableRooted");
 
     private void buildGraphRepresentation(Database db, Graph<Node, LabelEdge> graphRepresentation) {
@@ -1263,7 +1309,7 @@ class SchemaGraphBuilder {
         Node columnNode = new Node("Column", NodeType.COLUMN, null, false, null, null, null);
         Node columnTypeNode = new Node("ColumnType", NodeType.COLUMN_TYPE, null, false, null, null, null);
 
-        if (!TABLE_ROOTED) {
+        if (!options.tableRooted) {
             graphRepresentation.addVertex(schemaNode);
         }
         graphRepresentation.addVertex(tableNode);
@@ -1273,7 +1319,7 @@ class SchemaGraphBuilder {
         int uniqueID = 1;
 
         Node currentDatabaseNode = null;
-        if (!TABLE_ROOTED) {
+        if (!options.tableRooted) {
             Node databaseName = new Node(db.getName(), NodeType.DATABASE, null, false, null, null, null);
             graphRepresentation.addVertex(databaseName);
 
@@ -1284,7 +1330,7 @@ class SchemaGraphBuilder {
             graphRepresentation.addEdge(currentDatabaseNode, databaseName, new LabelEdge("name"));
         }
 
-        boolean originalMembership = "ORIGINAL".equals(TABLE_MEMBERSHIP);
+        boolean originalMembership = "ORIGINAL".equals(options.tableMembership);
         List<Node> membershipTableNodes = new ArrayList<>();
         List<Integer> membershipTableSizes = new ArrayList<>();
         List<Node> membershipColumns = new ArrayList<>();
@@ -1292,14 +1338,14 @@ class SchemaGraphBuilder {
         for (Table table : db.getTables()) {
 
             Node currentTableNode = null;
-            if (originalMembership || !"COLLAPSED".equals(TABLE_MEMBERSHIP) || membershipTableNodes.isEmpty()) {
+            if (originalMembership || !"COLLAPSED".equals(options.tableMembership) || membershipTableNodes.isEmpty()) {
             Node tableName = new Node(table.getName(), NodeType.TABLE, null, false, null, null, null);
             graphRepresentation.addVertex(tableName);
 
             currentTableNode = new Node("NodeID" + uniqueID++, NodeType.TABLE, null, true, tableName, null, null);
             graphRepresentation.addVertex(currentTableNode);
 
-            if (!TABLE_ROOTED) {
+            if (!options.tableRooted) {
                 graphRepresentation.addEdge(currentDatabaseNode, currentTableNode, new LabelEdge("table"));
             }
             graphRepresentation.addEdge(currentTableNode, tableNode, new LabelEdge("type"));
@@ -1328,7 +1374,7 @@ class SchemaGraphBuilder {
                 // per-value recoding changes it and the graph gains or loses these
                 // nodes. This switch omits them so the effect can be isolated. The
                 // default is unchanged production behaviour.
-                if (Boolean.getBoolean("smx.sf.noDatatypeNodes")) {
+                if (options.noDatatypeNodes) {
                     continue;
                 }
 
@@ -1361,10 +1407,10 @@ class SchemaGraphBuilder {
     }
 
     /** T1: the `column` edges under COLLAPSED or PERMUTED membership (see TABLE_MEMBERSHIP). */
-    private static void attachColumns(Database db, Graph<Node, LabelEdge> graph, List<Node> tableNodes,
+    private void attachColumns(Database db, Graph<Node, LabelEdge> graph, List<Node> tableNodes,
                                       List<Integer> sizes, List<Node> columns) {
         List<Integer> host = new ArrayList<>();
-        if ("COLLAPSED".equals(TABLE_MEMBERSHIP)) {
+        if ("COLLAPSED".equals(options.tableMembership)) {
             for (int k = 0; k < columns.size(); k++) {
                 host.add(0);
             }
@@ -1377,8 +1423,8 @@ class SchemaGraphBuilder {
             Path schema = Paths.get(db.getPath());
             String key = schema.getParent().getParent().getFileName() + "/" + schema.getParent().getFileName()
                     + "/" + schema.getFileName();
-            if (TABLE_MEMBERSHIP_DRAW != 0) {
-                key = key + "#" + TABLE_MEMBERSHIP_DRAW;
+            if (options.tableMembershipDraw != 0) {
+                key = key + "#" + options.tableMembershipDraw;
             }
             Collections.shuffle(host, new Random(key.hashCode()));
         }
@@ -1387,7 +1433,7 @@ class SchemaGraphBuilder {
             graph.addEdge(tableNodes.get(host.get(k)), columns.get(k), new LabelEdge("column"));
             assignment.append(host.get(k)).append(k + 1 < columns.size() ? "," : "");
         }
-        System.out.println("TABLEMEMBERSHIP\t" + db.getPath() + "\t" + TABLE_MEMBERSHIP + "\t" + tableNodes.size()
+        System.out.println("TABLEMEMBERSHIP\t" + db.getPath() + "\t" + options.tableMembership + "\t" + tableNodes.size()
                 + " table nodes\t" + assignment);
     }
 
@@ -1504,7 +1550,7 @@ class SchemaGraphBuilder {
 
             // B's dev copy (exploratory X21): -Dsmx.sf.uccNoNotUnique=true drops the notunique edges, so a
             // key node links only to its member columns, as in Melnik et al.'s key representation. Off by default.
-            if (!Boolean.getBoolean("smx.sf.uccNoNotUnique")) {
+            if (!options.uccNoNotUnique) {
                 for(Node IDNode : nodesNotPartOfUCC) {
                     graphRepresentation.addEdge(uccNode, IDNode, new LabelEdge("notunique", confidence));
                 }
@@ -1554,7 +1600,7 @@ class SchemaGraphBuilder {
     private double dependencyConfidence(UniqueColumnCombination uniqueColumnCombination) {
         // B's dev copy (exploratory X16): -Dsmx.sf.uccUnweighted=true keeps UCC edges at weight 1 under every
         // constraintWeighting, so that FD weighting can be tested next to unweighted UCCs. Off by default.
-        if (Boolean.getBoolean("smx.sf.uccUnweighted")) {
+        if (options.uccUnweighted) {
             return 1.0;
         }
         return weigh(uniqueColumnCombination.getPrimaryKeyScore(), uccRankScores);

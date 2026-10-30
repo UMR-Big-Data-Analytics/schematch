@@ -4,10 +4,10 @@
     "External HTTP service": 1,
     "Generic Python seed bridge": 1,
     "Generic Python study bridge": 1,
-    "Java": 67,
+    "Java": 73,
     "Java composition + Python seeds": 3,
     "Python seed server": 56,
-    "Python study server": 11
+    "Python study server": 12
   },
   "matchers": [
     {
@@ -97,6 +97,14 @@
       "scope": "scenario",
       "purpose": "matcher",
       "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/IVPlusValueMatcher.java"
+    },
+    {
+      "name": "PerturbedMatcher",
+      "package": "ensemble",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/ensemble/PerturbedMatcher.java"
     },
     {
       "name": "ProbabilisticMappingMatcher",
@@ -528,6 +536,15 @@
       "method": "ract"
     },
     {
+      "name": "PythonRemaMatcher",
+      "package": "external",
+      "backend": "Python study server",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/external/PythonRemaMatcher.java",
+      "method": "rema"
+    },
+    {
       "name": "PythonServerMatcher",
       "package": "external",
       "backend": "Generic Python seed bridge",
@@ -806,12 +823,36 @@
       "source": "src/main/java/de/uni_marburg/schematch/matching/metadata/UniquenessMatcher.java"
     },
     {
+      "name": "ClassTermMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/ClassTermMatcher.java"
+    },
+    {
+      "name": "DatatypeTermMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/DatatypeTermMatcher.java"
+    },
+    {
       "name": "HungarianBonusMatcher",
       "package": "refinement",
       "backend": "Java",
       "scope": "scenario",
       "purpose": "matcher",
       "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/HungarianBonusMatcher.java"
+    },
+    {
+      "name": "LiteralTermMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/LiteralTermMatcher.java"
     },
     {
       "name": "QualifiedNameRefinementMatcher",
@@ -822,12 +863,28 @@
       "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/QualifiedNameRefinementMatcher.java"
     },
     {
+      "name": "RoleTermMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/RoleTermMatcher.java"
+    },
+    {
       "name": "SinkhornMatcher",
       "package": "refinement",
       "backend": "Java",
       "scope": "scenario",
       "purpose": "matcher",
       "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/SinkhornMatcher.java"
+    },
+    {
+      "name": "TableContextTermMatcher",
+      "package": "refinement",
+      "backend": "Java",
+      "scope": "scenario",
+      "purpose": "matcher",
+      "source": "src/main/java/de/uni_marburg/schematch/matching/refinement/TableContextTermMatcher.java"
     },
     {
       "name": "CharDistributionMatcher",

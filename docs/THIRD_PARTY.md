@@ -28,7 +28,7 @@ The following files were already tracked by the upstream-based checkout:
 The build also uses legacy Metanome and metadata-store snapshots. A clean-cache
 build could not retrieve these from the original snapshot repository. Their
 exact resolved JARs and parent POMs are therefore archived under `src/lib/maven/`.
-[SOURCES.json](src/lib/maven/SOURCES.json) records every SHA-256 checksum and size;
+[SOURCES.json](../src/lib/maven/SOURCES.json) records every SHA-256 checksum and size;
 the original POMs and their embedded licensing information are preserved.
 This is a selected build dependency set, not a developer's Maven cache.
 
@@ -38,8 +38,8 @@ establish that every embedded component has the same license as Schematch.
 
 ## Bundled source and optional implementations
 
-[Python provenance](src/main/resources/python_matchers/schematch_py/SOURCES.json)
-and [dataset-converter provenance](tools/dataset_support/SOURCES.json) record the
+[Python provenance](../src/main/resources/python_matchers/schematch_py/SOURCES.json)
+and [dataset-converter provenance](../tools/dataset_support/SOURCES.json) record the
 origins and hashes of packaged computations. Historical source identifiers are
 provenance, not runtime imports or required source locations. Preserve the
 original source notices and establish distribution terms for copied material.

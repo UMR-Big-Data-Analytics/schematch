@@ -75,7 +75,8 @@ Deviations from the release (beyond dgl -> plain torch, which is exact up to flo
 Options: vectors, dim (50), seed (20261015), k (3), dimension (256), epochs (30), lr (0.001), margin (0.5), norm (2),
 number_of_sources (20), number_of_datasets (2), num_iterations (1), common_cols ((1, 6, 1)), overlaps ((0.1, 0.9, 0.1)),
 typo_prc (10), cov_prc (100), max_rows (20000), js_tokens ("header"), wordlist, vectors_cache, pca_rows (100000),
-vectors_limit (None; .vec only).
+vectors_limit (None; .vec only), arm ("full"; ablation arms "no_edges", "one_step_edges", "random_forest", see ARMS;
+random_forest needs scikit-learn).
 """
 from __future__ import annotations
 
@@ -740,22 +741,85 @@ def omnimatch(ctx: dict, options: dict) -> np.ndarray:
     ns = len(rows)
     te_pairs = [(i, ns + j) for i in range(ns) for j in range(len(cols_))]
     te_feats = [pair_features(te[a][1], te[b][1]) for a, b in te_pairs]
-    te_graph = _graph(*topk_edges(te_pairs, te_feats, k))
+    te_edges = topk_edges(te_pairs, te_feats, k)
+    te_graph = _graph(*te_edges)
+
+    arm = str(options.get("arm", "full"))
+    if arm not in ARMS:
+        raise ValueError(f"unknown OmniMatch arm {arm!r}; choose from {ARMS}")
+    if arm == "random_forest":
+        return _random_forest(tr_pairs, tr_feats, join_by_pair, te_feats, ns, len(cols_), seed)
 
     # 3. train (full batch, triplet margin loss) and embed the test graph inductively; deterministic kernels because the
     # CPU backward of repeated-index gathers accumulates in a thread-dependent order otherwise
     was_det = torch.are_deterministic_algorithms_enabled()
     torch.use_deterministic_algorithms(True)
     try:
-        Z = _train_and_embed(torch, seed, options, prof, (src, dst, typ), (A, P, N), [t[0] for t in te], te_graph)
+        if arm == "full":
+            Z = _train_and_embed(torch, seed, options, prof, (src, dst, typ), (A, P, N), [t[0] for t in te], te_graph)
+        else:  # no edges in the training and the test graph: only the self-loop weights act
+            Z, Ztr = _train_and_embed(torch, seed, options, prof, ([], [], []), (A, P, N), [t[0] for t in te],
+                                      _graph([], [], []), with_train=True)
     finally:
         torch.use_deterministic_algorithms(was_det)
     D = torch.cdist(Z[:ns].double(), Z[ns:].double()).numpy()
-    out = 1.0 - D / 2.0
-    return np.clip(np.nan_to_num(out, nan=0.0), 0.0, 1.0)
+    out = np.clip(np.nan_to_num(1.0 - D / 2.0, nan=0.0), 0.0, 1.0)
+    if arm == "one_step_edges":
+        gamma = _edge_gamma(torch, Ztr, (A, P, N), _edge_counts(tr_pairs, tr_feats, k))
+        c_te = _edge_counts(te_pairs, te_feats, k)
+        C = np.array([[c_te.get(frozenset((i, ns + j)), 0) for j in range(len(cols_))] for i in range(ns)], dtype=float)
+        out = out + gamma * C / N_FEATURES
+    return out
 
 
-def _train_and_embed(torch, seed, options, prof, edges, triplets, test_prof, te_graph):
+# Ablation arms (information-matched controls for the graph propagation):
+#   full            the release's model (above)
+#   no_edges        same features and training, but no edges in the training or test graph (self-loops only)
+#   one_step_edges  no_edges + gamma * (number of the five similarities under which s and t are among each other's top-k)
+#                   / 5, without propagation; gamma from EDGE_GAMMAS, chosen on the generated training triplets only
+#                   (share of triplets ranked correctly, first best wins)
+#   random_forest   the release's rf_predictor baseline: a random forest (sklearn, random_state = seed) on the five pair
+#                   similarities of the generated pairs, join = positive; its join probability is the score
+ARMS = ("full", "no_edges", "one_step_edges", "random_forest")
+EDGE_GAMMAS = (0.0, 0.05, 0.1, 0.2, 0.5, 1.0)
+
+
+def _edge_counts(pairs, feats, k) -> dict:
+    """For each unordered node pair, under how many of the five similarities one is among the other's top-k."""
+    src, dst, typ = topk_edges(pairs, feats, k)
+    rels = {}
+    for s, d, t in zip(src, dst, typ):
+        rels.setdefault(frozenset((s, d)), set()).add(t)
+    return {p: len(r) for p, r in rels.items()}
+
+
+def _edge_gamma(torch, Ztr, triplets, counts) -> float:
+    A, P, N = triplets
+    if not A or Ztr is None:
+        return 0.0
+
+    def score(u, v):
+        return 1.0 - float(torch.dist(Ztr[u].double(), Ztr[v].double())) / 2.0
+    best, best_g = -1.0, 0.0
+    for g in EDGE_GAMMAS:
+        ok = sum((score(a, p) + g * counts.get(frozenset((a, p)), 0) / N_FEATURES)
+                 > (score(a, n) + g * counts.get(frozenset((a, n)), 0) / N_FEATURES) for a, p, n in zip(A, P, N))
+        if ok / len(A) > best + 1e-12:
+            best, best_g = ok / len(A), g
+    return best_g
+
+
+def _random_forest(tr_pairs, tr_feats, join_by_pair, te_feats, ns, nt, seed) -> np.ndarray:
+    from sklearn.ensemble import RandomForestClassifier
+    joins = {p for lst in join_by_pair for p in lst}
+    y = np.array([p in joins for p in tr_pairs], dtype=int)
+    if y.size == 0 or y.min() == y.max():
+        return np.zeros((ns, nt))
+    clf = RandomForestClassifier(random_state=seed).fit(np.array(tr_feats), y)
+    return clf.predict_proba(np.array(te_feats))[:, 1].reshape(ns, nt)
+
+
+def _train_and_embed(torch, seed, options, prof, edges, triplets, test_prof, te_graph, with_train=False):
     src, dst, typ = edges
     A, P, N = triplets
     with torch.random.fork_rng():
@@ -774,4 +838,7 @@ def _train_and_embed(torch, seed, options, prof, edges, triplets, test_prof, te_
                 loss.backward()
                 opt.step()
         with torch.no_grad():
-            return net(_node_matrix(test_prof), te_graph)
+            Z = net(_node_matrix(test_prof), te_graph)
+            if with_train:
+                return Z, (net(X, G) if X is not None else None)
+            return Z

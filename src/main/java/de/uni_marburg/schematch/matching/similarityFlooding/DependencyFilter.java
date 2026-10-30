@@ -25,18 +25,37 @@ public class DependencyFilter {
     private final String indFilterThreshold;
     private final String fdFilterThreshold;
     private final int topK;
+    // The perturbation settings of this filter: matcher parameters where set, else the properties below
+    // (GraphOptions).
+    private final double retention;
+    private final long retentionSeed;
+    private final boolean rewire;
+    private final RewireMode rewireMode;
+    private final double wTarget;
+    private final String uccTopK;
 
     DependencyFilter(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold) {
         this(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, "");
     }
 
     DependencyFilter(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold, String dependencyTopK) {
+        this(uccFilterThreshold, indFilterThreshold, fdFilterThreshold, dependencyTopK, GraphOptions.defaults());
+    }
+
+    DependencyFilter(String uccFilterThreshold, String indFilterThreshold, String fdFilterThreshold, String dependencyTopK,
+                     GraphOptions options) {
         this.uccFilterThreshold = uccFilterThreshold;
         this.indFilterThreshold = indFilterThreshold;
         this.fdFilterThreshold = fdFilterThreshold;
         this.topK = (dependencyTopK == null || dependencyTopK.isBlank())
                 ? Integer.MAX_VALUE
                 : Integer.parseInt(dependencyTopK.trim());
+        this.retention = options.fdRetention;
+        this.retentionSeed = options.fdRetentionSeed;
+        this.rewire = options.fdRewire;
+        this.rewireMode = RewireMode.valueOf(options.fdRewireMode);
+        this.wTarget = options.fdWTarget;
+        this.uccTopK = options.uccTopK;
     }
 
     /**
@@ -64,11 +83,11 @@ public class DependencyFilter {
      * first, because the dependencies arrive from a hash set and the iteration
      * order is otherwise not reproducible across runs.
      */
-    private static final double RETENTION =
+    static final double RETENTION =
             Double.parseDouble(System.getProperty("smx.sf.fdRetention", "1.0"));
 
     /** Replicate index for the thinning draw; changing it redraws the subset. */
-    private static final long RETENTION_SEED =
+    static final long RETENTION_SEED =
             Long.parseLong(System.getProperty("smx.sf.fdRetentionSeed", "0"));
 
     /**
@@ -81,7 +100,7 @@ public class DependencyFilter {
      * second. If the response survives rewiring it is about edge count and
      * topology; if it disappears, the dependencies' content is what mattered.
      */
-    private static final boolean REWIRE =
+    static final boolean REWIRE =
             Boolean.parseBoolean(System.getProperty("smx.sf.fdRewire", "false"));
 
     /**
@@ -124,9 +143,9 @@ public class DependencyFilter {
      * so a difference under DEGREE is attributable to the pairing -- the FD
      * identities -- rather than to the degree sequence.
      */
-    private enum RewireMode { RANDOM, DEGREE, EDGE }
+    enum RewireMode { RANDOM, DEGREE, EDGE }
 
-    private static final RewireMode REWIRE_MODE = RewireMode.valueOf(
+    static final RewireMode REWIRE_MODE = RewireMode.valueOf(
             System.getProperty("smx.sf.fdRewireMode", "RANDOM").toUpperCase());
 
     /**
@@ -164,7 +183,7 @@ public class DependencyFilter {
      * every rung has had its dependant labels permuted, and they differ only in
      * how.
      */
-    private static final double W_TARGET =
+    static final double W_TARGET =
             Double.parseDouble(System.getProperty("smx.sf.fdWTarget", "NaN"));
 
     /** A determinant slot is bad if it repeats a column or names the dependant. */
@@ -216,7 +235,7 @@ public class DependencyFilter {
 
         int n = byOut.size();
         List<Column> image = new ArrayList<>(java.util.Collections.nCopies(n, (Column) null));
-        double t = Math.max(-1.0, Math.min(1.0, W_TARGET));
+        double t = Math.max(-1.0, Math.min(1.0, wTarget));
         if (t >= 0) {
             for (int k = 0; k < n; k++) {
                 image.set(k, byOut.get(k));                 // co-sorted: max W
@@ -273,27 +292,27 @@ public class DependencyFilter {
             laddered.add(new FunctionalDependency(dets.get(k), deps.get(k)));
         }
         log.info("FD W-ladder target={} nodes={} swaps={} repaired={} unresolved={} retention={} seed={}",
-                t, n, swaps, repaired, unresolved, RETENTION, RETENTION_SEED);
+                t, n, swaps, repaired, unresolved, retention, retentionSeed);
         return laddered;
     }
 
     private Collection<FunctionalDependency> perturb(Collection<FunctionalDependency> kept) {
-        if (RETENTION >= 1.0 && !REWIRE && Double.isNaN(W_TARGET)) {
+        if (retention >= 1.0 && !rewire && Double.isNaN(wTarget)) {
             return kept;
         }
         List<FunctionalDependency> ordered = new ArrayList<>(kept);
         ordered.sort(java.util.Comparator.comparing(FunctionalDependency::toString));
         java.util.Random rng = new java.util.Random(
-                RETENTION_SEED * 1000003L + ordered.size());
+                retentionSeed * 1000003L + ordered.size());
         java.util.Collections.shuffle(ordered, rng);
 
-        int take = RETENTION >= 1.0
+        int take = retention >= 1.0
                 ? ordered.size()
-                : (int) Math.floor(ordered.size() * RETENTION);
+                : (int) Math.floor(ordered.size() * retention);
         List<FunctionalDependency> thinned = new ArrayList<>(ordered.subList(0, take));
 
-        if (!Double.isNaN(W_TARGET)) {
-            if (REWIRE) {
+        if (!Double.isNaN(wTarget)) {
+            if (rewire) {
                 throw new IllegalArgumentException(
                         "smx.sf.fdWTarget and smx.sf.fdRewire are different manipulations "
                                 + "of the same dependency set. Set one or the other.");
@@ -301,9 +320,9 @@ public class DependencyFilter {
             return wLadder(thinned, rng);
         }
 
-        if (!REWIRE) {
+        if (!rewire) {
             log.info("FD thinning: {} -> {} (retention {}, seed {})",
-                    kept.size(), thinned.size(), RETENTION, RETENTION_SEED);
+                    kept.size(), thinned.size(), retention, retentionSeed);
             return thinned;
         }
 
@@ -318,7 +337,7 @@ public class DependencyFilter {
                         .collect(Collectors.toList())));
         pool.sort(java.util.Comparator.comparing(Column::toString));
 
-        if (REWIRE_MODE == RewireMode.EDGE) {
+        if (rewireMode == RewireMode.EDGE) {
             // Keep (dependant, arity) fixed; reshuffle the determinant slots.
             List<Column> slots = new ArrayList<>();
             for (FunctionalDependency fd : thinned) {
@@ -380,11 +399,11 @@ public class DependencyFilter {
             log.info("FD thinning+edge-rewire: {} -> {} (repaired {}, unresolved {}, "
                             + "retention {}, seed {})",
                     kept.size(), edgeRewired.size(), repaired, unresolved,
-                    RETENTION, RETENTION_SEED);
+                    retention, retentionSeed);
             return edgeRewired;
         }
 
-        if (REWIRE_MODE == RewireMode.DEGREE) {
+        if (rewireMode == RewireMode.DEGREE) {
             // Configuration model. Pool the dependant slots and the determinant
             // slots separately, shuffle each pool, and deal them back out in the
             // original arity pattern. Each column reappears exactly as often as
@@ -430,7 +449,7 @@ public class DependencyFilter {
             }
             log.info("FD thinning+degree-rewire: {} -> {} (self-pairs {}, dup-slots {}, "
                             + "retention {}, seed {})",
-                    kept.size(), degreeRewired.size(), selfPairs, dupSlots, RETENTION, RETENTION_SEED);
+                    kept.size(), degreeRewired.size(), selfPairs, dupSlots, retention, retentionSeed);
             return degreeRewired;
         }
 
@@ -452,7 +471,7 @@ public class DependencyFilter {
                     new ArrayList<>(rest.subList(0, arity)), dependant));
         }
         log.info("FD thinning+rewire: {} -> {} over a {}-column pool (retention {}, seed {})",
-                kept.size(), rewired.size(), pool.size(), RETENTION, RETENTION_SEED);
+                kept.size(), rewired.size(), pool.size(), retention, retentionSeed);
         return rewired;
     }
 
@@ -589,7 +608,7 @@ public class DependencyFilter {
 
         // B's dev copy (sf-matcher-study/devjava_b, exploratory X16): -Dsmx.sf.uccTopK=k keeps the k best UCCs by
         // primary-key score, independently of dependencyTopK (which also cuts FDs). Off by default.
-        String uccTopKProp = System.getProperty("smx.sf.uccTopK", "");
+        String uccTopKProp = this.uccTopK;
         Collection<UniqueColumnCombination> rankedUCCs;
         if (!uccTopKProp.isBlank()) {
             List<UniqueColumnCombination> byScore = new ArrayList<>(filteredUCCs);

@@ -74,21 +74,22 @@ It uses the project's active configuration and writes the run output under
 
 ## Evaluate the result
 
-For the paper's raw-score metrics, install the tested evaluation dependencies in
+For ranking and assignment metrics computed from raw similarity scores, install the tested evaluation dependencies in
 your selected environment:
 
 ```shell
-python -m pip install -r requirements-evaluation.txt
+python -m pip install -r requirements/evaluation.txt
 python tools/check_setup.py --paper-evaluation
 ```
 
+The `paperEvaluation` prefix is retained for compatibility; this evaluator works with any supported dataset.
 Set `paperEvaluation: true` and `paperEvaluationPython: "python"` in
 `general.yaml`, rebuild with the same Maven command, then run the launcher again.
 Recall@GT, MRR, Hungarian F1, mutual matching and extraction reports are written to
 the run's `paper_evaluation/` directory. Keep the legacy binary evaluation flags
 disabled when sending raw scores to this evaluator.
 
-For public datasets and conversion policies see [DATASETS.md](DATASETS.md).
-For matcher choices and optional resources see [MATCHERS.md](MATCHERS.md).
+For public datasets and conversion policies see [dataset preparation](datasets.md).
+For matcher choices and optional resources see [the matcher guide](matchers.md).
 For metric definitions and aggregation settings see
-[EVALUATION_AND_DATASETS.md](EVALUATION_AND_DATASETS.md).
+[evaluation](evaluation.md).

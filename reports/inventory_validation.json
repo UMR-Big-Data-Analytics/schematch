@@ -37,7 +37,7 @@
     "This update did not download publisher datasets, repeat the historical 9931-scenario scan, train models or run accuracy benchmarks.",
     "Optional package, cached model and external service availability is separate from named class coverage.",
     "PRISMA, PDED, SiMa, SemStruct, ReMa and learned-combiner outputs are file inputs; these systems have no bundled live backend.",
-    "JMM-2 and the remaining research terms listed in MATCHERS.md have no bundled callable implementation.",
+    "JMM-2 and the remaining research terms listed in docs/matchers.md have no bundled callable implementation.",
     "Exact paper replication still requires frozen selections, input snapshots, design manifests, annotations and dependency profiles."
   ]
 }

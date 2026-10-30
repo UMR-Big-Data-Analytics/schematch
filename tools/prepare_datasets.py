@@ -1,6 +1,6 @@
 """Download declared releases and prepare datasets from a standalone Schematch checkout.
 
-Python 3.10+, standard library only. See ../DATASETS.md for sources and recipes.
+Python 3.10+, standard library only. See ../docs/datasets.md for sources and recipes.
 """
 from __future__ import annotations
 
@@ -228,7 +228,7 @@ def prepare(args):
     adapter_name = entry["adapter"]
     preparation_support(entry)
     if entry["adapter"] == "manual":
-        raise ValueError(f"{source}: {entry['acquisition']} See DATASETS.md; no automatic adapter is claimed.")
+        raise ValueError(f"{source}: {entry['acquisition']} See docs/datasets.md; no automatic adapter is claimed.")
     if args.select is None and source in {"valentine", "gdc"}:
         args.select = [source + "/*"]
     raw = args.input.resolve() if args.input else (args.work / "raw" / source).resolve()

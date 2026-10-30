@@ -41,7 +41,7 @@
     "failures": 0,
     "errors": 0,
     "optional_learned_subtests_skipped": 2,
-    "environment": "new virtual environment installed from requirements-python.txt",
+    "environment": "new virtual environment installed from requirements/python.txt",
     "isolation_check": {
       "status": "passed",
       "tests": 37,

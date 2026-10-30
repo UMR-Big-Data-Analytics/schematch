@@ -1,4 +1,13 @@
-# Dataset compatibility audit
+# Historical dataset compatibility and variants
+
+This reference records parser checks on a historical evaluation installation.
+Identifiers in the table name archived collections and transformations, not
+directories required in a fresh checkout or bundled datasets. For acquisition
+commands use [dataset preparation](../datasets.md). Names such as `x87` identify
+old experiment runs; `md5` and `opaque` denote recoded data, and `self` denotes
+self-matching controls.
+
+## Parser validation record
 
 Completed 2026-10-14 using the normal Java CSV and ground-truth parsers. All rows were parsed; no matcher was run and no dataset was rewritten.
 
@@ -12,7 +21,7 @@ Nine roots initially blocked by filesystem permissions were retried with the req
 
 Validation covers UTF-8 CSV syntax, every row width, headers, table discovery, matrix dimensions, label alignment, binary truth and full/pair-block consistency. It does not certify annotation semantics or profile discovery/readiness.
 
-Full per-scenario reports are under `target/dataset-audit-report.json` and `target/dataset-audit-linked-report.json`. The compact [JSON summary](dataset_compatibility_summary.json) is retained with this report. See [usage and limitations](../EVALUATION_AND_DATASETS.md).
+Full per-scenario reports were written to the original installation's ignored `target/` directory and are not bundled. The compact [JSON summary](../../reports/dataset_compatibility_summary.json) is retained with this report. See [usage and limitations](../evaluation.md).
 
 | Corpus | Dataset directories | Scenarios | Evaluable | Inference only | Errors |
 |---|---:|---:|---:|---:|---:|
@@ -127,3 +136,39 @@ Full per-scenario reports are under `target/dataset-audit-report.json` and `targ
 | `sf-matcher-study/data/test_md5` | 3 | 27 | 27 | 0 | 0 |
 | `sf-matcher-study/data/test_on` | 3 | 27 | 27 | 0 | 0 |
 | `sf-matcher-study/data/test_plain` | 3 | 27 | 27 | 0 | 0 |
+
+## Archived dataset variants and reproduction requirements
+
+These are generated artifacts, not additional public downloads. The table above preserves the historical inventory identifiers.
+These historical variants require the corresponding frozen input snapshots,
+selection manifests and annotations. The [dataset preparation guide](../datasets.md)
+covers the available release adapters; they do not infer unpublished annotations or
+load construction code from another repository. Acquisition-only sources are
+marked `manual preparation` by the `list` command.
+
+| Indexed corpus/variant | Base inputs and original recipe |
+|---|---|
+| `benchmark-full`, `benchmark-smoke` | Valentine/GDC import; portable `valentine`/`gdc` plus frozen selected cases/corrections. |
+| `controlled-imported*` | MusicBrainz/Lahman joined views; `tools/dataset_support/controlled.py` and the version's design manifest. Portable `controlled` reproduces v2. |
+| `final-controlled` | AdventureWorks/IMDb/Sakila/SCOPe, 96 tasks; the frozen joined-view design, source hashes, 5,000-row samples, three seeds. |
+| `indep_plain`, `indep_prof*` | TPC-H/AdventureWorks/Chinook; normalized/denormalized schema provenance and frozen independent samples; 81 tasks. Profiles are a separate step. |
+| `indep2_*` | Lahman/MusicBrainz; normalized/denormalized schema provenance; 54 tasks across seeds/overlap/schema views. |
+| `test_*` | Sakila/IMDb/SCOPe; frozen schema-view and sampling manifests; 27 disjoint-instance multi-table tasks. |
+| `final_indep*` | Amalgam/music instances plus the curated correspondence CSVs; use the curated correspondence annotations and the declared MusicBrainz table restriction. Nine tasks. |
+| `synthea_*`, `mimic_*` | Portable `synthea`/`mimic` for readable bases; original hashes, sampling and conversion reports define the exact variants. |
+| `t2d-usable`, `hdxsm-usable` | Frozen subsets of 175/199 pairs; importing all 178/204 is not the same case selection. Keep exclusions and analysis manifests as code/data-free JSON. |
+| `*_md5`, `*_md5_encrypted`, `*_on` | Original readable inputs plus their frozen transformation manifests, salts/seeds, null/strip policies and label maps. `_on` hashes names; `_md5` also recodes values. |
+| `*_opaque*`, `*_partial*`, `*_corrupt*`, `*_revalue*` | Original bases plus the corresponding frozen perturbation recipe/settings. Preserve the manifest identifying affected cells/columns and truth. |
+| `knobs` | Frozen perturbation settings; derived perturbation grid, not a separately acquired dataset. |
+| `self_*` | Construct two within-side self-matches per original case, identity/provenance truth. |
+| `x87-*-perm*` | Apply recorded column permutations, truth/profile remapping. |
+| `scale-imported` | Portable `scale`; 31 size/density/row settings × three repetitions = 93 cases. `--smoke` creates one case only. |
+| `_ref_clean_exact`, `DeNorm`, thesis examples | Preserve their generation recipe or small original fixture if redistribution permits; their names alone are insufficient provenance. |
+
+The historical opaque multi-table builder preserves readable table/column order.
+That order can affect tied assignment results; use the experiment's permutation/tie
+protocol for replication. Changing order or null policies creates a new dataset
+version. These recipes and curated annotations must be published alongside the
+paper for a complete exact rerun; downloading current raw databases cannot
+recover them. This guide makes that remaining release work visible.
+

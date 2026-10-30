@@ -19,7 +19,7 @@ public final class ManagedProfiles {
         String status = props.getProperty(side + ".fd", "not_profiled");
         if (!status.equals("complete")) {
             throw new IllegalStateException("Explicit FD profile is " + status + " for " + table
-                    + "; provide a complete profile with matching checksums (see DATASETS.md); domain catalogues are not applicable");
+                    + "; provide a complete profile with matching checksums (see docs/datasets.md); domain catalogues are not applicable");
         }
         verify(table, props.getProperty(side + ".table.sha256"));
         verify(fd, props.getProperty(side + ".fd.sha256"));

@@ -9,7 +9,7 @@ a frozen expected result. For new adapters, document the actual backend,
 required resources and supported input/output contract. A named class alone
 does not establish that a published system was reproduced.
 
-Run the checks in [RELEASE.md](RELEASE.md). Use `mvn test` and the Python test
+Run the checks in [the release checklist](maintainers/releasing.md). Use `mvn test` and the Python test
 suite for routine development. Two learned-model subtests require optional
 PyTorch and are explicitly skipped when it is absent; model weights are not
 needed by those synthetic tests. Heavy model or dataset runs are separate from
