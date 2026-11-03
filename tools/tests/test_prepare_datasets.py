@@ -68,6 +68,30 @@ class DatasetPreparationTest(unittest.TestCase):
         self.assertEqual(tool.main(argv), 2)
         self.assertEqual(tables[0].read_bytes(), before)
 
+    def test_release_quirks_view_unionable_folder_and_repeated_header(self):
+        # The official Valentine release spells one folder "View -Unionable" and repeats the Magellan headers once.
+        raw, out = self.root / "input", self.root / "ready"
+        folder = raw / "Valentine-datasets" / "Example" / "View -Unionable" / "case"
+        folder.mkdir(parents=True)
+        for side in ("source", "target"):
+            with (folder / f"case_{side}.csv").open("w", encoding="utf-8", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow(['id', 'name'])
+                if side == "source":
+                    writer.writerow(['id', 'name'])
+                writer.writerow(['1', 'a'])
+        (folder / "case_mapping.json").write_text(json.dumps({"matches": [
+            {"source_column": "name", "target_column": "name"}]}), encoding="utf-8")
+        self.assertEqual(tool.main(["prepare", "valentine-layout", "--input", str(raw), "--output", str(out)]), 0)
+        scenario = out / "Example-View-Unionable" / "case"
+        for side in ("source", "target"):
+            with (scenario / side / f"{side}.csv").open(encoding="utf-8", newline="") as stream:
+                self.assertEqual(list(csv.reader(stream)), [['id', 'name'], ['1', 'a']])
+        manifest = json.loads((scenario / "manifest.json").read_text())
+        self.assertEqual(manifest["scenario_type"], "View-Unionable")
+        self.assertIn({"kind": "repeated_header", "side": "source", "data_row": 1}, manifest["corrections"])
+        self.assertEqual(manifest["tables"]["source"]["rows"], 1)
+
     def test_invalid_truth_leaves_audit_and_no_published_output(self):
         raw, out = self.raw_case(bad=True), self.root / "ready"
         self.assertEqual(tool.main(['prepare', 'valentine-layout', '--input', str(raw), '--output', str(out)]), 2)

@@ -80,6 +80,15 @@ def columns(path: Path, trim: bool = False) -> tuple[list[str], list[str]]:
     return original, labels
 
 
+def repeats_header(path: Path) -> bool:
+    """True if the first data row is an exact copy of the header (the Magellan files of the Valentine release)."""
+    rows = csv_rows(path)
+    try:
+        return next(rows) == next(rows, None)
+    finally:
+        rows.close()
+
+
 def discover(root: Path) -> list[dict]:
     records = []
     valentine = root / "Valentine-datasets"
@@ -98,7 +107,8 @@ def discover(root: Path) -> list[dict]:
             relative = directory.relative_to(valentine)
             family = relative.parts[0]
             for stem in sorted(stems):
-                subtype = next((x for x in relative.parts if x in (
+                # the official release spells one folder "View -Unionable"
+                subtype = next((x.replace(" ", "") for x in relative.parts if x.replace(" ", "") in (
                     "Unionable", "View-Unionable", "Joinable", "Semantically-Joinable")), None)
                 if subtype is None:
                     name = directory.name.lower()
@@ -153,6 +163,9 @@ def audit(root: Path, selectors: list[str] | None = None, corrections: dict | No
                     if old != new:
                         row["corrections"].append({"kind": "header_trim", "side": side,
                                                    "from": old, "to": new})
+                if repeats_header(path):
+                    row["tables"][side]["repeated_header"] = True
+                    row["corrections"].append({"kind": "repeated_header", "side": side, "data_row": 1})
             except (OSError, ValueError, csv.Error) as exc:
                 row["errors"].append(f"{side}: {exc}")
         try:
@@ -252,6 +265,8 @@ def export_one(root: Path, destination: Path, scenario: dict, trim: bool) -> Pat
             original = next(rows)
             if original != info["original_labels"]:
                 raise ValueError("CSV header changed since audit")
+            if info.get("repeated_header") and next(rows, None) != original:
+                raise ValueError("CSV header repetition changed since audit")
             count = 0
             with out.open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.writer(stream, lineterminator="\n")

@@ -92,9 +92,12 @@ have been supplied.
 
 The companion [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets)
 collects reusable ground truth and precomputed FD/UCC/IND/DC profiles.
-The eight archives in [release v1.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v1.0.0)
-cover 910 archived scenarios. The catalog records their fixed download URLs and
-SHA-256 checksums.
+The eight archives in [release v2.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v2.0.0)
+cover 1,069 archived scenarios, including the 549 valid scenarios of the official
+Valentine release. Their FD profiles come from a corrected HyFD validator; the
+superseded v1.0.0 archives miss valid approximate FDs and remain only for
+reproducing earlier results. The catalog records fixed download URLs and
+SHA-256 checksums for both versions.
 It is maintained independently rather than embedded as a Git submodule. Users
 select its catalog explicitly; Schematch can run without a metadata checkout.
 
@@ -109,8 +112,8 @@ T2D-SM as above, attach its metadata using an explicitly selected catalog:
 
 ```shell
 # Example assumes the metadata checkout is next to this Schematch checkout.
-python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm --dry-run
-python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v2 --prepared datasets-local/prepared/t2dsm --dry-run
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v2 --prepared datasets-local/prepared/t2dsm
 ```
 
 The installer uses a local archive if present. Otherwise it can download the

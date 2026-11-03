@@ -2,8 +2,10 @@
 
 The [Schema Matching Benchmark Datasets repository](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets)
 is the companion project for reusable ground truth and precomputed FD/UCC/IND/DC
-profiles. [Release v1.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v1.0.0)
-contains eight profile/ground-truth archives covering 910 archived scenarios.
+profiles. [Release v2.0.0](https://github.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/releases/tag/v2.0.0)
+contains eight profile/ground-truth archives covering 1,069 archived scenarios.
+It supersedes v1.0.0 (910 scenarios), whose FD profiles came from a HyFD
+validator that missed valid approximate FDs; see the companion project's changelog.
 The repository contains their catalog, versioned manifests and curated annotations;
 local ZIP copies can be stored under its ignored `dist/` directory. Archive URLs
 and SHA-256 checksums are recorded in the updated catalog.
@@ -69,7 +71,7 @@ sibling; replace the catalog argument for any other location:
 
 ```shell
 python tools/benchmark_assets.py list --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json
-python tools/benchmark_assets.py verify --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1
+python tools/benchmark_assets.py verify --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v2
 ```
 
 The location is not hard-coded in the tool. An HTTPS catalog URL
@@ -78,14 +80,17 @@ in the catalog; archives absent locally are fetched only from its explicit HTTPS
 The repository's current catalog URL is
 `https://raw.githubusercontent.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/main/catalog.json`.
 For a reproducible experiment, save the catalog and its SHA-256 hash or use a
-catalog URL pinned to a verified commit. The original `v1.0.0` Git tag predates
-the addition of archive URLs; use the updated catalog rather than that tag's copy.
-The published URL update is pinned at commit `733ede555f0863bdd6a91f5b7a6afac9456d0f4f`.
-For example, metadata can be obtained without cloning its repository:
+catalog URL pinned to a verified commit. The `v2.0.0` tag, commit
+`e1351e932e456265894c0e86e764ec316d0eb1cf`, contains the catalog with the URLs of
+both versions. For example, metadata can be obtained without cloning its repository:
 
 ```shell
-python tools/benchmark_assets.py verify --catalog https://raw.githubusercontent.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/733ede555f0863bdd6a91f5b7a6afac9456d0f4f/catalog.json --id t2dsm-readable-v1
+python tools/benchmark_assets.py verify --catalog https://raw.githubusercontent.com/UMR-Big-Data-Analytics/Schema-Matching-Benchmark-Datasets/v2.0.0/catalog.json --id t2dsm-readable-v2
 ```
+
+The original `v1.0.0` tag predates the addition of archive URLs; for the
+superseded version 1 bundles alone, the URL update is pinned at commit
+`733ede555f0863bdd6a91f5b7a6afac9456d0f4f`.
 
 ## Attach assets to prepared tables
 
@@ -94,9 +99,16 @@ the import report; preparation errors should be resolved explicitly.
 
 ```shell
 python tools/prepare_datasets.py prepare t2dsm --download
-python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm --dry-run
-python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v1 --prepared datasets-local/prepared/t2dsm
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v2 --prepared datasets-local/prepared/t2dsm --dry-run
+python tools/benchmark_assets.py install --catalog ../Schema-Matching-Benchmark-Datasets/catalog.json --id t2dsm-readable-v2 --prepared datasets-local/prepared/t2dsm
 ```
+
+`valentine-readable-v2` binds the tables of `prepare_datasets.py prepare valentine
+--download --skip-invalid`. The importer files the release folder
+`View -Unionable` as View-Unionable and drops the repeated header row of the
+seven Magellan source tables; both appear as corrections in the scenario
+manifests. Preparations from earlier Schematch versions differ in these tables
+and folders, and the installer rejects them.
 
 Before writing, the installer verifies archive integrity, every required local
 table's filename and SHA-256 hash, and all annotation/profile conflicts. It adds
